@@ -642,6 +642,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   //         final String threadId, final String boardId) async =>
   //     await selectedForumState?.existThreadFromStrorage(threadId, boardId) ??
   //     false;
+  Future<void> post(final CommentData value) async {
+    final result = await selectedForumState?.postComment(value);
+    if (result != null && result) {
+      await updateContent();
+    }
+  }
 
   Future<void> updateContent() async {
     if (currentContent == null) return;
@@ -1147,9 +1153,9 @@ abstract class MainStoreBase with Store, WithDateTime {
     selectedForumState?.setSettings(newData);
   }
 
-  Future<bool> postComment(final CommentData value) async {
-    return await selectedForumState?.postComment(value) ?? false;
-  }
+  // Future<bool> postComment(final CommentData value) async {
+  //   return await selectedForumState?.postComment(value) ?? false;
+  // }
 
   Future<Uint8List?> getFavicon(final String uri) async {
     return await FetchData.getFavicon(uri);

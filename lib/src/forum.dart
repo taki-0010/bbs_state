@@ -201,7 +201,6 @@ abstract class ForumStateBase with Store, WithDateTime {
     return [...thread.importanceList, ...?settingsData];
   }
 
-
   // @action
   void setLastThreadsScrollOffset(final BottomMenu screen, final double value) {
     switch (screen) {
@@ -1051,27 +1050,32 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<bool> postComment(final CommentData value) async {
-    // switch (type) {
-    //   case Communities.fiveCh:
-    //     final domain = currentContent?.fiveDomain;
-    //     final bbs = currentContent?.fiveDirectoryName;
-    //     if (domain != null && bbs != null) {
-    //       final result = await FiveChHandler.post(value, domain, bbs);
-    //       if (result != null) {
-    //         await commentsStorage.setComment(result);
-    //         return true;
-    //       }
-    //     }
-    //     return false;
-    //   case Communities.girlsCh:
-    //     final result = await GirlsChHandler.post(value);
-    //     if (result != null) {
-    //       await commentsStorage.setComment(result);
-    //       return true;
-    //     }
-    //     return false;
-    //   default:
-    // }
+    switch (type) {
+      case Communities.fiveCh:
+        final domain = currentContentThreadData?.uri.host;
+        final bbs = currentContentThreadData?.boardId;
+        if (domain != null && bbs != null) {
+          final result = await FiveChHandler.post(value, domain, bbs);
+          if (result != null) {
+            final resnum = int.tryParse(result.resnum ?? '0');
+            if (resnum == null || resnum == 0) {
+              return false;
+            }
+            final resMark = ResMarkData(index: resnum, icon: MarkIcon.edit);
+            await updateMark(resMark);
+            return true;
+          }
+        }
+        return false;
+      // case Communities.girlsCh:
+      //   final result = await GirlsChHandler.post(value);
+      //   if (result != null) {
+      //     await commentsStorage.setComment(result);
+      //     return true;
+      //   }
+      //   return false;
+      default:
+    }
     return false;
   }
 
