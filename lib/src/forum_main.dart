@@ -84,13 +84,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case ThreadsOrder.hot:
         list.sort((a, b) => (b?.ikioi ?? 0).compareTo(a?.ikioi ?? 0));
         break;
-      case ThreadsOrder.newOrder:
+      case ThreadsOrder.newerResponce:
         list.sort(
             (a, b) => (b?.updateAtStr ?? '').compareTo(a?.updateAtStr ?? ''));
         break;
-      case ThreadsOrder.oldOrder:
-        list.sort(
-            (a, b) => (a?.updateAtStr ?? '').compareTo(b?.updateAtStr ?? ''));
+      case ThreadsOrder.newerThread:
+        list.sort((a, b) => (b?.createdAt ?? 0).compareTo(a?.createdAt ?? 0));
+        logger.i('oder: ${list.map((e) => e?.createdAt).toList()}');
         break;
       case ThreadsOrder.resCountDesc:
         list.sort((a, b) => (b?.resCount ?? 0).compareTo(a?.resCount ?? 0));

@@ -267,7 +267,8 @@ abstract class RepositoryStateBase with Store, WithDateTime {
 
   void deleteThreadById(final String id) {}
 
-  void deleteThreadData(final ThreadMarkData? value) {
+  void deleteThreadData(final ThreadMarkData? value,
+      {final bool showSnack = true}) {
     if (value != null) {
       switch (value.type) {
         case Communities.fiveCh:
@@ -284,7 +285,10 @@ abstract class RepositoryStateBase with Store, WithDateTime {
           break;
         default:
       }
-      parent.setDeletedThreadTitle(value.title);
+      if (showSnack) {
+        parent.setDeletedThreadTitle(value.title);
+      }
+
       mediaLocal.deleteThreadCacheByThreadMarkId(value);
     }
   }

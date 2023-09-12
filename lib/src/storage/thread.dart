@@ -26,13 +26,14 @@ abstract class ThreadStateForLocalBase with Store {
     final query = Finder(filter: Filter.matches('userId', parent.user!.id));
     final list = await store.find(parent.db, finder: query);
     if (list.isNotEmpty) {
-      await parent.db.transaction((transaction) {
-        for (final i in list) {
-          final data = ThreadMarkData.fromJson(i.value);
-          parent.setThreadData(data);
-        }
-      });
+      // await parent.db.transaction((transaction) {
+      for (final i in list) {
+        final data = ThreadMarkData.fromJson(i.value);
+        parent.setThreadData(data);
+      }
+      // });
     }
+
     await _delete(showSnackWhenDeleted: false);
     Timer.periodic(const Duration(minutes: 15), _deleteThreadAutomatically);
   }
@@ -49,8 +50,11 @@ abstract class ThreadStateForLocalBase with Store {
 
   Future<void> _delete({final bool showSnackWhenDeleted = false}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final query =
-        Finder(filter: Filter.lessThanOrEquals('retentionPeriodSeconds', now));
+    // final data =
+    //     DateTime.fromMillisecondsSinceEpoch(now).add(Duration(days: 5));
+    final query = Finder(
+        filter: Filter.lessThanOrEquals(
+            'retentionPeriodSeconds', now));
     final list = await store.find(parent.db, finder: query);
     // await parent.db.transaction((transaction) {
     logger.f(
@@ -58,9 +62,9 @@ abstract class ThreadStateForLocalBase with Store {
     for (final i in list) {
       final data = ThreadMarkData.fromJson(i.value);
       await deleteCacheByDataId(i.key);
-      if (showSnackWhenDeleted) {
-        parent.deleteThreadData(data);
-      }
+      // if (showSnackWhenDeleted) {
+      parent.deleteThreadData(data, showSnack: showSnackWhenDeleted);
+      // }
     }
   }
 
