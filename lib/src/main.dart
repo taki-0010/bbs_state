@@ -49,6 +49,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   @observable
   ObservableList<String?> debugLog = ObservableList<String?>();
 
+  @observable
+  String? overlayId;
+
+  @action
+  void setOverlayId(final String? id) => overlayId = id;
+
   // bool? isWeb;
   // bool? isDebugMode;
 
@@ -143,6 +149,9 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   List<Communities>? get selectedForumList => userData?.forums;
+
+  @computed
+  LangList get getLocale => userData?.language ?? LangList.ja;
 
   @observable
   bool reverseForumSwitchAnimation = false;
@@ -376,6 +385,7 @@ abstract class MainStoreBase with Store, WithDateTime {
             .where((element) =>
                 element == ThreadsOrder.catalog ||
                 element == ThreadsOrder.newerThread ||
+                element == ThreadsOrder.importance ||
                 element == ThreadsOrder.resCountDesc)
             .toList();
       case Communities.girlsCh:
@@ -383,6 +393,7 @@ abstract class MainStoreBase with Store, WithDateTime {
             .where((element) =>
                 element == ThreadsOrder.hot ||
                 element == ThreadsOrder.newerResponce ||
+                element == ThreadsOrder.importance ||
                 element == ThreadsOrder.resCountDesc)
             .toList();
       default:
@@ -390,6 +401,7 @@ abstract class MainStoreBase with Store, WithDateTime {
             .where((element) =>
                 element == ThreadsOrder.hot ||
                 element == ThreadsOrder.newerThread ||
+                element == ThreadsOrder.importance ||
                 // element == ThreadsOrder.oldOrder ||
                 element == ThreadsOrder.resCountDesc)
             .toList();
@@ -627,8 +639,8 @@ abstract class MainStoreBase with Store, WithDateTime {
   //   return false;
   // }
 
-  void setFilterWordForContent(final String value) =>
-      selectedForumState?.currentContentState?.setFilterWord(value);
+  List<int?>? setFilterWordForContent(final String value) =>
+      selectedForumState?.currentContentState?.filterdIndexList(value);
 
   @action
   void setLaunchStatus(final LaunchStatus value) => launchStatus = value;
@@ -721,6 +733,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   ImportanceData? _getImportanceByBody(final String? body) {
     if (body == null) return null;
     return selectedForumState?.getImportanceByBody(body);
+  }
+
+  bool byNotCaseSensitive(final String value, final String? value2) {
+    return value.toLowerCase().contains(value.toLowerCase());
   }
 
   ImportanceData? getImportanceByTitle(final String? title) {
@@ -1260,18 +1276,18 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleHistoryThreadsLoading();
   }
 
-  Future<void> updateLibraryByBoard() async {
-    await selectedForumState?.history.updateLibraryList();
-    // switch (library) {
-    //   case LibraryType.history:
-    //     await selectedForumState?.history.updateLibraryList();
-    //     break;
-    //   case LibraryType.favorite:
-    //     await selectedForumState?.favorite.updateLibraryList();
-    //     break;
-    //   default:
-    // }
-  }
+  // Future<void> updateLibraryByBoard() async {
+  //   await selectedForumState?.history.updateLibraryList();
+  //   // switch (library) {
+  //   //   case LibraryType.history:
+  //   //     await selectedForumState?.history.updateLibraryList();
+  //   //     break;
+  //   //   case LibraryType.favorite:
+  //   //     await selectedForumState?.favorite.updateLibraryList();
+  //   //     break;
+  //   //   default:
+  //   // }
+  // }
 
   // @computed
   // double get onChangedIndex{

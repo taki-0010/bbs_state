@@ -104,31 +104,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
   @action
   void toggleThreadsLoading() => threadsLoading = !threadsLoading;
 
-  // @computed
-  // List<ThreadMarkData?> get markListByBoard {
-  //   if (boardIdSetOfContentList.isEmpty) return [];
-  //   final boardId = boardIdSetOfContentList.elementAt(viewIndex);
-  //   return markListByBoardId[boardId] ?? [];
-  // }
-
-  // @computed
-  // String? get selectedBoardName {
-  //   if (boardIdSetOfContentList.isEmpty) return null;
-  //   final boardId = boardIdSetOfContentList.elementAt(viewIndex);
-  //   if (boardId == null) return null;
-  //   final mark = markList.firstWhere(
-  //     (element) => element?.boardId == boardId,
-  //     orElse: () => null,
-  //   );
-  //   logger.d(
-  //       'selectedBoardName: vewIndex: $viewIndex, boardId: $boardId, name: ${mark?.boardName}');
-  //   // final data = await parent.boardStorage.getBoardData(boardId);
-  //   // if (data != null) {
-  //   //   return data.board.name;
-  //   // }
-  //   return mark?.boardName;
-  // }
-
   @computed
   String get appBarTitle => switch (selectedPrimaryView) {
         PrimaryViewState.content => '${parent.currentContentThreadData?.title}',
@@ -156,9 +131,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
   ) {
     if (value != null && parent.parent.userData != null) {
       final data = ContentState(
-        content: value,
-        locale: parent.parent.userData!.language.name
-      );
+          content: value, locale: parent.parent.userData!.language.name);
       // data.setLastOpenedIndex(lastOpenedIndex);
       content = data;
     } else {
@@ -251,17 +224,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
   // @action
   // void setViewIndex(final int index) => viewIndex = index;
 
-  Future<void> updateLibraryList() async {
-    // logger.d(
-    //     'updateLibraryList: viewByBoard:$viewByBoard, historyListByBoard:${boardIdSetOfContentList.length}, viewIndex:$viewIndex');
-    // if (viewByBoard) {
-    //   if (boardIdSetOfContentList.isEmpty) return;
-    //   final boardId = boardIdSetOfContentList.elementAt(viewIndex);
-    //   if (boardId != null) {
-    //     // await parent.updateThreads(boardId);
-    //   }
-    // }
-  }
 
   Future<void> updateAllList() async {
     // for (final i in markList) {
@@ -299,7 +261,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 newer: FutabaParser.getBoardPath(
                     directory: b.futabaDirectory,
                     boardId: b.boardId,
-                    order: ThreadsOrder.newOrder),
+                    order: ThreadsOrder.newerThread),
                 hug: FutabaParser.getBoardPath(
                     directory: b.futabaDirectory,
                     boardId: b.boardId,

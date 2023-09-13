@@ -90,13 +90,58 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case ThreadsOrder.newerThread:
         list.sort((a, b) => (b?.createdAt ?? 0).compareTo(a?.createdAt ?? 0));
-        logger.i('oder: ${list.map((e) => e?.createdAt).toList()}');
+        // logger.i('oder: ${list.map((e) => e?.createdAt).toList()}');
         break;
       case ThreadsOrder.resCountDesc:
         list.sort((a, b) => (b?.resCount ?? 0).compareTo(a?.resCount ?? 0));
         break;
       case ThreadsOrder.resCountAsc:
         list.sort((a, b) => (a?.resCount ?? 0).compareTo(b?.resCount ?? 0));
+        break;
+      case ThreadsOrder.importance:
+        final importances = parent.settings!.boardImportanceList;
+        final veryIm = importances
+            .where((element) => element?.level == ImportanceList.veryImportant)
+            .toList();
+        final im = importances
+            .where((element) => element?.level == ImportanceList.important)
+            .toList();
+        List<ThreadData?> veryImList = [];
+        for (final v in veryIm) {
+          for (final e in list) {
+            if (e != null &&
+                v != null &&
+                v.target == ImportanceTarget.title &&
+                e.title.toLowerCase().contains(v.strValue.toLowerCase())) {
+              veryImList.add(e);
+            }
+          }
+        }
+        List<ThreadData?> imList = [];
+        for (final v in im) {
+          for (final e in list) {
+            if (e != null &&
+                v != null &&
+                v.target == ImportanceTarget.title &&
+                e.title.toLowerCase().contains(v.strValue.toLowerCase())) {
+              veryImList.add(e);
+            }
+          }
+        }
+        for (final i in veryImList) {
+          if (i != null) {
+            list.removeWhere((element) => element?.id == i.id);
+          }
+        }
+        for (final i in imList) {
+          if (i != null) {
+            list.removeWhere((element) => element?.id == i.id);
+          }
+        }
+        list.insertAll(0, imList);
+        list.insertAll(0, veryImList);
+        // logger.i(
+        //     'importance: im: ${imList.length}, ${im.length},  very: ${veryImList.length}, ${veryIm.length}');
         break;
       case ThreadsOrder.catalog:
         return list

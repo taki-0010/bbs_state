@@ -81,6 +81,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<List<Communities>?>(() => super.selectedForumList,
               name: 'MainStoreBase.selectedForumList'))
       .value;
+  Computed<LangList>? _$getLocaleComputed;
+
+  @override
+  LangList get getLocale =>
+      (_$getLocaleComputed ??= Computed<LangList>(() => super.getLocale,
+              name: 'MainStoreBase.getLocale'))
+          .value;
   Computed<List<String?>>? _$fontsListComputed;
 
   @override
@@ -518,6 +525,22 @@ mixin _$MainStore on MainStoreBase, Store {
     });
   }
 
+  late final _$overlayIdAtom =
+      Atom(name: 'MainStoreBase.overlayId', context: context);
+
+  @override
+  String? get overlayId {
+    _$overlayIdAtom.reportRead();
+    return super.overlayId;
+  }
+
+  @override
+  set overlayId(String? value) {
+    _$overlayIdAtom.reportWrite(value, super.overlayId, () {
+      super.overlayId = value;
+    });
+  }
+
   late final _$largeScreenAtom =
       Atom(name: 'MainStoreBase.largeScreen', context: context);
 
@@ -715,6 +738,17 @@ mixin _$MainStore on MainStoreBase, Store {
   }
 
   @override
+  void setOverlayId(String? id) {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase.setOverlayId');
+    try {
+      return super.setOverlayId(id);
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setLog(String value) {
     final _$actionInfo = _$MainStoreBaseActionController.startAction(
         name: 'MainStoreBase.setLog');
@@ -831,6 +865,7 @@ launchStatus: ${launchStatus},
 devMode: ${devMode},
 devModeCount: ${devModeCount},
 debugLog: ${debugLog},
+overlayId: ${overlayId},
 largeScreen: ${largeScreen},
 entireLoading: ${entireLoading},
 selectedForum: ${selectedForum},
@@ -851,6 +886,7 @@ showHot: ${showHot},
 lastOpenedIndexForVisibleContent: ${lastOpenedIndexForVisibleContent},
 userData: ${userData},
 selectedForumList: ${selectedForumList},
+getLocale: ${getLocale},
 fontsList: ${fontsList},
 selectedForumState: ${selectedForumState},
 selectedTheme: ${selectedTheme},

@@ -30,13 +30,6 @@ mixin _$ContentState on ContentStateBase, Store {
       (_$groupListComputed ??= Computed<List<GroupData?>>(() => super.groupList,
               name: 'ContentStateBase.groupList'))
           .value;
-  Computed<List<ContentData?>>? _$filterdComputed;
-
-  @override
-  List<ContentData?> get filterd =>
-      (_$filterdComputed ??= Computed<List<ContentData?>>(() => super.filterd,
-              name: 'ContentStateBase.filterd'))
-          .value;
 
   late final _$contentAtom =
       Atom(name: 'ContentStateBase.content', context: context);
@@ -150,31 +143,15 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
-  late final _$filterWordAtom =
-      Atom(name: 'ContentStateBase.filterWord', context: context);
-
-  @override
-  String? get filterWord {
-    _$filterWordAtom.reportRead();
-    return super.filterWord;
-  }
-
-  @override
-  set filterWord(String? value) {
-    _$filterWordAtom.reportWrite(value, super.filterWord, () {
-      super.filterWord = value;
-    });
-  }
-
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
 
   @override
-  void setLastResIndex() {
+  void setLastResIndex(int? value) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
         name: 'ContentStateBase.setLastResIndex');
     try {
-      return super.setLastResIndex();
+      return super.setLastResIndex(value);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -197,28 +174,6 @@ mixin _$ContentState on ContentStateBase, Store {
         name: 'ContentStateBase.updateContent');
     try {
       return super.updateContent(value);
-    } finally {
-      _$ContentStateBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setFilterWord(String value) {
-    final _$actionInfo = _$ContentStateBaseActionController.startAction(
-        name: 'ContentStateBase.setFilterWord');
-    try {
-      return super.setFilterWord(value);
-    } finally {
-      _$ContentStateBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void clearFilterWord() {
-    final _$actionInfo = _$ContentStateBaseActionController.startAction(
-        name: 'ContentStateBase.clearFilterWord');
-    try {
-      return super.clearFilterWord();
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -289,11 +244,9 @@ panY: ${panY},
 showSeekBar: ${showSeekBar},
 seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
-filterWord: ${filterWord},
 initialSeekableIndex: ${initialSeekableIndex},
 getJumpIndex: ${getJumpIndex},
-groupList: ${groupList},
-filterd: ${filterd}
+groupList: ${groupList}
     ''';
   }
 }

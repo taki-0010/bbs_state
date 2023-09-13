@@ -41,11 +41,14 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   int currentContentItemIndex = 1;
 
-  @observable
-  String? filterWord;
+  // @observable
+  // String? filterWord;
+
+  // @action
+  // void setLastResIndex() => lastResIndex = content.content.lastOrNull?.index;
 
   @action
-  void setLastResIndex() => lastResIndex = content.content.lastOrNull?.index;
+  void setLastResIndex(final int? value) => lastResIndex = value;
 
   @action
   void setSeekHandleValue(final int value) => seekBarHandleValue = value;
@@ -81,7 +84,7 @@ abstract class ContentStateBase with Store, WithDateTime {
   @computed
   List<GroupData?> get groupList {
     List<GroupData?> result = [];
-    final list = filterd;
+    final list = content.content;
     // final list = content.content;
     if (list.isEmpty) {
       return result;
@@ -89,10 +92,7 @@ abstract class ContentStateBase with Store, WithDateTime {
     logger.f('groupList: list: ${list.length}');
     list.asMap().forEach((final key, final v) {
       if (v != null && v.createdAt != null) {
-        final timeago = getTimeago(
-          v.createdAt!,
-          locale
-        );
+        final timeago = getTimeago(v.createdAt!, locale);
         final exist = result.firstWhere((element) => element?.date == timeago,
             orElse: () => null);
         // logger.i('groupList: item: key:$key, timeAgo: $timeago v:${v.createdAt}');
@@ -106,10 +106,25 @@ abstract class ContentStateBase with Store, WithDateTime {
     return result;
   }
 
-  @computed
-  List<ContentData?> get filterd {
-    if (filterWord == null || filterWord!.isEmpty) {
-      return content.content;
+  // @computed
+  // List<ContentData?> get filterd {
+  //   if (filterWord == null || filterWord!.isEmpty) {
+  //     return content.content;
+  //   }
+  //   if (content.content.isEmpty) {
+  //     return [];
+  //   }
+  //   final result = content.content
+  //       .where((element) =>
+  //           element != null &&
+  //           element.body.toLowerCase().contains(filterWord!.toLowerCase()))
+  //       .toList();
+  //   return result;
+  // }
+  // @computed
+  List<int?> filterdIndexList(final String value) {
+    if (value.isEmpty) {
+      return [];
     }
     if (content.content.isEmpty) {
       return [];
@@ -117,10 +132,13 @@ abstract class ContentStateBase with Store, WithDateTime {
     final result = content.content
         .where((element) =>
             element != null &&
-            element.body.toLowerCase().contains(filterWord!.toLowerCase()))
+            element.body.toLowerCase().contains(value.toLowerCase()))
         .toList();
-    return result;
+    return result.map((e) => e?.index).toList();
   }
+
+  // @computed
+  // List<int?> get filterdIndexList => filterd.map((e) => e?.index).toList();
 
   @action
   void updateContent(final ThreadContentData? value) {
@@ -129,13 +147,13 @@ abstract class ContentStateBase with Store, WithDateTime {
     }
   }
 
-  @action
-  void setFilterWord(final String value) {
-    filterWord = value;
-  }
+  // @action
+  // void setFilterWord(final String value) {
+  //   filterWord = value;
+  // }
 
-  @action
-  void clearFilterWord() => filterWord = null;
+  // @action
+  // void clearFilterWord() => filterWord = null;
 
   // @action
   // void setLastOpenedIndex(final int? value) {

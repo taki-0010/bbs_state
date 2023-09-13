@@ -345,8 +345,12 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
   }
 
-  // @action
-  // void _toggleLoading() => loading = !loading;
+  ThreadBase? getThreadMarkDataByThreadData(final ThreadData value) {
+    return historyList.firstWhere(
+        (element) =>
+            element?.id == value.id && element?.boardId == value.boardId,
+        orElse: () => null);
+  }
 
   @action
   Future<bool> setContent(final String id,
@@ -361,14 +365,29 @@ abstract class ForumStateBase with Store, WithDateTime {
     _setContent(
       content,
     );
+    if (thread is ThreadMarkData && currentScreen == BottomMenu.history) {
+      history.content?.setLastResIndex(thread.resCount);
+    }
+    if (thread is ThreadData) {
+      final exist = getThreadMarkDataByThreadData(thread);
+      if (exist != null) {
+        switch (currentScreen) {
+          case BottomMenu.forums:
+            forumMain.content?.setLastResIndex(exist.resCount);
+            break;
+          case BottomMenu.search:
+            search.content?.setLastResIndex(exist.resCount);
+            break;
+          default:
+        }
+      }
+    }
     if (!parent.largeScreen) {
       switch (currentScreen) {
         case BottomMenu.forums:
-          // _setVisibleContentId(selected.id);
           forumMain.setPrimaryView(PrimaryViewState.content);
           break;
         case BottomMenu.history:
-          // setSearchedContentId(selected.id);
           history.setPrimaryView(PrimaryViewState.content);
           break;
         case BottomMenu.search:
@@ -383,80 +402,33 @@ abstract class ForumStateBase with Store, WithDateTime {
 
     // return true;
   }
-  // @action
-  // Future<bool> setVisibleContentForPrimary(final String id,
-  //     {required final ThreadBase thread}) async {
-  //   // _toggleLoading();
-
-  //   final content = await _getData(id, thread: thread);
-  //   if (content == null) {
-  //     return false;
-  //   }
-
-  //   _setContent(
-  //     content,
-  //   );
-
-  //   await _updateMark(thread, content);
-  //   // _toggleLoading();
-  //   switch (currentScreen) {
-  //     case BottomMenu.forums:
-  //       // _setVisibleContentId(selected.id);
-  //       forumMain.setPrimaryView(PrimaryViewState.content);
-  //       break;
-  //     case BottomMenu.history:
-  //       // setSearchedContentId(selected.id);
-  //       history.setPrimaryView(PrimaryViewState.content);
-  //       break;
-  //     case BottomMenu.search:
-  //       // setSearchedContentId(selected.id);
-  //       search.setPrimaryView(PrimaryViewState.content);
-  //       break;
-  //     default:
-  //   }
-  //   return true;
-  // }
-
-  // @action
-  // Future<bool> setVisibleContentForSecondry(final String id,
-  //     {required final ThreadBase thread}) async {
-  //   try {
-  //     final content = await _getData(id, thread: thread);
-  //     parent.setLog(
-  //         '$type, setVisibleContentForSecondry: content: ${content?.id}');
-  //     if (content == null) return false;
-
-  //     _setContent(
-  //       content,
-  //     );
-  //     _updateMark(thread, content);
-  //     return true;
-  //   } catch (e) {
-  //     parent.setLog(e.toString());
-  //   }
-  //   return false;
-  // }
 
   Future<bool> _updateMark(
       final ThreadBase thread, final ThreadContentData? content) async {
     if (content == null) {
       return false;
     }
-    if (thread is ThreadMarkData) {
-      // history.setLog(thread);
-      return _updateMarkData(thread, content);
+    final exist = historyList.firstWhere(
+        (element) =>
+            element?.id == thread.id && element?.boardId == thread.boardId,
+        orElse: () => null);
+    logger.i('_updateMarkData: ${exist?.id}');
+    if (exist != null && exist is ThreadMarkData) {
+      return _updateMarkData(exist, content);
     } else {
-      if (thread is! ThreadData) return false;
-      final exist = history.markList.firstWhere(
-        (element) => element?.id == thread.id,
-        orElse: () => null,
-      );
-      if (exist == null) {
-        return await _setInitialThreadMarkData(
-            content, thread.url, thread.thumbnailStr);
-      } else {
-        return true;
-      }
+      return await _setInitialThreadMarkData(
+          content, thread.url, thread.thumbnailStr);
+      // if (thread is! ThreadData) return false;
+      // final exist = history.markList.firstWhere(
+      //   (element) => element?.id == thread.id,
+      //   orElse: () => null,
+      // );
+      // if (exist == null) {
+      //   return await _setInitialThreadMarkData(
+      //       content, thread.url, thread.thumbnailStr);
+      // } else {
+      //   return true;
+      // }
     }
   }
 
@@ -530,7 +502,7 @@ abstract class ForumStateBase with Store, WithDateTime {
 
       // history.setLog(newLog);
       logger.f(
-          'updateMark: $retention, title: $title, hot: $hot, retention: ${settings?.retentionPeriod}');
+          '_setInitialThreadMarkData: $retention, title: $title, hot: $hot, retention: ${settings?.retentionPeriod}');
       await parent.repository.saveThreadMark(newLog);
       return true;
     } else {
@@ -557,13 +529,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     final resCount = content.lastIndex ?? thread.resCount;
     if (resCount == thread.resCount) return true;
     final index = lastOpenedIndex;
-    // final index = !parent.largeScreen && lastOpenedIndex != null
-    //     ? lastOpenedIndex
-    //     : thread.lastOpendIndex;
-    // final hot = getIkioi(int.tryParse(thread.id) ?? 0, resCount);
-    // final retention = retentionPeriod != RetentionPeriodList.byPostPace
-    //     ? thread.retentionPeriodSeconds
-    //     : _getRetentionPeriodSeconds(hot);
+    logger.i('_updateMarkData');
 
     final newMark = thread.copyWith(
         boardId: content.boardId,
@@ -614,6 +580,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         id = FiveChParser.getId(url);
         final host = Uri.parse(url).host;
         boardId = FiveChParser.getBoardIdFromDat(url);
+        logger.i('getDataByUrl: $url, id:$id, $boardId, host:$host');
         if (id != null && boardId != null) {
           (result, archived) = await _getContentForFiveCh(
             id,
@@ -704,10 +671,12 @@ abstract class ForumStateBase with Store, WithDateTime {
         positionToGet ?? settings?.positionToGet ?? PositionToGet.first;
     switch (type) {
       case Communities.fiveCh:
-        // if (thread is! FiveChThreadTitleData) return null;
+        final host = thread.uri.host;
+        logger.i('_getData: host: $host');
+
         final data = await _getContentForFiveCh(
           dataId,
-          domain: thread.uri.host,
+          domain: host,
           directoryName: thread.boardId,
           // title: thread.title
         );
@@ -819,7 +788,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         thread: thread, positionToGet: thread.positionToGet);
     if (content == null) return;
     final lastIndex = currentContentState?.currentContentIndex;
-    currentContentState?.setLastResIndex();
+    currentContentState?.setLastResIndex(lastIndex);
     // if (!parent.cancelInitialScroll) {
     //   parent.toggleCancelInitialScroll();
     // }
