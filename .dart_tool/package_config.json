@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-a7507e855dd05686fe3992d331d88b83d7de8b50/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-2fa6a1bc5b651f0d2ae2eff656d72bd416788848/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -369,7 +369,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-7c97aac0e480b0046d39801b8e1d002d05198cc9/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-aaf31e7c12f06e5917bdabe323a8534227b6cd0e/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -746,13 +746,19 @@
       "languageVersion": "2.19"
     },
     {
+      "name": "youtube_parser",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/youtube_parser-2.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "bbs_state",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-13T06:07:14.968339Z",
+  "generated": "2023-09-14T06:25:23.023773Z",
   "generator": "pub",
   "generatorVersion": "3.1.1"
 }

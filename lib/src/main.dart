@@ -674,8 +674,9 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleEntireLoading();
   }
 
-  Future<bool> getDataByUrl(final String value,
+  Future<bool> getDataByUrl(final String? value,
       {final bool setContent = true}) async {
+    if (value == null) return false;
     toggleContentLoading();
     final result =
         await selectedForumState?.getDataByUrl(value, setContent: setContent);
@@ -872,6 +873,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   // @action
   void setBottomIndex(final int value) {
+    if (value == bottomBarIndex) return;
     if (largeScreen) {
       _setBottomIndex(value);
     } else {
@@ -1361,5 +1363,16 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> getThreadsByJson() async {
     // FutabaChHandler.getThreadsByJson();
+  }
+
+  String? parsedUrl(final String url) {
+    switch (selectedForum) {
+      case Communities.fiveCh:
+        return FiveChParser.toDatUrl(url);
+      case Communities.pinkCh:
+        return FiveChParser.toDatUrl(url);
+      default:
+        return url;
+    }
   }
 }

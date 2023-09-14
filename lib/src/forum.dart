@@ -787,8 +787,10 @@ abstract class ForumStateBase with Store, WithDateTime {
     final content = await _getData<ThreadMarkData>(thread.id,
         thread: thread, positionToGet: thread.positionToGet);
     if (content == null) return;
+    final lastReadIndex =
+        currentContentState?.content.content.lastOrNull?.index;
     final lastIndex = currentContentState?.currentContentIndex;
-    currentContentState?.setLastResIndex(lastIndex);
+    currentContentState?.setLastResIndex(lastReadIndex);
     // if (!parent.cancelInitialScroll) {
     //   parent.toggleCancelInitialScroll();
     // }

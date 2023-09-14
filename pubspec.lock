@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a7507e855dd05686fe3992d331d88b83d7de8b50
+      resolved-ref: "2fa6a1bc5b651f0d2ae2eff656d72bd416788848"
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -489,7 +489,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "7c97aac0e480b0046d39801b8e1d002d05198cc9"
+      resolved-ref: aaf31e7c12f06e5917bdabe323a8534227b6cd0e
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"
@@ -986,6 +986,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  youtube_parser:
+    dependency: transitive
+    description:
+      name: youtube_parser
+      sha256: ad57996024f8e592da2b2ea39759ca1513e624ed9e8d89db933a7c1e1f4dc4e8
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
 sdks:
   dart: ">=3.1.0 <4.0.0"
   flutter: ">=3.13.0"
