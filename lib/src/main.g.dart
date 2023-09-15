@@ -226,6 +226,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<bool>(() => super.sortHistoryByRetention,
               name: 'MainStoreBase.sortHistoryByRetention'))
       .value;
+  Computed<SortHistory>? _$sortHistoryComputed;
+
+  @override
+  SortHistory get sortHistory =>
+      (_$sortHistoryComputed ??= Computed<SortHistory>(() => super.sortHistory,
+              name: 'MainStoreBase.sortHistory'))
+          .value;
   Computed<bool>? _$openLinkByWebViewComputed;
 
   @override
@@ -906,6 +913,7 @@ currentFavoritesBoards: ${currentFavoritesBoards},
 retentionPeriod: ${retentionPeriod},
 userFavoritesBoards: ${userFavoritesBoards},
 sortHistoryByRetention: ${sortHistoryByRetention},
+sortHistory: ${sortHistory},
 openLinkByWebView: ${openLinkByWebView},
 historyDiff: ${historyDiff},
 currentBoardUrl: ${currentBoardUrl},

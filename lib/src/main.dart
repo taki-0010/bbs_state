@@ -270,6 +270,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get sortHistoryByRetention =>
       selectedForumState?.history.sortHistoryByRetention ?? false;
+  @computed
+  SortHistory get sortHistory =>
+      selectedForumState?.history.sortHistory ?? SortHistory.history;
   // @computed
   // bool get viewByBoard => switch (currentScreen) {
   //       BottomMenu.history => selectedForumState?.history.viewByBoard ?? false,
@@ -1216,6 +1219,15 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (settnigs == null) return;
     if (settnigs.sortHistoryByRetention == value) return;
     final newData = settnigs.copyWith(sortHistoryByRetention: value);
+    selectedForumState?.setSettings(newData);
+    await updateForumSettings();
+  }
+
+  Future<void> setSortHistory(final SortHistory value) async {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    if (settnigs.sortHistory == value) return;
+    final newData = settnigs.copyWith(sortHistory: value);
     selectedForumState?.setSettings(newData);
     await updateForumSettings();
   }

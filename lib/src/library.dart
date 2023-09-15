@@ -58,6 +58,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
 
   @computed
   bool get sortHistoryByRetention => settings?.sortHistoryByRetention ?? false;
+  @computed
+  SortHistory get sortHistory => settings?.sortHistory ?? SortHistory.history;
   // @computed
   // bool get viewByBoard => settings?.viewByBoardInHistory ?? false;
 
@@ -88,13 +90,26 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   List<ThreadMarkData?> _sort(final List<ThreadMarkData?> list) {
-    if (sortHistoryByRetention) {
-      list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
-          .compareTo((b?.retentionPeriodSeconds ?? 0)));
-    } else {
-      list.sort((a, b) =>
-          (b?.createdAtBySeconds ?? 0).compareTo((a?.createdAtBySeconds ?? 0)));
+    switch (sortHistory) {
+      case SortHistory.hot:
+         list.sort((a, b) => (getIkioi(b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
+            .compareTo(getIkioi(a?.createdAtBySeconds ?? 0, a?.resCount ?? 0)));
+        break;
+      case SortHistory.deletionDate:
+         list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
+            .compareTo((b?.retentionPeriodSeconds ?? 0)));
+      case SortHistory.history:
+          list.sort((a, b) => (b?.lastReadAt ?? 0)
+            .compareTo((a?.lastReadAt ?? 0)));
+      default:
     }
+    // if (sortHistory) {
+    //   list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
+    //       .compareTo((b?.retentionPeriodSeconds ?? 0)));
+    // } else {
+    //   list.sort((a, b) =>
+    //       (b?.createdAtBySeconds ?? 0).compareTo((a?.createdAtBySeconds ?? 0)));
+    // }
     return list;
   }
 

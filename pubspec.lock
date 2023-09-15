@@ -213,10 +213,10 @@ packages:
     dependency: transitive
     description:
       name: csslib
-      sha256: "831883fb353c8bdc1d71979e5b342c7d88acfbc643113c14ae51e2442ea0f20f"
+      sha256: "706b5707578e0c1b4b7550f64078f0a0f19dec3f50a178ffae7006b0a9ca58fb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.17.3"
+    version: "1.0.0"
   dart_style:
     dependency: transitive
     description:
@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2fa6a1bc5b651f0d2ae2eff656d72bd416788848"
+      resolved-ref: e68dd9bb08fc29963ee2c5baf48d80051030a0a4
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -489,7 +489,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: aaf31e7c12f06e5917bdabe323a8534227b6cd0e
+      resolved-ref: b4113dec1ac5f1824b11af037da290a60f40aa38
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"

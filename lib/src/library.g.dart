@@ -31,6 +31,13 @@ mixin _$LibraryState on LibraryStateBase, Store {
           Computed<bool>(() => super.sortHistoryByRetention,
               name: 'LibraryStateBase.sortHistoryByRetention'))
       .value;
+  Computed<SortHistory>? _$sortHistoryComputed;
+
+  @override
+  SortHistory get sortHistory =>
+      (_$sortHistoryComputed ??= Computed<SortHistory>(() => super.sortHistory,
+              name: 'LibraryStateBase.sortHistory'))
+          .value;
   Computed<Set<String?>>? _$boardIdSetOfContentListComputed;
 
   @override
@@ -263,6 +270,7 @@ markListDiff: ${markListDiff},
 settings: ${settings},
 currentMarksResCount: ${currentMarksResCount},
 sortHistoryByRetention: ${sortHistoryByRetention},
+sortHistory: ${sortHistory},
 boardIdSetOfContentList: ${boardIdSetOfContentList},
 markListByBoardId: ${markListByBoardId},
 appBarTitle: ${appBarTitle}

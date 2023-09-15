@@ -417,7 +417,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       return _updateMarkData(exist, content);
     } else {
       return await _setInitialThreadMarkData(
-          content, thread.url, thread.thumbnailStr);
+          content, thread.url, thread.thumbnailStr,);
       // if (thread is! ThreadData) return false;
       // final exist = history.markList.firstWhere(
       //   (element) => element?.id == thread.id,
@@ -465,14 +465,18 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   // Future<void> setThreadMarkDataToHistoryList(final String url) async {}
 
-  Future<bool> _setInitialThreadMarkData(final ThreadContentData content,
-      final String url, final String? thumbnailData) async {
+  Future<bool> _setInitialThreadMarkData(
+    final ThreadContentData content,
+    final String url,
+    final String? thumbnailData,
+  ) async {
     final session = '';
     // final session = await currentSessionId;
     final user = parent.repository.user;
     // final user = await parent.server.userState.getUserAccount;
     if (user != null && settings != null) {
-      final resCount = content.lastIndex ?? 0;
+      final resCount = content.threadLength;
+      // final resCount = content.lastIndex ?? 0;
       final title = content.content.firstOrNull?.title;
       final thumbnail = content.content.firstOrNull?.srcThumbnail;
       final hot = getIkioi(int.tryParse(content.id) ?? 0, resCount);
@@ -526,7 +530,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   Future<bool> _updateMarkData(
       final ThreadMarkData thread, final ThreadContentData content,
       {final int? lastOpenedIndex}) async {
-    final resCount = content.lastIndex ?? thread.resCount;
+    final resCount = content.threadLength;
     if (resCount == thread.resCount) return true;
     final index = lastOpenedIndex;
     logger.i('_updateMarkData');
@@ -575,6 +579,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     bool archived = false;
     String? id;
     String? boardId;
+    int? threadLength;
     switch (type) {
       case Communities.fiveCh:
         id = FiveChParser.getId(url);
@@ -589,19 +594,22 @@ abstract class ForumStateBase with Store, WithDateTime {
             // title: thread.title
           );
         }
+        threadLength = result?.lastOrNull?.index;
         break;
       case Communities.girlsCh:
         id = GirlsChParser.getIdFromUrl(url);
 
         final position = settings?.positionToGet;
         if (id != null && position != null) {
-          result = await _getContentForGirlsCh(
+          final resultRecord = await _getContentForGirlsCh(
             id,
             // categoryId: thread.boardId,
             // thumbnail: thread.thumbnailUrl,
             positionToGet: position,
             // title: thread.title
           );
+          result = resultRecord?.$1;
+          threadLength = resultRecord?.$2;
           if (result != null) {
             final item = result.firstOrNull;
             if (item is GirlsChContent) {
@@ -617,6 +625,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (id != null && boardId != null && directory != null) {
           result = await _getContentForFutabaCh(
               url: url.replaceAll('https://', ''), directory: directory);
+          threadLength = result?.lastOrNull?.index;
         }
         break;
       case Communities.pinkCh:
@@ -631,15 +640,17 @@ abstract class ForumStateBase with Store, WithDateTime {
             // title: thread.title
           );
         }
+        threadLength = result?.lastOrNull?.index;
         break;
       default:
     }
-    if (result != null) {
+    if (result != null && threadLength != null) {
       final content = ThreadContentData(
           id: id!,
           boardId: boardId!,
           type: type,
           content: result,
+          threadLength: threadLength,
           archived: archived);
       if (setContent) {
         _setContent(content);
@@ -662,6 +673,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     // _toggleLoading();
     List<ContentData?>? result;
     bool archived = false;
+    int? threadLength;
     // final boardId = thread.boardId;
     // final title = thread.title;
     // final thumbnail = SrcData(thumbnailUri: thread.thumbnailUrl);
@@ -682,6 +694,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         );
         result = data.$1;
         archived = data.$2;
+        threadLength = result?.lastOrNull?.index;
         logger.i('_getData: five: ${result?.length}');
         // _toggleLoading();
         break;
@@ -690,14 +703,16 @@ abstract class ForumStateBase with Store, WithDateTime {
         // final positionToGet = settings!.positionToGet;
         logger.d(
             'girlsCh: positionToGet: $positionToGet, ${T is ThreadMarkData}');
-        result = await _getContentForGirlsCh(
+        final resultRecord = await _getContentForGirlsCh(
           dataId,
           // categoryId: thread.boardId,
           // thumbnail: thread.thumbnailUrl,
           positionToGet: position,
           // title: thread.title
         );
-        parent.setLog('_getData: $type, result: ${result?.length}');
+        result = resultRecord?.$1;
+        threadLength = resultRecord?.$2;
+        // parent.setLog('_getData: $type, result: ${result?.length}');
         // _toggleLoading();
         break;
       case Communities.futabaCh:
@@ -709,6 +724,7 @@ abstract class ForumStateBase with Store, WithDateTime {
             // thumbnail: thread.thumbnailUrl
             );
         // _toggleLoading();
+        threadLength = result?.lastOrNull?.index;
         break;
       case Communities.pinkCh:
         // if (thread is! FiveChThreadTitleData) return null;
@@ -720,18 +736,20 @@ abstract class ForumStateBase with Store, WithDateTime {
         );
         result = data.$1;
         archived = data.$2;
+        threadLength = result?.lastOrNull?.index;
         logger.i('_getData: five: ${result?.length}');
         // _toggleLoading();
         break;
       default:
       // _toggleLoading();
     }
-    if (result != null) {
+    if (result != null && threadLength != null) {
       final content = ThreadContentData(
           id: thread.id,
           boardId: thread.boardId,
           type: type,
           content: result,
+          threadLength: threadLength,
           archived: archived);
       return content;
 
@@ -903,7 +921,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   @action
-  Future<List<GirlsChContent?>?> _getContentForGirlsCh(final String id,
+  Future<(List<GirlsChContent?>?, int)?> _getContentForGirlsCh(final String id,
       {
       // required final String categoryId,
       required final PositionToGet positionToGet}) async {
@@ -1054,13 +1072,13 @@ abstract class ForumStateBase with Store, WithDateTime {
           }
         }
         return false;
-      // case Communities.girlsCh:
-      //   final result = await GirlsChHandler.post(value);
-      //   if (result != null) {
-      //     await commentsStorage.setComment(result);
-      //     return true;
-      //   }
-      //   return false;
+      case Communities.girlsCh:
+        final result = await GirlsChHandler.post(value, value.media);
+        if (result != null) {
+          // await commentsStorage.setComment(result);
+          return true;
+        }
+        return false;
       default:
     }
     return false;

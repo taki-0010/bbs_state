@@ -206,7 +206,7 @@ mixin _$ForumState on ForumStateBase, Store {
       AsyncAction('ForumStateBase._getContentForGirlsCh', context: context);
 
   @override
-  Future<List<GirlsChContent?>?> _getContentForGirlsCh(String id,
+  Future<(List<GirlsChContent?>?, int)?> _getContentForGirlsCh(String id,
       {required PositionToGet positionToGet}) {
     return _$_getContentForGirlsChAsyncAction.run(
         () => super._getContentForGirlsCh(id, positionToGet: positionToGet));
