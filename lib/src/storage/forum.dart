@@ -21,20 +21,11 @@ abstract class ForumStateForLocalBase with Store {
   ForumSettingsData? get currentData =>
       parent.parent.selectedForumState?.settings;
 
-  Future<void> init() async {
-    // cache = await store.cache<ForumSettingsData>(
-    //     name: dbCollectionId,
-    //     fromEncodable: (json) => ForumSettingsData.fromJson(json),
-    //     expiryPolicy: st.EternalExpiryPolicy(),
-    //     // maxEntries: 1,
-    //     eventListenerMode: st.EventListenerMode.synchronous)
-    //   ..on<st.CacheEntryCreatedEvent<ForumSettingsData>>().listen((event) =>
-    //       logger.d(
-    //           '$dbCollectionId: Key "${event.entry.key}" added to the forumsettings vault, entry: ${event.entry}, info:${event.entry.info}'));
-    await _load();
-  }
+  // Future<void> init() async {
+  //   await _load();
+  // }
 
-  Future<void> _load() async {
+  Future<void> load() async {
     final query = Finder(filter: Filter.matches('userId', parent.user!.id));
     final list = await store.find(parent.db, finder: query);
     if (list.isEmpty) {
@@ -45,16 +36,6 @@ abstract class ForumStateForLocalBase with Store {
         parent.setForumSettings(data);
       }
     }
-    // final keys = await cache.keys;
-    // if (keys.isEmpty) {
-    //   await _setInitialData();
-    // } else {
-    //   final data = await cache.getAll(keys.toSet());
-    //   final list = data.values.toList();
-    //   if (list.isNotEmpty) {
-    //     parent.setSettingsData(list);
-    //   }
-    // }
   }
 
   Future<void> _setInitialData() async {

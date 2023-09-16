@@ -11,7 +11,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   RepositoryStateBase({required this.parent});
   late MainStoreBase parent;
   late Database db;
-  late Database mediaCache;
+  // late Database mediaCache;
+
+  late String cacheFolderPath;
   // late final SembastCacheStore store;
   late final server = AppwriteState(parent: this);
 
@@ -31,36 +33,59 @@ abstract class RepositoryStateBase with Store, WithDateTime {
 
   @action
   Future<void> init() async {
-    // final dir = Directory('vault');
-    // // Temporary database file for a shared store
-    // final path = '${dir.path}/main.sdb';
-    // store = await newSembastLocalCacheStore(path: path);
-    final dir = await getApplicationDocumentsDirectory();
-// make sure it exists
-    await dir.create(recursive: true);
+    late Directory cacheDir;
+    try {
+      cacheDir = await getApplicationCacheDirectory();
+    } catch (e) {
+      logger.e(e);
+      return;
+    }
+
+    logger.i('cacheState: dir: ${cacheDir.path}');
+    await cacheDir.create();
     final folder =
         PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
+    await _mediaInit(cacheDir, folder);
+    await _threadInit(cacheDir, folder);
+
+    final dir = await getApplicationSupportDirectory();
+// make sure it exists
+    await dir.create();
+    // final folder =
+    //     PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
     final filePath = '$folder/database.db';
-    final mediaCachePath = '$folder/mediaCache.db';
     final dbPath = path.join(dir.path, filePath);
-    final mediaCachePathData = path.join(dir.path, mediaCachePath);
+    // final mediaCachePathData = path.join(dir.path, mediaCachePath);
 // open the database
     db = await databaseFactoryIo.openDatabase(dbPath);
-    mediaCache = await databaseFactoryIo.openDatabase(mediaCachePathData);
-    // String dbPath = 'samplesembast.db';
-    // DatabaseFactory dbFactory = databaseFactoryIo;
-    // db = await dbFactory.openDatabase(dbPath);
+    // mediaCache = await databaseFactoryIo.openDatabase(mediaCachePathData);
+    await userLocal.init();
+
     final accountExist = await server.init();
     if (!accountExist) {
       connection = ConnectTo.local;
-      await userLocal.init();
-      await threadLocal.init();
-      await forumLocal.init();
+      
+      await threadLocal.loadCache();
+      await forumLocal.load();
     } else {
       connection = ConnectTo.server;
     }
     logger.d(
         'repository: init: connection: $connection, user: ${user?.toJson()}');
+  }
+
+  Future<void> _mediaInit(final Directory cacheDir, final String folder) async {
+    cacheFolderPath = path.join(cacheDir.path, '$folder/');
+    final mediaCachePath = '$folder/mediaCache.db';
+    final mediaCacheDbPath = path.join(cacheDir.path, mediaCachePath);
+    await mediaLocal.init(mediaCacheDbPath);
+  }
+
+  Future<void> _threadInit(
+      final Directory cacheDir, final String folder) async {
+    final threadCachePath = '$folder/threadCache.db';
+    final threadCacheDbPath = path.join(cacheDir.path, threadCachePath);
+    await threadLocal.init(threadCacheDbPath);
   }
 
   @action
@@ -289,7 +314,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
         parent.setDeletedThreadTitle(value.title);
       }
 
-      mediaLocal.deleteThreadCacheByThreadMarkId(value);
+      mediaLocal.deleteCacheWhenThreadDeleted(value);
     }
   }
 }
