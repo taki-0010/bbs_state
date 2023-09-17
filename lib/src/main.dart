@@ -1223,6 +1223,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
+
+
   Future<void> setSortHistory(final SortHistory value) async {
     final settnigs = selectedForumState?.settings;
     if (settnigs == null) return;

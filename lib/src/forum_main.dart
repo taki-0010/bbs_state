@@ -274,6 +274,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       final pink =
           result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
       // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
+      // final data = pink.where((element) => element.).toList();
       boards.addAll([...pink]);
     }
   }
@@ -294,7 +295,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
                 directoryName: e.directoryName)))
         .toList();
     return data
-        .where((element) => element.fiveCh?.directoryName != 'NONE')
+        .where((element) =>
+            element.fiveCh?.directoryName != 'NONE' &&
+            !element.fiveCh!.url.contains('headline'))
         .toList();
   }
 

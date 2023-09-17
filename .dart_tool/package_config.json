@@ -369,7 +369,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-b4113dec1ac5f1824b11af037da290a60f40aa38/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-2ae9d59a0f453213904340506e8e1de62ea2c635/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-16T09:05:14.737407Z",
+  "generated": "2023-09-17T12:25:18.491776Z",
   "generator": "pub",
   "generatorVersion": "3.1.1"
 }
