@@ -417,7 +417,10 @@ abstract class ForumStateBase with Store, WithDateTime {
       return _updateMarkData(exist, content);
     } else {
       return await _setInitialThreadMarkData(
-          content, thread.url, thread.thumbnailStr,);
+        content,
+        thread.url,
+        thread.thumbnailStr,
+      );
       // if (thread is! ThreadData) return false;
       // final exist = history.markList.firstWhere(
       //   (element) => element?.id == thread.id,
@@ -897,13 +900,14 @@ abstract class ForumStateBase with Store, WithDateTime {
           currentContentState?.updateAgree(type, index, good);
         }
         break;
-      // case Communities.futabaCh:
-      //   final boardId = currentContent?.boardId;
-      //   if (boardId == null) return;
-      //   final item = value as FutabaChContent;
+      case Communities.futabaCh:
+        final boardId = currentContent?.boardId;
+        if (boardId == null) return;
+        final item = value as FutabaChContent;
 
-      //   final result = await FutabaChHandler.sendAgree(
-      //       item.directory, boardId, item.number.toString());
+        final result = await FutabaChHandler.sendAgree(
+            item.directory, boardId, item.number.toString());
+        logger.d('agree:futaba: $result');
       default:
     }
   }
@@ -1079,6 +1083,26 @@ abstract class ForumStateBase with Store, WithDateTime {
           return true;
         }
         return false;
+      case Communities.futabaCh:
+        final contentData = currentContent?.content.firstOrNull;
+        final thread = currentContentThreadData;
+        if (thread == null) return false;
+        final directory = FutabaParser.getDirectory(thread.uri);
+        final id = FutabaParser.getIdFromUrl(thread.url);
+        final boardId = thread.boardId;
+        if (directory == null || id == null) {
+          return false;
+        }
+        if (contentData is FutabaChContent) {
+          final resto = contentData.resto;
+          final hash = contentData.hash;
+          if (resto != null && hash != null) {
+            return await FutabaChHandler.post(directory, boardId, id,
+                comment: value, resto: resto, hash: hash);
+          }
+        }
+        return false;
+
       default:
     }
     return false;
