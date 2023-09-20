@@ -1223,8 +1223,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
-
-
   Future<void> setSortHistory(final SortHistory value) async {
     final settnigs = selectedForumState?.settings;
     if (settnigs == null) return;
@@ -1388,5 +1386,10 @@ abstract class MainStoreBase with Store, WithDateTime {
       default:
         return url;
     }
+  }
+
+  Future<bool> postThread(
+      {required final CommentData data,}) async {
+    return await selectedForumState?.forumMain.postThread(data:data) ?? false;
   }
 }

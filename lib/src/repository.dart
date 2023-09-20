@@ -21,6 +21,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   late final userLocal = UserStateForLocal(parent: this);
   late final forumLocal = ForumStateForLocal(parent: this);
   late final mediaLocal = MediaCacheState(parent: this);
+  late final postDraftLocal = PostDraftStateForLocal(parent: this);
 
   @observable
   ConnectTo connection = ConnectTo.local;
@@ -45,8 +46,10 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     await cacheDir.create();
     final folder =
         PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
+        await _postDraftInit(cacheDir, folder);
     await _mediaInit(cacheDir, folder);
     await _threadInit(cacheDir, folder);
+    
 
     final dir = await getApplicationSupportDirectory();
 // make sure it exists
@@ -64,7 +67,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     final accountExist = await server.init();
     if (!accountExist) {
       connection = ConnectTo.local;
-      
+
       await threadLocal.loadCache();
       await forumLocal.load();
     } else {
@@ -86,6 +89,13 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     final threadCachePath = '$folder/threadCache.db';
     final threadCacheDbPath = path.join(cacheDir.path, threadCachePath);
     await threadLocal.init(threadCacheDbPath);
+  }
+
+  Future<void> _postDraftInit(
+      final Directory cacheDir, final String folder) async {
+    final postDraftCachePath = '$folder/postDraftCache.db';
+    final postDraftCacheDbPath = path.join(cacheDir.path, postDraftCachePath);
+    await postDraftLocal.init(postDraftCacheDbPath);
   }
 
   @action
@@ -315,6 +325,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       }
 
       mediaLocal.deleteCacheWhenThreadDeleted(value);
+      postDraftLocal.deleteCacheWhenThreadDeleted(value);
     }
   }
 }

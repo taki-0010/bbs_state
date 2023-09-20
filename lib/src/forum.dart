@@ -1042,13 +1042,16 @@ abstract class ForumStateBase with Store, WithDateTime {
     // await indexStorage.setLastOpenedContentIndex(id, index);
   }
 
+
   Future<bool> postComment(final CommentData value) async {
     switch (type) {
-      case Communities.fiveCh:
+      case Communities.fiveCh || Communities.pinkCh:
         final domain = currentContentThreadData?.uri.host;
         final bbs = currentContentThreadData?.boardId;
-        if (domain != null && bbs != null) {
-          final result = await FiveChHandler.post(value, domain, bbs);
+        final threadId =
+            FiveChParser.getId(currentContentThreadData?.url ?? '');
+        if (domain != null && bbs != null && threadId != null) {
+          final result = await FiveChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
             final resnum = int.tryParse(result.resnum ?? '0');
             if (resnum == null || resnum == 0) {
@@ -1060,24 +1063,29 @@ abstract class ForumStateBase with Store, WithDateTime {
           }
         }
         return false;
-      case Communities.pinkCh:
-        final domain = currentContentThreadData?.uri.host;
-        final bbs = currentContentThreadData?.boardId;
-        if (domain != null && bbs != null) {
-          final result = await FiveChHandler.post(value, domain, bbs);
-          if (result != null) {
-            final resnum = int.tryParse(result.resnum ?? '0');
-            if (resnum == null || resnum == 0) {
-              return false;
-            }
-            final resMark = ResMarkData(index: resnum, icon: MarkIcon.edit);
-            await updateMark(resMark);
-            return true;
-          }
-        }
-        return false;
+      // case Communities.pinkCh:
+      //   final domain = currentContentThreadData?.uri.host;
+      //   final bbs = currentContentThreadData?.boardId;
+      //   if (domain != null && bbs != null) {
+      //     final result = await FiveChHandler.post(value, domain, bbs);
+      //     if (result != null) {
+      //       final resnum = int.tryParse(result.resnum ?? '0');
+      //       if (resnum == null || resnum == 0) {
+      //         return false;
+      //       }
+      //       final resMark = ResMarkData(index: resnum, icon: MarkIcon.edit);
+      //       await updateMark(resMark);
+      //       return true;
+      //     }
+      //   }
+      //   return false;
       case Communities.girlsCh:
-        final result = await GirlsChHandler.post(value, value.media);
+        final threadId =
+            FiveChParser.getId(currentContentThreadData?.url ?? '');
+        if (threadId == null) {
+          return false;
+        }
+        final result = await GirlsChHandler.post(value, threadId, value.media, );
         if (result != null) {
           // await commentsStorage.setComment(result);
           return true;

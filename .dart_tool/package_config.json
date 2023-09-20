@@ -3,15 +3,15 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-61.0.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-64.0.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.0"
     },
     {
       "name": "analyzer",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/analyzer-5.13.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/analyzer-6.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "appwrite",
@@ -165,13 +165,13 @@
     },
     {
       "name": "dart_style",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/dart_style-2.3.2",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/dart_style-2.3.3",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-899fef0bf149112b82d68b05666e5f312374d8ae/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-bc9757f70446ac8fb67d2ecdf0db93cc9eb42bcf/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -363,13 +363,13 @@
     },
     {
       "name": "mobx_codegen",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/mobx_codegen-2.3.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/mobx_codegen-2.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.13"
+      "languageVersion": "3.0"
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-f76a93e67d77c61216645fd2ab82d5bdd21aad49/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-3b5e5d5ddb1af3618ec0cf04833e1f6ac076f23c/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -723,9 +723,9 @@
     },
     {
       "name": "win32_registry",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32_registry-1.1.1",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32_registry-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.1"
     },
     {
       "name": "window_to_front",
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-18T11:36:33.590146Z",
+  "generated": "2023-09-20T05:44:57.267793Z",
   "generator": "pub",
   "generatorVersion": "3.1.1"
 }

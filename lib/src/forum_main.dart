@@ -516,6 +516,44 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
   }
 
+  Future<bool> postThread({required final CommentData data}) async {
+    bool result = false;
+    switch (parent.type) {
+      case Communities.fiveCh || Communities.pinkCh:
+        final domain = board?.fiveCh?.domain;
+        final bbs = board?.fiveCh?.directoryName;
+        if (domain == null ||
+            bbs == null ||
+            data.body.isEmpty ||
+            data.name.isEmpty) {
+          return result;
+        }
+        logger.i('postThread: $domain, $bbs');
+        result = await FiveChHandler.postThread(
+            forum: parent.type,
+            body: data.body,
+            title: data.name,
+            origin: domain,
+            boardId: bbs);
+      case Communities.futabaCh:
+        final directory = board?.futabaCh?.directory;
+        final boardId = board?.id;
+        if (directory == null || boardId == null) {
+          return false;
+        }
+        result =
+            await FutabaChHandler.postThread(directory, boardId, comment: data);
+      default:
+    }
+    if (result) {
+      toggleThreadsLoading();
+      await Future.delayed(const Duration(milliseconds: 500));
+      await getThreads();
+      toggleThreadsLoading();
+    }
+    return result;
+  }
+
   @action
   void setContent(
     final ThreadContentData? value,

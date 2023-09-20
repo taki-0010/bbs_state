@@ -20,3 +20,4 @@ export 'package:sembast/sembast_io.dart';
 export 'repository.dart';
 export 'storage/forum.dart';
 export 'storage/media.dart';
+export 'storage/draft.dart';
