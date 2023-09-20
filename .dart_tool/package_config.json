@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-bc9757f70446ac8fb67d2ecdf0db93cc9eb42bcf/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-a7dfa169ba4e112d76b27bcc393c7b92069c4fa2/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -717,7 +717,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.0.7",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.0.8",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-20T05:44:57.267793Z",
+  "generated": "2023-09-20T07:51:53.102566Z",
   "generator": "pub",
   "generatorVersion": "3.1.1"
 }
