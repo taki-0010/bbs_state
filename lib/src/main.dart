@@ -657,7 +657,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   //         final String threadId, final String boardId) async =>
   //     await selectedForumState?.existThreadFromStrorage(threadId, boardId) ??
   //     false;
-  Future<void> post(final CommentData value) async {
+  Future<void> post(final PostData value) async {
     final result = await selectedForumState?.postComment(value);
     if (result != null && result) {
       await updateContent();
@@ -792,18 +792,19 @@ abstract class MainStoreBase with Store, WithDateTime {
     // toggleLoading();
     setLaunchStatus(LaunchStatus.loading);
     await repository.init();
-    // await repository.server.init();
-    // await _initStore();
-    // await userStorage.init();
-    // logger.d('initStore: 1');
-    // await setForums();
-    initialLoad();
-    _setInitialForum();
-    initWhenLargeScreen();
+    // await repository.loadInitialData();
+    initialLocaleLoad();
+
     setLaunchStatus(LaunchStatus.start);
 
     // logger.d('initStore: 2');
     // toggleLoading();
+  }
+
+  Future<void> loadInitialData() async {
+    await repository.loadInitialData();
+    _setInitialForum();
+    initWhenLargeScreen();
   }
 
   Future<void> sendAgree(final ContentData value,
@@ -1388,8 +1389,9 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
-  Future<bool> postThread(
-      {required final CommentData data,}) async {
-    return await selectedForumState?.forumMain.postThread(data:data) ?? false;
+  Future<bool> postThread({
+    required final PostData data,
+  }) async {
+    return await selectedForumState?.forumMain.postThread(data: data) ?? false;
   }
 }

@@ -57,6 +57,14 @@ mixin _$RepositoryState on RepositoryStateBase, Store {
     return _$initAsyncAction.run(() => super.init());
   }
 
+  late final _$loadInitialDataAsyncAction =
+      AsyncAction('RepositoryStateBase.loadInitialData', context: context);
+
+  @override
+  Future<void> loadInitialData() {
+    return _$loadInitialDataAsyncAction.run(() => super.loadInitialData());
+  }
+
   late final _$RepositoryStateBaseActionController =
       ActionController(name: 'RepositoryStateBase', context: context);
 

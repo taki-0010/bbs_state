@@ -516,7 +516,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
   }
 
-  Future<bool> postThread({required final CommentData data}) async {
+  Future<bool> postThread({required final PostData data}) async {
     bool result = false;
     switch (parent.type) {
       case Communities.fiveCh || Communities.pinkCh:
@@ -543,6 +543,11 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         }
         result =
             await FutabaChHandler.postThread(directory, boardId, comment: data);
+      case Communities.girlsCh:
+        final postResult = await GirlsChHandler.postThread(data);
+        if (postResult != null && postResult) {
+          return true;
+        }
       default:
     }
     if (result) {

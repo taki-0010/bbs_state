@@ -27,16 +27,7 @@ abstract class ThreadStateForLocalBase with Store {
 
   Future<void> init(final String path) async {
     threadCache = await databaseFactoryIo.openDatabase(path);
-    // final query = Finder(filter: Filter.matches('userId', parent.user!.id));
-    // final list = await store.find(_db, finder: query);
-    // if (list.isNotEmpty) {
-    //   // await parent.db.transaction((transaction) {
-    //   for (final i in list) {
-    //     final data = ThreadMarkData.fromJson(i.value);
-    //     parent.setThreadData(data);
-    //   }
-    //   // });
-    // }
+    
 
     await _delete(showSnackWhenDeleted: false);
     Timer.periodic(const Duration(minutes: 15), _deleteThreadAutomatically);

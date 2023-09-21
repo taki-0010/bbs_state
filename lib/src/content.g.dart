@@ -16,6 +16,13 @@ mixin _$ContentState on ContentStateBase, Store {
           Computed<double>(() => super.initialSeekableIndex,
               name: 'ContentStateBase.initialSeekableIndex'))
       .value;
+  Computed<String?>? _$futabaLimitComputed;
+
+  @override
+  String? get futabaLimit =>
+      (_$futabaLimitComputed ??= Computed<String?>(() => super.futabaLimit,
+              name: 'ContentStateBase.futabaLimit'))
+          .value;
   Computed<int>? _$getJumpIndexComputed;
 
   @override
@@ -245,6 +252,7 @@ showSeekBar: ${showSeekBar},
 seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
 initialSeekableIndex: ${initialSeekableIndex},
+futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},
 groupList: ${groupList}
     ''';

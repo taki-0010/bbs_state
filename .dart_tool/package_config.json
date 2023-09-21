@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-a7dfa169ba4e112d76b27bcc393c7b92069c4fa2/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-eddd4e6197bbfa79fe448d5a322b2b96582eb9e7/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -369,7 +369,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-3b5e5d5ddb1af3618ec0cf04833e1f6ac076f23c/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-3b0ddab4cd0b8d2b24420ae2b6e1be617f19dc42/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-20T07:51:53.102566Z",
+  "generated": "2023-09-21T12:32:05.961497Z",
   "generator": "pub",
   "generatorVersion": "3.1.1"
 }

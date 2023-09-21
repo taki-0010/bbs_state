@@ -554,7 +554,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (retentionPeriod != RetentionPeriodList.byPostPace) {
       return thread.retentionPeriodSeconds;
     }
-    final hot = getIkioi(int.tryParse(thread.id) ?? 0, resCount);
+    final hot = thread.ikioi;
     final retention = _getRetentionPeriodSeconds(hot);
     logger.i(
         'getRetentionSinceEpoch: hot: $hot, retention: $retention, retentionPeriod: $retentionPeriod, ${thread.retentionPeriodSeconds}');
@@ -563,7 +563,10 @@ abstract class ForumStateBase with Store, WithDateTime {
         .millisecondsSinceEpoch;
   }
 
-  int _getRetentionPeriodSeconds(final double hot) {
+  int _getRetentionPeriodSeconds(double hot) {
+    // if (hot == 0) {
+    //   hot = 0.1;
+    // }
     if (retentionPeriod == RetentionPeriodList.byPostPace) {
       final hours = hot >= 4000 ? 4 : 15000 ~/ hot;
       return hours < 4
@@ -1042,8 +1045,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     // await indexStorage.setLastOpenedContentIndex(id, index);
   }
 
-
-  Future<bool> postComment(final CommentData value) async {
+  Future<bool> postComment(final PostData value) async {
     switch (type) {
       case Communities.fiveCh || Communities.pinkCh:
         final domain = currentContentThreadData?.uri.host;
@@ -1053,7 +1055,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (domain != null && bbs != null && threadId != null) {
           final result = await FiveChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
-            final resnum = int.tryParse(result.resnum ?? '0');
+            final resnum = result.resnum;
             if (resnum == null || resnum == 0) {
               return false;
             }
@@ -1085,7 +1087,11 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (threadId == null) {
           return false;
         }
-        final result = await GirlsChHandler.post(value, threadId, value.media, );
+        final result = await GirlsChHandler.post(
+          value,
+          threadId,
+          // value.media,
+        );
         if (result != null) {
           // await commentsStorage.setComment(result);
           return true;

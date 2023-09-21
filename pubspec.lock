@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a7dfa169ba4e112d76b27bcc393c7b92069c4fa2
+      resolved-ref: eddd4e6197bbfa79fe448d5a322b2b96582eb9e7
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -489,7 +489,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "3b5e5d5ddb1af3618ec0cf04833e1f6ac076f23c"
+      resolved-ref: "3b0ddab4cd0b8d2b24420ae2b6e1be617f19dc42"
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"

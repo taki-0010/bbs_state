@@ -46,24 +46,20 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     await cacheDir.create();
     final folder =
         PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
-        await _postDraftInit(cacheDir, folder);
+    await _postDraftInit(cacheDir, folder);
     await _mediaInit(cacheDir, folder);
     await _threadInit(cacheDir, folder);
-    
 
     final dir = await getApplicationSupportDirectory();
-// make sure it exists
     await dir.create();
-    // final folder =
-    //     PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
     final filePath = '$folder/database.db';
     final dbPath = path.join(dir.path, filePath);
-    // final mediaCachePathData = path.join(dir.path, mediaCachePath);
-// open the database
     db = await databaseFactoryIo.openDatabase(dbPath);
-    // mediaCache = await databaseFactoryIo.openDatabase(mediaCachePathData);
-    await userLocal.init();
+  }
 
+  @action
+  Future<void> loadInitialData() async {
+    await userLocal.init();
     final accountExist = await server.init();
     if (!accountExist) {
       connection = ConnectTo.local;

@@ -68,6 +68,15 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   @computed
+  String? get futabaLimit {
+    final first = content.content.firstOrNull;
+    if (first is FutabaChContent && first.limit != null) {
+      return StringMethodData.replaceText(first.limit!);
+    }
+    return null;
+  }
+
+  @computed
   int get getJumpIndex {
     if (content.content.lastOrNull?.index == null) {
       return 0;

@@ -38,15 +38,7 @@ abstract class MediaCacheStateBase with Store {
   }
 
   Future<void> init(final String dbPath) async {
-    // final dir = await getApplicationCacheDirectory();
-    // logger.i('cacheState: dir: ${dir.path}');
-    // await dir.create();
-    // // cacheDir = dir;
-    // final folder =
-    //     PlatformData.instance.isDebugMode ? 'forumbookDBdebug' : 'forumbookDB';
-    // final mediaCachePath = '$folder/mediaCache.db';
-    // final dbPath = path.join(dir.path, mediaCachePath);
-    // cacheFolderPath = path.join(dir.path, '$folder/');
+    
     mediaCacheInfo = await databaseFactoryIo.openDatabase(dbPath);
     logger.i('cacheState: path: $dbPath');
   }
