@@ -878,6 +878,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   // @action
   void setBottomIndex(final int value) {
     if (value == bottomBarIndex) return;
+    selectedForumState?.clearHoverdItem();
     if (largeScreen) {
       _setBottomIndex(value);
     } else {
@@ -1260,7 +1261,15 @@ abstract class MainStoreBase with Store, WithDateTime {
     final newData = settnigs.copyWith(openLink: value);
     selectedForumState?.setSettings(newData);
     await updateForumSettings();
-    // await repository.server.forumState.update();
+  }
+
+  Future<void> setDeleteKeyFotFutaba() async {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    final newPass = randomInt(count: 9999);
+    final newData = settnigs.copyWith(deleteKeyForFutaba: newPass.toString());
+    selectedForumState?.setSettings(newData);
+    await updateForumSettings();
   }
   // await userStorage.setOpenLink(value);
 
@@ -1393,5 +1402,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     required final PostData data,
   }) async {
     return await selectedForumState?.forumMain.postThread(data: data) ?? false;
+  }
+
+  Future<bool> deleteRes(final ContentData value) async {
+    toggleContentLoading();
+    final result = await selectedForumState?.deleteRes(value) ?? false;
+    if (result) {
+      await selectedForumState?.updateContent();
+    }
+
+    toggleContentLoading();
+    return result;
   }
 }

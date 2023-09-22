@@ -538,11 +538,12 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.futabaCh:
         final directory = board?.futabaCh?.directory;
         final boardId = board?.id;
-        if (directory == null || boardId == null) {
+        final deleteKey = parent.settings?.deleteKeyForFutaba;
+        if (directory == null || boardId == null || deleteKey == null) {
           return false;
         }
-        result =
-            await FutabaChHandler.postThread(directory, boardId, comment: data);
+        result = await FutabaChHandler.postThread(directory, boardId,
+            comment: data, deleteKey: deleteKey);
       case Communities.girlsCh:
         final postResult = await GirlsChHandler.postThread(data);
         if (postResult != null && postResult) {

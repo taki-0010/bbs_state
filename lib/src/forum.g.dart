@@ -156,6 +156,54 @@ mixin _$ForumState on ForumStateBase, Store {
     });
   }
 
+  late final _$hoverdItemAtom =
+      Atom(name: 'ForumStateBase.hoverdItem', context: context);
+
+  @override
+  ThreadBase? get hoverdItem {
+    _$hoverdItemAtom.reportRead();
+    return super.hoverdItem;
+  }
+
+  @override
+  set hoverdItem(ThreadBase? value) {
+    _$hoverdItemAtom.reportWrite(value, super.hoverdItem, () {
+      super.hoverdItem = value;
+    });
+  }
+
+  late final _$hoverdItemXAtom =
+      Atom(name: 'ForumStateBase.hoverdItemX', context: context);
+
+  @override
+  double? get hoverdItemX {
+    _$hoverdItemXAtom.reportRead();
+    return super.hoverdItemX;
+  }
+
+  @override
+  set hoverdItemX(double? value) {
+    _$hoverdItemXAtom.reportWrite(value, super.hoverdItemX, () {
+      super.hoverdItemX = value;
+    });
+  }
+
+  late final _$hoverdItemYAtom =
+      Atom(name: 'ForumStateBase.hoverdItemY', context: context);
+
+  @override
+  double? get hoverdItemY {
+    _$hoverdItemYAtom.reportRead();
+    return super.hoverdItemY;
+  }
+
+  @override
+  set hoverdItemY(double? value) {
+    _$hoverdItemYAtom.reportWrite(value, super.hoverdItemY, () {
+      super.hoverdItemY = value;
+    });
+  }
+
   late final _$boardsScrollAtom =
       Atom(name: 'ForumStateBase.boardsScroll', context: context);
 
@@ -226,6 +274,17 @@ mixin _$ForumState on ForumStateBase, Store {
       ActionController(name: 'ForumStateBase', context: context);
 
   @override
+  void setHoverdItemPosition(ThreadBase? item, double? x, double? y) {
+    final _$actionInfo = _$ForumStateBaseActionController.startAction(
+        name: 'ForumStateBase.setHoverdItemPosition');
+    try {
+      return super.setHoverdItemPosition(item, x, y);
+    } finally {
+      _$ForumStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void computeBoardScrol(double? value) {
     final _$actionInfo = _$ForumStateBaseActionController.startAction(
         name: 'ForumStateBase.computeBoardScrol');
@@ -285,6 +344,9 @@ mixin _$ForumState on ForumStateBase, Store {
     return '''
 settings: ${settings},
 loading: ${loading},
+hoverdItem: ${hoverdItem},
+hoverdItemX: ${hoverdItemX},
+hoverdItemY: ${hoverdItemY},
 boardsScroll: ${boardsScroll},
 currentTotal: ${currentTotal},
 currentContentThreadData: ${currentContentThreadData},

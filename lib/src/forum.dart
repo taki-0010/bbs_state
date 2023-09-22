@@ -49,6 +49,36 @@ abstract class ForumStateBase with Store, WithDateTime {
   @observable
   bool loading = false;
 
+  @observable
+  ThreadBase? hoverdItem;
+
+  @observable
+  double? hoverdItemX;
+
+  @observable
+  double? hoverdItemY;
+
+  @action
+  void setHoverdItemPosition(
+      final ThreadBase? item, final double? x, final double? y) {
+    if (item != null) {
+      if (item != hoverdItem) {
+        hoverdItemX = x;
+        hoverdItemY = y;
+        hoverdItem = item;
+      }
+    } else {
+      clearHoverdItem();
+    }
+  }
+
+  @action
+  void clearHoverdItem() {
+    hoverdItem = null;
+    hoverdItemX = null;
+    hoverdItemY = null;
+  }
+
   // @computed
   // Future<String?> get currentSessionId async =>
   //     await parent.repository.server.userState.currentSessionId;
@@ -1000,6 +1030,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     //   // }
     // default:
     // }
+    clearHoverdItem();
   }
 
   Future<int?> getThreadDiffById(final String value,
@@ -1104,7 +1135,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         final directory = FutabaParser.getDirectory(thread.uri);
         final id = FutabaParser.getIdFromUrl(thread.url);
         final boardId = thread.boardId;
-        if (directory == null || id == null) {
+        final deleteKey = settings?.deleteKeyForFutaba;
+        if (directory == null || id == null || deleteKey == null) {
           return false;
         }
         if (contentData is FutabaChContent) {
@@ -1112,7 +1144,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           final hash = contentData.hash;
           if (resto != null && hash != null) {
             return await FutabaChHandler.post(directory, boardId, id,
-                comment: value, resto: resto, hash: hash);
+                comment: value, deleteKey: deleteKey, resto: resto, hash: hash);
           }
         }
         return false;
@@ -1122,11 +1154,38 @@ abstract class ForumStateBase with Store, WithDateTime {
     return false;
   }
 
+  Future<bool> deleteRes(final ContentData value) async {
+    bool result = false;
+    switch (type) {
+      case Communities.futabaCh:
+        // final contentData = currentContent?.content.firstOrNull;
+        if (value is! FutabaChContent) {
+          return result;
+        }
+        final thread = currentContentThreadData;
+        if (thread == null) return result;
+        final directory = FutabaParser.getDirectory(thread.uri);
+        final id = FutabaParser.getIdFromUrl(thread.url);
+        final boardId = thread.boardId;
+        final deleteKey = settings?.deleteKeyForFutaba;
+        if (directory == null || id == null || deleteKey == null) {
+          return result;
+        }
+
+        result = await FutabaChHandler.deleteRes(
+            directory, boardId, value.number.toString(), deleteKey, thread.id);
+        break;
+      default:
+    }
+    return result;
+  }
+
   void deleteContent(final ThreadMarkData? value) {
     if (value != null) {
       forumMain.deleteData(value);
       history.deleteData(value);
       search.deleteData(value);
+      clearHoverdItem();
     }
   }
 
