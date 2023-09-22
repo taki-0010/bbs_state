@@ -1,6 +1,7 @@
 // import 'dart:typed_data';
 // import 'package:path/path.dart' as path;
 
+import 'dart:async';
 import 'dart:typed_data';
 
 // import 'package:sembast/blob.dart';
@@ -41,6 +42,7 @@ abstract class MediaCacheStateBase with Store {
     
     mediaCacheInfo = await databaseFactoryIo.openDatabase(dbPath);
     logger.i('cacheState: path: $dbPath');
+    Timer.periodic(const Duration(hours: 6), _deleteCacheAutomatically);
   }
 
   Future<void> putMediaData(final String? threadMarkId,
@@ -120,7 +122,7 @@ abstract class MediaCacheStateBase with Store {
 
   // }
 
-  Future<void> deleteCacheAutomatically() async {
+  Future<void> _deleteCacheAutomatically(final Timer value) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final query =
         Finder(filter: Filter.lessThanOrEquals(_retentionPeriod, now));

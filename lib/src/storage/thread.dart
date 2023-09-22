@@ -53,7 +53,7 @@ abstract class ThreadStateForLocalBase with Store {
 
   Future<void> _deleteThreadAutomatically(Timer timer) async {
     await _delete(showSnackWhenDeleted: parent.connection == ConnectTo.local);
-    await parent.mediaLocal.deleteCacheAutomatically();
+    // await parent.mediaLocal.deleteCacheAutomatically();
   }
 
   Future<void> _delete({final bool showSnackWhenDeleted = false}) async {
