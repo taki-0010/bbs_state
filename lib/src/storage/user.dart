@@ -46,15 +46,6 @@ abstract class UserStateForLocalBase with Store {
         user = UserData.fromJson(data);
       // }
     }
-
-    // final keys = await cache.keys;
-    // UserData? user;
-    // if (keys.isEmpty) {
-    //   await _setInitialUserData();
-    //   user = _initialData;
-    // } else {
-    //   user = await cache.get(keys.first);
-    // }
     parent.setUser(user);
   }
 

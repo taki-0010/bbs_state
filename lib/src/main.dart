@@ -206,6 +206,10 @@ abstract class MainStoreBase with Store, WithDateTime {
       selectedForumState?.settings?.threadsOrder ?? ThreadsOrder.newOrder;
 
   @computed
+  ListViewStyle get currentViewStyle =>
+      selectedForumState?.settings?.listViewStyle ?? ListViewStyle.list;
+
+  @computed
   PositionToGet get currentPositionToGet =>
       selectedForumState?.settings?.positionToGet ?? PositionToGet.first;
 
@@ -1144,6 +1148,17 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (settnigs == null) return;
     if (settnigs.positionToGet == value) return;
     final newData = settnigs.copyWith(positionToGet: value);
+    selectedForumState?.setSettings(newData);
+    // await repository.server.forumState.setPositionToGet(value);
+
+    // await userStorage.setPositionToGet(selected, value);
+  }
+
+  void setListViewStyle(final ListViewStyle value) {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    if (settnigs.listViewStyle == value) return;
+    final newData = settnigs.copyWith(listViewStyle: value);
     selectedForumState?.setSettings(newData);
     // await repository.server.forumState.setPositionToGet(value);
 

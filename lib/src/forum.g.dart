@@ -285,6 +285,17 @@ mixin _$ForumState on ForumStateBase, Store {
   }
 
   @override
+  void clearHoverdItem() {
+    final _$actionInfo = _$ForumStateBaseActionController.startAction(
+        name: 'ForumStateBase.clearHoverdItem');
+    try {
+      return super.clearHoverdItem();
+    } finally {
+      _$ForumStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void computeBoardScrol(double? value) {
     final _$actionInfo = _$ForumStateBaseActionController.startAction(
         name: 'ForumStateBase.computeBoardScrol');
