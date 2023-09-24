@@ -871,6 +871,11 @@ abstract class MainStoreBase with Store, WithDateTime {
     selectedForum = selected;
   }
 
+  // int? lastReadTimeBySelectedThread(final ThreadBase item) {
+  //   final data = selectedForumState?.history.getSelectedMarkData(item);
+  //   return data?.lastReadAt;
+  // }
+
   // @action
   // void setForumIndex(final int value) {
   //   _updateLastOpenedIndexWhenScreenTransition();

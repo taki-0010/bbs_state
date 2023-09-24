@@ -16,6 +16,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'ForumMainStateBase.settings'))
           .value;
+  Computed<Map<String, int?>>? _$threadsLastReadAtComputed;
+
+  @override
+  Map<String, int?> get threadsLastReadAt => (_$threadsLastReadAtComputed ??=
+          Computed<Map<String, int?>>(() => super.threadsLastReadAt,
+              name: 'ForumMainStateBase.threadsLastReadAt'))
+      .value;
   Computed<List<BoardData?>>? _$boardsDataComputed;
 
   @override
@@ -30,12 +37,12 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<List<ThreadData?>>(() => super.sortedThreads,
               name: 'ForumMainStateBase.sortedThreads'))
       .value;
-  Computed<List<ThreadData?>>? _$displayTreadsComputed;
+  Computed<List<ThreadData?>>? _$displayThreadsComputed;
 
   @override
-  List<ThreadData?> get displayTreads => (_$displayTreadsComputed ??=
-          Computed<List<ThreadData?>>(() => super.displayTreads,
-              name: 'ForumMainStateBase.displayTreads'))
+  List<ThreadData?> get displayThreads => (_$displayThreadsComputed ??=
+          Computed<List<ThreadData?>>(() => super.displayThreads,
+              name: 'ForumMainStateBase.displayThreads'))
       .value;
   Computed<List<ThreadDataForDiff?>>? _$primaryViewDiffComputed;
 
@@ -270,14 +277,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
     return _$getThreadsAsyncAction.run(() => super.getThreads());
   }
 
-  late final _$_setThreadsAndCacheAsyncAction =
-      AsyncAction('ForumMainStateBase._setThreadsAndCache', context: context);
+  late final _$_setThreadsMetadataAsyncAction =
+      AsyncAction('ForumMainStateBase._setThreadsMetadata', context: context);
 
   @override
-  Future<void> _setThreadsAndCache<T extends ThreadData>(
+  Future<void> _setThreadsMetadata<T extends ThreadData>(
       List<T?> result, BoardData boardData) {
-    return _$_setThreadsAndCacheAsyncAction
-        .run(() => super._setThreadsAndCache<T>(result, boardData));
+    return _$_setThreadsMetadataAsyncAction
+        .run(() => super._setThreadsMetadata<T>(result, boardData));
   }
 
   late final _$_getThreadsForFiveChAsyncAction =
@@ -435,9 +442,10 @@ threadList: ${threadList},
 threadsDiff: ${threadsDiff},
 searchThreadWord: ${searchThreadWord},
 settings: ${settings},
+threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
 sortedThreads: ${sortedThreads},
-displayTreads: ${displayTreads},
+displayThreads: ${displayThreads},
 primaryViewDiff: ${primaryViewDiff},
 userFavoritesBoards: ${userFavoritesBoards},
 favoritesBoards: ${favoritesBoards},

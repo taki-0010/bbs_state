@@ -39,6 +39,20 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   @observable
   ObservableMap<String, List<ThreadDataForDiff?>> threadsDiff = ObservableMap();
 
+  @computed
+  Map<String, int?> get threadsLastReadAt {
+    Map<String, int?> result = {};
+    for (final i in threadList) {
+      if (i != null) {
+        final markData = parent.history.getSelectedMarkData(i);
+        if (markData != null) {
+          result[markData.id] = markData.lastReadAt;
+        }
+      }
+    }
+    return result;
+  }
+
   // @observable
   // ThreadContentData? mainContent;
 
@@ -152,11 +166,34 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return list;
   }
 
+  // int? _lastRead(final ThreadBase item) => threadsLastReadAt[item.id];
+
+  // @computed
+  // List<ThreadData?> get displayThreads {
+  //   final list = [...filterdThreads];
+  //   List<(ThreadData, int)> historyList = [];
+  //   for (final i in list) {
+  //     if (i != null) {
+  //       final lastRead = _lastRead(i);
+  //       if (lastRead != null) {
+  //         historyList.add((i, lastRead));
+  //         list.removeWhere((element) => element?.id == i.id);
+  //       }
+  //     }
+  //   }
+  //   // historyList.sort((a, b) => a.$2.compareTo(b.$2));
+  //   // final newList = historyList.map((e) => e.$1).toList();
+  //   // list.insertAll(0, newList);
+  //   // logger.i('displayTreads: histry: $historyList');
+  //   return list;
+  // }
+
   @computed
-  List<ThreadData?> get displayTreads {
+  List<ThreadData?> get displayThreads {
     if (searchThreadWord == null) {
       return sortedThreads;
     }
+
     return sortedThreads
         .where((element) =>
             element != null &&
@@ -397,7 +434,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @action
-  Future<void> _setThreadsAndCache<T extends ThreadData>(
+  Future<void> _setThreadsMetadata<T extends ThreadData>(
       final List<T?> result, final BoardData boardData) async {
     // final cache = await boardStorage.getBoardData(boardData.id);
     // final oldList = [...threadList];
@@ -406,14 +443,21 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         // oldList: oldList.whereType<T?>().toList(),
         newList: result,
         boardData: boardData);
-    // } else {
-
-    //   threadList.addAll(result);
+    // threadsLastReadAt.clear();
+    // for (final i in result) {
+    //   if (i != null) {
+    //     final markData = parent.history.getSelectedMarkData(i);
+    //     if (markData != null) {
+    //       setThreadsLastReadAt(markData);
+    //     }
+    //   }
     // }
-    // logger.d(
-    //     '_setThreadsAndCache: ${boardData.id}, cache: ${cache != null}, cacheId: ${cache?.board.id}');
-    // await boardStorage.setBoardData(boardData.id, threadList);
   }
+
+  // @action
+  // void setThreadsLastReadAt(final ThreadMarkData item) {
+  //   threadsLastReadAt[item.id] = item.lastReadAt;
+  // }
 
   @action
   Future<void> _getThreadsForFiveCh({final BoardData? value}) async {
@@ -435,7 +479,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       if (result == null) {
         return;
       }
-      await _setThreadsAndCache<FiveChThreadTitleData>(result, b);
+      await _setThreadsMetadata<FiveChThreadTitleData>(result, b);
     }
   }
 
@@ -459,11 +503,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       if (result == null) {
         return;
       }
-      //  await _setThreadsAndCache<FiveChThreadTitleData>(result, b);
-      _setThreads<FiveChThreadTitleData>(
-          // oldList: oldList.whereType<T?>().toList(),
-          newList: result,
-          boardData: b);
+      await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
     }
   }
 
@@ -475,16 +515,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       if (result == null) {
         return;
       }
-      await _setThreadsAndCache<GirlsChThread>(result, board!);
-      // final cache = await boardStorage.getBoardData(board!.id);
-      // if (cache != null && cache.threads.isNotEmpty) {
-      //   _setThreads(oldList: cache.threads, newList: result);
-      // } else {
-      //   threadList.addAll(result);
-      // }
-      // logger.d(
-      //     '_getThreadsForGirlsCh: ${board!.id}, cache: ${cache != null}, cacheId: ${cache?.board.id}');
-      // await boardStorage.setBoardData(board!.id, threadList);
+      await _setThreadsMetadata<GirlsChThread>(result, board!);
     }
   }
 
@@ -503,16 +534,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       if (result == null) {
         return;
       }
-      await _setThreadsAndCache<FutabaChThread>(result, board!);
-      // final cache = await boardStorage.getBoardData(board!.id);
-      // if (cache != null && cache.threads.isNotEmpty) {
-      //   _setThreads(oldList: cache.threads, newList: result);
-      // } else {
-      //   threadList.addAll(result);
-      // }
-      // logger.d(
-      //     '_getThreadsForFutabaCh: ${board!.id}, cache: ${cache != null}, cacheId: ${cache?.board.id}');
-      // await boardStorage.setBoardData(board!.id, threadList);
+      await _setThreadsMetadata<FutabaChThread>(result, board!);
     }
   }
 

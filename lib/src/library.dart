@@ -92,15 +92,16 @@ abstract class LibraryStateBase with Store, WithDateTime {
   List<ThreadMarkData?> _sort(final List<ThreadMarkData?> list) {
     switch (sortHistory) {
       case SortHistory.hot:
-         list.sort((a, b) => (getIkioi(b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
+        list.sort((a, b) => (getIkioi(
+                b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
             .compareTo(getIkioi(a?.createdAtBySeconds ?? 0, a?.resCount ?? 0)));
         break;
       case SortHistory.deletionDate:
-         list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
+        list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
             .compareTo((b?.retentionPeriodSeconds ?? 0)));
       case SortHistory.history:
-          list.sort((a, b) => (b?.lastReadAt ?? 0)
-            .compareTo((a?.lastReadAt ?? 0)));
+        list.sort(
+            (a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
       default:
     }
     // if (sortHistory) {
@@ -132,7 +133,17 @@ abstract class LibraryStateBase with Store, WithDateTime {
       markList.removeWhere((element) =>
           element?.id == value?.id && element?.boardId == value?.boardId);
       markList.insert(0, value);
+      // parent.forumMain.setThreadsLastReadAt(value!);
     }
+  }
+
+  ThreadMarkData? getSelectedMarkData(final ThreadBase value) {
+    return markList.firstWhere(
+        (element) =>
+            element?.id == value.id &&
+            element?.boardId == value.boardId &&
+            element?.type == value.type,
+        orElse: () => null);
   }
 
   @action
@@ -238,7 +249,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
 
   // @action
   // void setViewIndex(final int index) => viewIndex = index;
-
 
   Future<void> updateAllList() async {
     // for (final i in markList) {
