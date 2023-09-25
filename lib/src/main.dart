@@ -618,7 +618,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     debugLog.add(value);
   }
 
-  Future<bool> setContent(final String id,
+  Future<FetchResult> setContent(final String id,
       {required final ThreadBase thread}) async {
     // toggleContentLoading();
     if (largeScreen) {
@@ -626,7 +626,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
     final result = await selectedForumState?.setContent(id, thread: thread);
     // toggleContentLoading();
-    return result ?? false;
+    return result ?? FetchResult.error;
   }
 
   // Future<bool> setVisibleContentForSecondry(final String id,
@@ -681,14 +681,14 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleEntireLoading();
   }
 
-  Future<bool> getDataByUrl(final String? value,
+  Future<FetchResult> getDataByUrl(final String? value,
       {final bool setContent = true}) async {
-    if (value == null) return false;
+    if (value == null) return FetchResult.error;
     toggleContentLoading();
     final result =
         await selectedForumState?.getDataByUrl(value, setContent: setContent);
     toggleContentLoading();
-    return result ?? false;
+    return result ?? FetchResult.error;
   }
 
   Future<void> updateMark(final ResMarkData value) async {
@@ -1207,12 +1207,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<Uint8List?> getMediaData(final String url) async {
     final cache = await _getMediaFromCache(url);
     if (cache != null) {
-      logger.i('get media from cache: $url');
+      // logger.i('get media from cache: $url');
       return cache;
     }
     final data = await FetchData.getMediaData(url);
     if (data == null) return null;
-    logger.i('get media from network: $url');
+    // logger.i('get media from network: $url');
     final currentThread = currentContentThreadData;
     await repository.mediaLocal
         .putMediaData(currentThread?.documentId, url: url, data: data);

@@ -224,26 +224,28 @@ mixin _$ForumState on ForumStateBase, Store {
       AsyncAction('ForumStateBase.setContent', context: context);
 
   @override
-  Future<bool> setContent(String id, {required ThreadBase thread}) {
+  Future<FetchResult> setContent(String id, {required ThreadBase thread}) {
     return _$setContentAsyncAction
         .run(() => super.setContent(id, thread: thread));
   }
 
-  late final _$_getDataAsyncAction =
-      AsyncAction('ForumStateBase._getData', context: context);
+  late final _$_fetchDataAsyncAction =
+      AsyncAction('ForumStateBase._fetchData', context: context);
 
   @override
-  Future<ThreadContentData?> _getData<T extends ThreadBase>(String dataId,
-      {required T thread, PositionToGet? positionToGet}) {
-    return _$_getDataAsyncAction.run(() => super
-        ._getData<T>(dataId, thread: thread, positionToGet: positionToGet));
+  Future<FetchContentResultData?> _fetchData<T extends ThreadBase>(
+      String dataId,
+      {required T thread,
+      PositionToGet? positionToGet}) {
+    return _$_fetchDataAsyncAction.run(() => super
+        ._fetchData<T>(dataId, thread: thread, positionToGet: positionToGet));
   }
 
   late final _$_getContentForFiveChAsyncAction =
       AsyncAction('ForumStateBase._getContentForFiveCh', context: context);
 
   @override
-  Future<(List<FiveChThreadContentData>?, bool)> _getContentForFiveCh(String id,
+  Future<FetchContentResultData> _getContentForFiveCh(String id,
       {required String domain, required String directoryName}) {
     return _$_getContentForFiveChAsyncAction.run(() => super
         ._getContentForFiveCh(id,
@@ -254,7 +256,7 @@ mixin _$ForumState on ForumStateBase, Store {
       AsyncAction('ForumStateBase._getContentForGirlsCh', context: context);
 
   @override
-  Future<(List<GirlsChContent?>?, int)?> _getContentForGirlsCh(String id,
+  Future<FetchContentResultData> _getContentForGirlsCh(String id,
       {required PositionToGet positionToGet}) {
     return _$_getContentForGirlsChAsyncAction.run(
         () => super._getContentForGirlsCh(id, positionToGet: positionToGet));
@@ -264,7 +266,7 @@ mixin _$ForumState on ForumStateBase, Store {
       AsyncAction('ForumStateBase._getContentForFutabaCh', context: context);
 
   @override
-  Future<List<FutabaChContent?>?> _getContentForFutabaCh(
+  Future<FetchContentResultData> _getContentForFutabaCh(
       {required String url, required String directory}) {
     return _$_getContentForFutabaChAsyncAction.run(
         () => super._getContentForFutabaCh(url: url, directory: directory));

@@ -237,6 +237,18 @@ mixin _$LibraryState on LibraryStateBase, Store {
   }
 
   @override
+  void _setDiff<T extends ThreadData>(
+      List<T?>? result, Map<String, int> currentRes) {
+    final _$actionInfo = _$LibraryStateBaseActionController.startAction(
+        name: 'LibraryStateBase._setDiff<T extends ThreadData>');
+    try {
+      return super._setDiff<T>(result, currentRes);
+    } finally {
+      _$LibraryStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void deleteContentState() {
     final _$actionInfo = _$LibraryStateBaseActionController.startAction(
         name: 'LibraryStateBase.deleteContentState');

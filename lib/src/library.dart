@@ -133,8 +133,14 @@ abstract class LibraryStateBase with Store, WithDateTime {
       markList.removeWhere((element) =>
           element?.id == value?.id && element?.boardId == value?.boardId);
       markList.insert(0, value);
+
       // parent.forumMain.setThreadsLastReadAt(value!);
     }
+  }
+
+  @action
+  void deleteDiffField(final String? id) {
+    markListDiff.remove(id);
   }
 
   ThreadMarkData? getSelectedMarkData(final ThreadBase value) {
@@ -269,38 +275,71 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            _setDiff(result, currentRes);
+            _setDiff(
+              result,
+              currentRes,
+            );
             break;
           case Communities.girlsCh:
             final result = await GirlsChHandler.getTitleList(
                 'topics/category/${b.boardId}',
                 categoryId: b.boardId);
-            _setDiff(result, currentRes);
+            _setDiff(
+              result,
+              currentRes,
+            );
             break;
           case Communities.futabaCh:
-            final result = await FutabaChHandler.getAllThreads(
-                catalog: FutabaParser.getBoardPath(
-                    directory: b.futabaDirectory,
-                    boardId: b.boardId,
-                    order: ThreadsOrder.catalog),
-                newer: FutabaParser.getBoardPath(
-                    directory: b.futabaDirectory,
-                    boardId: b.boardId,
-                    order: ThreadsOrder.newerThread),
-                hug: FutabaParser.getBoardPath(
-                    directory: b.futabaDirectory,
-                    boardId: b.boardId,
-                    order: ThreadsOrder.resCountDesc),
-                boardId: b.boardId,
-                directory: b.futabaDirectory);
-            _setDiff(result, currentRes);
+            final selectedBoardThreads =
+                markList.where((e) => e?.boardId == b.boardId).toList();
+            List<FutabaChThread?> threadsData = [];
+            for (final i in selectedBoardThreads) {
+              if (i != null) {
+                final data =
+                    await FutabaChHandler.getContent(i.url, b.futabaDirectory);
+                if (data.result == FetchResult.error ||
+                    data.statusCode == 404) {
+                  await parent.parent.deleteThreadMarkData(i);
+                } else {
+                  final rescount = data.contentList?.lastOrNull?.index;
+                  if (rescount != null && i.resCount != 1001) {
+                    final newData = FutabaParser.parseFromJson(rescount, i);
+                    threadsData
+                        .removeWhere((element) => element?.id == newData?.id);
+                    threadsData.add(newData);
+                  }
+                }
+              }
+            }
+            // final result = await FutabaChHandler.getAllThreads(
+            //     catalog: FutabaParser.getBoardPath(
+            //         directory: b.futabaDirectory,
+            //         boardId: b.boardId,
+            //         order: ThreadsOrder.catalog),
+            //     newer: FutabaParser.getBoardPath(
+            //         directory: b.futabaDirectory,
+            //         boardId: b.boardId,
+            //         order: ThreadsOrder.newerThread),
+            //     hug: FutabaParser.getBoardPath(
+            //         directory: b.futabaDirectory,
+            //         boardId: b.boardId,
+            //         order: ThreadsOrder.resCountDesc),
+            //     boardId: b.boardId,
+            //     directory: b.futabaDirectory);
+            _setDiff(
+              threadsData,
+              currentRes,
+            );
             break;
           case Communities.pinkCh:
             final result = await PinkChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            _setDiff(result, currentRes);
+            _setDiff(
+              result,
+              currentRes,
+            );
             break;
           default:
         }
@@ -308,9 +347,55 @@ abstract class LibraryStateBase with Store, WithDateTime {
     }
   }
 
+  Future<void> updateResCountWhenUpdateBoard(
+      final List<ThreadData?> list) async {
+    for (final i in list) {
+      if (i != null) {
+        final exist = getSelectedMarkData(i);
+        if (exist != null && !exist.archived && exist.resCount != i.resCount) {
+          final newData = exist.copyWith(resCount: i.resCount);
+          deleteDiffField(newData.id);
+
+          await parent.parent.repository.updateThreadMark(newData);
+        }
+      }
+    }
+  }
+
+  Future<void> deleteMarkDataWhenNotFound<T extends ThreadData>(
+      final List<T?> list, final String boardId) async {
+    Set<ThreadMarkData?> willDeleteList = {};
+    final filterd =
+        markList.where((element) => element?.boardId == boardId).toList();
+    for (final i in filterd) {
+      if (i != null) {
+        final exist = list.firstWhere(
+          (element) => element?.id == i.id,
+          orElse: () => null,
+        );
+        if (exist == null) {
+          willDeleteList.add(i);
+        }
+      }
+    }
+    if (willDeleteList.isNotEmpty) {
+      for (final d in willDeleteList) {
+        if (d != null) {
+          await parent.parent.deleteThreadMarkData(d);
+        }
+      }
+    }
+  }
+
+  @action
   void _setDiff<T extends ThreadData>(
-      final List<T?>? result, final Map<String, int> currentRes) {
+    final List<T?>? result,
+    final Map<String, int> currentRes,
+  ) {
     if (result == null) return;
+    // Set<ThreadMarkData?> willDeleteSet = {};
+    // final list =
+    //     [...markList.where((element) => element?.boardId == boardId).toList()];
     for (final m in markList) {
       if (m != null) {
         final exist = result.firstWhere(
@@ -329,9 +414,19 @@ abstract class LibraryStateBase with Store, WithDateTime {
             // setLog(newData);
             parent.parent.repository.updateThreadMark(newData);
           }
-        } else {}
+        } else {
+          logger.d('_setDiff: ${m.title}');
+          // willDeleteSet.add(m);
+        }
       }
     }
+    // if (willDeleteSet.isNotEmpty) {
+    //   for (final i in willDeleteSet) {
+    //     if (i != null) {
+    //       parent.parent.deleteThreadMarkData(i);
+    //     }
+    //   }
+    // }
   }
 
   @action
