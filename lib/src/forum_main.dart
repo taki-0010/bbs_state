@@ -433,30 +433,30 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     // logger.i('_setThreads: 2 ${threadList.length}');
   }
 
-  Future<void> _setArchived(
-      final List<ThreadData?> newList, final String boardId) async {
-    if (parent.type == Communities.futabaCh ||
-        parent.type == Communities.girlsCh) {
-      return;
-    }
-    final before = parent.history.markList
-        .where((element) => element?.boardId == boardId)
-        .toList();
-    for (final i in before) {
-      if (i != null) {
-        final exist = newList.firstWhere((element) => element?.id == i.id,
-            orElse: () => null);
-        if (exist == null) {
-          // final history = parent.history.markList
-          //     .firstWhere((element) => element?.id == i.id, orElse: () => null);
-          if (!i.archived) {
-            final newData = i.copyWith(archived: true);
-            await parent.parent.repository.updateThreadMark(newData);
-          }
-        }
-      }
-    }
-  }
+  // Future<void> _setArchived(
+  //     final List<ThreadData?> newList, final String boardId) async {
+  //   if (parent.type == Communities.futabaCh ||
+  //       parent.type == Communities.girlsCh) {
+  //     return;
+  //   }
+  //   final before = parent.history.markList
+  //       .where((element) => element?.boardId == boardId)
+  //       .toList();
+  //   for (final i in before) {
+  //     if (i != null) {
+  //       final exist = newList.firstWhere((element) => element?.id == i.id,
+  //           orElse: () => null);
+  //       if (exist == null) {
+  //         // final history = parent.history.markList
+  //         //     .firstWhere((element) => element?.id == i.id, orElse: () => null);
+  //         if (!i.archived) {
+  //           final newData = i.copyWith(archived: true);
+  //           await parent.parent.repository.updateThreadMark(newData);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   @action
   Future<void> _setThreadsMetadata<T extends ThreadData>(
@@ -465,7 +465,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     // final oldList = [...threadList];
 
     _setThreads<T>(newList: result, boardData: boardData);
-    await _setArchived(result, boardData.id);
+    await parent.history.setArchived<T>(result, boardData.id);
     await parent.history.updateResCountWhenUpdateBoard(result);
   }
 

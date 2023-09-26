@@ -275,10 +275,14 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            _setDiff(
-              result,
-              currentRes,
-            );
+            if (result != null) {
+              setArchived<FiveChThreadTitleData>(result, b.boardId);
+              _setDiff(
+                result,
+                currentRes,
+              );
+            }
+
             break;
           case Communities.girlsCh:
             final result = await GirlsChHandler.getTitleList(
@@ -382,6 +386,30 @@ abstract class LibraryStateBase with Store, WithDateTime {
       for (final d in willDeleteList) {
         if (d != null) {
           await parent.parent.deleteThreadMarkData(d);
+        }
+      }
+    }
+  }
+
+  Future<void> setArchived<T extends ThreadData>(
+      final List<T?> newList, final String boardId) async {
+    if (parent.type == Communities.futabaCh ||
+        parent.type == Communities.girlsCh) {
+      return;
+    }
+    final before =
+        markList.where((element) => element?.boardId == boardId).toList();
+    for (final i in before) {
+      if (i != null) {
+        final exist = newList.firstWhere((element) => element?.id == i.id,
+            orElse: () => null);
+        if (exist == null) {
+          // final history = parent.history.markList
+          //     .firstWhere((element) => element?.id == i.id, orElse: () => null);
+          if (!i.archived) {
+            final newData = i.copyWith(archived: true);
+            await parent.parent.repository.updateThreadMark(newData);
+          }
         }
       }
     }
