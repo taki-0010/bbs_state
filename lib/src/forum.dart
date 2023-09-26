@@ -527,6 +527,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       final retention = _getRetentionPeriodSeconds(hot);
       final documentId = _getDocumentId(content.id, content.boardId);
       final createdAtBySeconds = _getCreatedAtBySecounds(content);
+      final now = DateTime.now();
 
       final newLog = ThreadMarkData(
           id: content.id,
@@ -544,7 +545,8 @@ abstract class ForumStateBase with Store, WithDateTime {
           // boardName: null,
           positionToGet: settings!.positionToGet,
           createdAtBySeconds: createdAtBySeconds ?? 0,
-          retentionPeriodSeconds: DateTime.now()
+          lastReadAt: now.millisecondsSinceEpoch,
+          retentionPeriodSeconds: now
               .add(Duration(hours: retention))
               .millisecondsSinceEpoch);
 
