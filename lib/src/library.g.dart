@@ -24,19 +24,20 @@ mixin _$LibraryState on LibraryStateBase, Store {
               () => super.currentMarksResCount,
               name: 'LibraryStateBase.currentMarksResCount'))
           .value;
-  Computed<bool>? _$sortHistoryByRetentionComputed;
+  Computed<SortHistoryList>? _$sortHistoryComputed;
 
   @override
-  bool get sortHistoryByRetention => (_$sortHistoryByRetentionComputed ??=
-          Computed<bool>(() => super.sortHistoryByRetention,
-              name: 'LibraryStateBase.sortHistoryByRetention'))
-      .value;
-  Computed<SortHistory>? _$sortHistoryComputed;
-
-  @override
-  SortHistory get sortHistory =>
-      (_$sortHistoryComputed ??= Computed<SortHistory>(() => super.sortHistory,
+  SortHistoryList get sortHistory => (_$sortHistoryComputed ??=
+          Computed<SortHistoryList>(() => super.sortHistory,
               name: 'LibraryStateBase.sortHistory'))
+      .value;
+  Computed<Map<String, List<ThreadMarkData?>?>>? _$displayListComputed;
+
+  @override
+  Map<String, List<ThreadMarkData?>?> get displayList =>
+      (_$displayListComputed ??= Computed<Map<String, List<ThreadMarkData?>?>>(
+              () => super.displayList,
+              name: 'LibraryStateBase.displayList'))
           .value;
   Computed<Set<String?>>? _$boardIdSetOfContentListComputed;
 
@@ -54,6 +55,24 @@ mixin _$LibraryState on LibraryStateBase, Store {
               Computed<Map<String, List<ThreadMarkData?>?>>(
                   () => super.markListByBoardId,
                   name: 'LibraryStateBase.markListByBoardId'))
+          .value;
+  Computed<Map<String, List<ThreadMarkData?>?>>? _$markListByLastReadAtComputed;
+
+  @override
+  Map<String, List<ThreadMarkData?>?> get markListByLastReadAt =>
+      (_$markListByLastReadAtComputed ??=
+              Computed<Map<String, List<ThreadMarkData?>?>>(
+                  () => super.markListByLastReadAt,
+                  name: 'LibraryStateBase.markListByLastReadAt'))
+          .value;
+  Computed<Map<String, List<ThreadMarkData?>?>>? _$currentHistoryListComputed;
+
+  @override
+  Map<String, List<ThreadMarkData?>?> get currentHistoryList =>
+      (_$currentHistoryListComputed ??=
+              Computed<Map<String, List<ThreadMarkData?>?>>(
+                  () => super.currentHistoryList,
+                  name: 'LibraryStateBase.currentHistoryList'))
           .value;
   Computed<String>? _$appBarTitleComputed;
 
@@ -204,6 +223,17 @@ mixin _$LibraryState on LibraryStateBase, Store {
   }
 
   @override
+  void deleteDiffField(String? id) {
+    final _$actionInfo = _$LibraryStateBaseActionController.startAction(
+        name: 'LibraryStateBase.deleteDiffField');
+    try {
+      return super.deleteDiffField(id);
+    } finally {
+      _$LibraryStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void replaceContent(ContentState value) {
     final _$actionInfo = _$LibraryStateBaseActionController.startAction(
         name: 'LibraryStateBase.replaceContent');
@@ -281,10 +311,12 @@ markList: ${markList},
 markListDiff: ${markListDiff},
 settings: ${settings},
 currentMarksResCount: ${currentMarksResCount},
-sortHistoryByRetention: ${sortHistoryByRetention},
 sortHistory: ${sortHistory},
+displayList: ${displayList},
 boardIdSetOfContentList: ${boardIdSetOfContentList},
 markListByBoardId: ${markListByBoardId},
+markListByLastReadAt: ${markListByLastReadAt},
+currentHistoryList: ${currentHistoryList},
 appBarTitle: ${appBarTitle}
     ''';
   }

@@ -56,12 +56,21 @@ abstract class LibraryStateBase with Store, WithDateTime {
   @observable
   ObservableMap<String, int> markListDiff = ObservableMap();
 
+  // @computed
+  // bool get sortHistoryByRetention => settings?.sortHistoryByRetention ?? false;
   @computed
-  bool get sortHistoryByRetention => settings?.sortHistoryByRetention ?? false;
-  @computed
-  SortHistory get sortHistory => settings?.sortHistory ?? SortHistory.history;
+  SortHistoryList get sortHistory =>
+      settings?.sortHistoryList ?? SortHistoryList.boards;
   // @computed
   // bool get viewByBoard => settings?.viewByBoardInHistory ?? false;
+
+  @computed
+  Map<String, List<ThreadMarkData?>?> get displayList => switch (sortHistory) {
+        SortHistoryList.boards => markListByBoardId,
+        // SortHistoryList.deletionDate => markListByBoardId,
+        // SortHistoryList.hot => markListByBoardId,
+        SortHistoryList.history => markListByLastReadAt
+      };
 
   @computed
   Set<String?> get boardIdSetOfContentList {
@@ -89,28 +98,55 @@ abstract class LibraryStateBase with Store, WithDateTime {
     return result;
   }
 
-  List<ThreadMarkData?> _sort(final List<ThreadMarkData?> list) {
-    switch (sortHistory) {
-      case SortHistory.hot:
-        list.sort((a, b) => (getIkioi(
-                b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
-            .compareTo(getIkioi(a?.createdAtBySeconds ?? 0, a?.resCount ?? 0)));
-        break;
-      case SortHistory.deletionDate:
-        list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
-            .compareTo((b?.retentionPeriodSeconds ?? 0)));
-      case SortHistory.history:
-        list.sort(
-            (a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
-      default:
+  @computed
+  Map<String, List<ThreadMarkData?>?> get markListByLastReadAt {
+    Map<String, List<ThreadMarkData?>?> result = {};
+    final locale = parent.parent.getLocale.name;
+    final lastReadAtSet =
+        markList.map((element) => element?.lastReadAt).toSet();
+    final list = lastReadAtSet.toList();
+    list.sort((a, b) => (b ?? 0).compareTo((a ?? 0)));
+    for (final b in list) {
+      if (b != null) {
+        final daysago = getTimeago(epochToDateTime(b), locale);
+        final list = markList
+            .where((element) =>
+                element?.lastReadAt != null &&
+                getTimeago(epochToDateTime(element!.lastReadAt!), locale) ==
+                    daysago)
+            .toList();
+        result[daysago] = [];
+        final sorted = _sort(list);
+        result[daysago]?.addAll(sorted);
+      }
     }
-    // if (sortHistory) {
-    //   list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
-    //       .compareTo((b?.retentionPeriodSeconds ?? 0)));
-    // } else {
-    //   list.sort((a, b) =>
-    //       (b?.createdAtBySeconds ?? 0).compareTo((a?.createdAtBySeconds ?? 0)));
+    return result;
+  }
+
+  @computed
+  Map<String, List<ThreadMarkData?>?> get currentHistoryList =>
+      switch (sortHistory) {
+        SortHistoryList.history => markListByLastReadAt,
+        SortHistoryList.boards => markListByBoardId
+      };
+
+  List<ThreadMarkData?> _sort(final List<ThreadMarkData?> list) {
+    // switch (sortHistory) {
+    //   // case SortHistory.hot:
+    //   //   list.sort((a, b) => (getIkioi(
+    //   //           b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
+    //   //       .compareTo(getIkioi(a?.createdAtBySeconds ?? 0, a?.resCount ?? 0)));
+    //   //   break;
+    //   // case SortHistory.deletionDate:
+    //   //   list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
+    //   //       .compareTo((b?.retentionPeriodSeconds ?? 0)));
+    //   case SortHistoryList.history:
+    //     list.sort(
+    //         (a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
+    //   default:
     // }
+    list.sort((a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
+
     return list;
   }
 
@@ -207,6 +243,13 @@ abstract class LibraryStateBase with Store, WithDateTime {
   // @action
   Future<void> clearThreadsByBoard(final String boardId) async {
     final list = [...?markListByBoardId[boardId]];
+    if (list.isNotEmpty) {
+      await _clearThreads(list);
+    }
+  }
+
+  Future<void> clearThreadsByHistory(final String keyName) async {
+    final list = [...?markListByLastReadAt[keyName]];
     if (list.isNotEmpty) {
       await _clearThreads(list);
     }

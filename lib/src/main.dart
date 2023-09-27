@@ -271,12 +271,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get userFavoritesBoards =>
       selectedForumState?.forumMain.userFavoritesBoards ?? false;
+  // @computed
+  // bool get sortHistoryByRetention =>
+  //     selectedForumState?.history.sortHistoryByRetention ?? false;
   @computed
-  bool get sortHistoryByRetention =>
-      selectedForumState?.history.sortHistoryByRetention ?? false;
-  @computed
-  SortHistory get sortHistory =>
-      selectedForumState?.history.sortHistory ?? SortHistory.history;
+  SortHistoryList get sortHistory =>
+      selectedForumState?.history.sortHistory ?? SortHistoryList.boards;
   // @computed
   // bool get viewByBoard => switch (currentScreen) {
   //       BottomMenu.history => selectedForumState?.history.viewByBoard ?? false,
@@ -550,7 +550,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   Map<String, List<ThreadBase?>?> get currentHistoryList =>
-      selectedForumState?.history.markListByBoardId ?? {};
+      selectedForumState?.history.currentHistoryList ?? {};
 
   @computed
   Map<String, List<ThreadBase?>?> get currentSearchList =>
@@ -1245,11 +1245,11 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
-  Future<void> setSortHistory(final SortHistory value) async {
+  Future<void> setSortHistory(final SortHistoryList value) async {
     final settnigs = selectedForumState?.settings;
     if (settnigs == null) return;
-    if (settnigs.sortHistory == value) return;
-    final newData = settnigs.copyWith(sortHistory: value);
+    if (settnigs.sortHistoryList == value) return;
+    final newData = settnigs.copyWith(sortHistoryList: value);
     selectedForumState?.setSettings(newData);
     await updateForumSettings();
   }
@@ -1388,6 +1388,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<void> clearThreadsByBoard(final String boardId) async {
     selectedForumState?.history.toggleThreadsLoading();
     await selectedForumState?.history.clearThreadsByBoard(boardId);
+    selectedForumState?.history.toggleThreadsLoading();
+  }
+
+  Future<void> clearThreadsByLastReadAt(final String history) async {
+    selectedForumState?.history.toggleThreadsLoading();
+    await selectedForumState?.history.clearThreadsByHistory(history);
     selectedForumState?.history.toggleThreadsLoading();
   }
 
