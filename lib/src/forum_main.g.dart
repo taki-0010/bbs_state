@@ -269,50 +269,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
         .run(() => super._getBoardsForFutaba());
   }
 
-  late final _$getThreadsAsyncAction =
-      AsyncAction('ForumMainStateBase.getThreads', context: context);
-
-  @override
-  Future<void> getThreads() {
-    return _$getThreadsAsyncAction.run(() => super.getThreads());
-  }
-
   late final _$_setThreadsMetadataAsyncAction =
       AsyncAction('ForumMainStateBase._setThreadsMetadata', context: context);
 
   @override
-  Future<void> _setThreadsMetadata<T extends ThreadData>(
-      List<T?> result, BoardData boardData) {
+  Future<void> _setThreadsMetadata<T extends ThreadData>(List<T?> result) {
     return _$_setThreadsMetadataAsyncAction
-        .run(() => super._setThreadsMetadata<T>(result, boardData));
-  }
-
-  late final _$_getThreadsForFiveChAsyncAction =
-      AsyncAction('ForumMainStateBase._getThreadsForFiveCh', context: context);
-
-  @override
-  Future<void> _getThreadsForFiveCh({BoardData? value}) {
-    return _$_getThreadsForFiveChAsyncAction
-        .run(() => super._getThreadsForFiveCh(value: value));
-  }
-
-  late final _$_getThreadsForGirlsChAsyncAction =
-      AsyncAction('ForumMainStateBase._getThreadsForGirlsCh', context: context);
-
-  @override
-  Future<void> _getThreadsForGirlsCh() {
-    return _$_getThreadsForGirlsChAsyncAction
-        .run(() => super._getThreadsForGirlsCh());
-  }
-
-  late final _$_getThreadsForFutabaChAsyncAction = AsyncAction(
-      'ForumMainStateBase._getThreadsForFutabaCh',
-      context: context);
-
-  @override
-  Future<void> _getThreadsForFutabaCh() {
-    return _$_getThreadsForFutabaChAsyncAction
-        .run(() => super._getThreadsForFutabaCh());
+        .run(() => super._setThreadsMetadata<T>(result));
   }
 
   late final _$ForumMainStateBaseActionController =

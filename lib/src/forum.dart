@@ -319,7 +319,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   // }
 
   @computed
-  List<ThreadBase?> get historyList => history.markList;
+  List<ThreadMarkData?> get historyList => history.markList;
 
   @computed
   List<ThreadBase?> get searchList => search.searchThreadList;
@@ -465,7 +465,7 @@ abstract class ForumStateBase with Store, WithDateTime {
             element?.id == thread.id && element?.boardId == thread.boardId,
         orElse: () => null);
     logger.i('_updateMarkData: ${exist?.id}');
-    if (exist != null && exist is ThreadMarkData) {
+    if (exist != null) {
       return _updateMarkData(exist, content);
     } else {
       return await _setInitialThreadMarkData(

@@ -531,12 +531,6 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   String get appBarTitle => selectedForumState?.appBarTitle ?? '';
 
-  // @computed
-  // List<ThreadBase?> get currentLibrary => switch (currentScreen) {
-  //       BottomMenu.history => selectedForumState?.historyList ?? [],
-  //       BottomMenu.search => selectedForumState?.searchList ?? [],
-  //       BottomMenu.forums => const []
-  //     };
 
   @computed
   List<ThreadBase?> get historyList => selectedForumState?.historyList ?? [];
@@ -629,22 +623,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     return result ?? FetchResult.error;
   }
 
-  // Future<bool> setVisibleContentForSecondry(final String id,
-  //     {required final ThreadBase thread}) async {
-  //   toggleContentLoading();
-  //   // setLastReIndex(null);
-  //   try {
-  //     await _updateLastOpenedIndexWhenScreenTransition();
-  //     final result = await selectedForumState?.setVisibleContentForSecondry(id,
-  //         thread: thread);
-  //     setLog('setVisibleContentForSecondry: id:$id, thread: ${thread.url}');
-  //     toggleContentLoading();
-  //     return result ?? false;
-  //   } catch (e) {
-  //     setLog(e.toString());
-  //   }
-  //   return false;
-  // }
 
   List<int?>? setFilterWordForContent(final String value) =>
       selectedForumState?.currentContentState?.filterdIndexList(value);
@@ -657,10 +635,7 @@ abstract class MainStoreBase with Store, WithDateTime {
       await selectedForumState?.getThreadDiffById(value,
           onLibraryView: onLibraryView);
 
-  // Future<bool> existThreadFromStrorage(
-  //         final String threadId, final String boardId) async =>
-  //     await selectedForumState?.existThreadFromStrorage(threadId, boardId) ??
-  //     false;
+
   Future<void> post(final PostData value) async {
     final result = await selectedForumState?.postComment(value);
     if (result != null && result) {
@@ -808,7 +783,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<void> loadInitialData() async {
     await repository.loadInitialData();
     _setInitialForum();
-    initWhenLargeScreen();
+    // initWhenLargeScreen();
   }
 
   Future<void> sendAgree(final ContentData value,
@@ -816,33 +791,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     await selectedForumState?.sendAgree(value, good: good);
   }
 
-  void initWhenLargeScreen() {
-    if (largeScreen && selectedForumList != null) {
-      for (final i in selectedForumList!) {
-        switch (i) {
-          case Communities.fiveCh:
-            // if (fiveCh.currentLibrary.isNotEmpty) {
-            //   // fiveCh.history
-            //   //     .setContentIdByData(fiveCh.currentLibrary.firstOrNull);
-            // }
-            break;
-          case Communities.girlsCh:
-            // if (girlsCh.currentLibrary.isNotEmpty) {
-            //   // girlsCh.history
-            //   //     .setContentIdByData(girlsCh.currentLibrary.firstOrNull);
-            // }
-            break;
-          case Communities.futabaCh:
-            // if (futabaCh.currentLibrary.isNotEmpty) {
-            //   // futabaCh.history
-            //   //     .setContentIdByData(futabaCh.currentLibrary.firstOrNull);
-            // }
-            break;
-          default:
-        }
-      }
-    }
-  }
 
   void _setInitialForum() {
     if (userData?.lastOpenedForum != null && selectedForumList != null) {
@@ -918,21 +866,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     await _updateLastOpenedIndexWhenScreenTransition();
   }
 
-  // void setLibraryItemIndex(
-  //   final int index,
-  // ) {
-  //   switch (currentScreen) {
-  //     case BottomMenu.history:
-  //       selectedForumState?.history.setViewIndex(index);
-  //       break;
-  //     case BottomMenu.search:
-  //       selectedForumState?.search.setViewIndex(index);
-  //       break;
-  //     default:
-  //   }
-  // }
 
-  // @action
 
   @action
   void setScreenSize(final bool value) {
@@ -976,30 +910,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     await repository.updateThreadMark(newData);
   }
 
-  Future<DateTime?> getExpiryTime(final String id) async {
-    // final expiryTime = await selectedForumState?.storage.getExpiryTime(id);
-    // return expiryTime;
-    return null;
-  }
 
-  // void setIsWeb(final bool value) => isWeb = value;
-  // void setIsDebug(final bool value) => isDebugMode = value;
 
-  Future<void> clearAllCache() async {
-    // await userStorage.clearAll();
-    // await fiveCh.storage.clearAll();
-    // await girlsCh.storage.clearAll();
-    // await futabaCh.storage.clearAll();
-  }
-
-  // Future<void> deleteCacheByDataId(final String id) async {
-  //   await selectedForumState?.deleteCache(id);
-  // }
-
-  // @action
-  // void deleteDataById(final String id) {
-  //   logList.removeWhere((element) => element?.id == id);
-  // }
 
   Future<(String?, String?, String?)?> fetch(final String url) async {
     return await FetchData.fetch(url);
@@ -1320,23 +1232,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleHistoryThreadsLoading();
   }
 
-  // Future<void> updateLibraryByBoard() async {
-  //   await selectedForumState?.history.updateLibraryList();
-  //   // switch (library) {
-  //   //   case LibraryType.history:
-  //   //     await selectedForumState?.history.updateLibraryList();
-  //   //     break;
-  //   //   case LibraryType.favorite:
-  //   //     await selectedForumState?.favorite.updateLibraryList();
-  //   //     break;
-  //   //   default:
-  //   // }
-  // }
 
-  // @computed
-  // double get onChangedIndex{
-
-  // }
 
   Future<void> searchThreadsFromServer(final String keyword) async {
     await selectedForumState?.search.searchServerThreads(keyword);

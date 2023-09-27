@@ -95,11 +95,11 @@ mixin _$ForumState on ForumStateBase, Store {
               () => super.getCurrentImportanceList,
               name: 'ForumStateBase.getCurrentImportanceList'))
           .value;
-  Computed<List<ThreadBase?>>? _$historyListComputed;
+  Computed<List<ThreadMarkData?>>? _$historyListComputed;
 
   @override
-  List<ThreadBase?> get historyList => (_$historyListComputed ??=
-          Computed<List<ThreadBase?>>(() => super.historyList,
+  List<ThreadMarkData?> get historyList => (_$historyListComputed ??=
+          Computed<List<ThreadMarkData?>>(() => super.historyList,
               name: 'ForumStateBase.historyList'))
       .value;
   Computed<List<ThreadBase?>>? _$searchListComputed;

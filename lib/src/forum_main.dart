@@ -360,7 +360,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
   }
 
-  @action
+  // @action
   Future<void> getThreads() async {
     if (board == null) return;
     final currentBoard = threadList.firstOrNull?.boardId;
@@ -371,26 +371,40 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     await _fetchThreads();
   }
 
-  Future<void> _fetchThreads({final BoardData? value}) async {
+  Future<void> _fetchThreads() async {
+    List<ThreadData?>? result;
     switch (parent.type) {
       case Communities.fiveCh:
         // if (value == null || value.type == Communities.fiveCh) {
-        await _getThreadsForFiveCh(value: value);
+        result = await _getThreadsForFiveCh();
         // }
 
         break;
       case Communities.girlsCh:
         // _clearThreads();
-        await _getThreadsForGirlsCh();
+        result = await _getThreadsForGirlsCh();
         break;
       case Communities.futabaCh:
         // _clearThreads();
-        await _getThreadsForFutabaCh();
+        result = await _getThreadsForFutabaCh();
         break;
       case Communities.pinkCh:
-        await _getThreadsForPinkCh();
+        result = await _getThreadsForPinkCh();
         break;
       default:
+    }
+    if (result != null) {
+      await _setThreadsMetadata(
+        result,
+      );
+      if (parent.type == Communities.futabaCh) {
+        final jsonData = await FutabaChHandler.fetchThreadsByJson(
+            board!.futabaCh!.directory, board!.id);
+        if (jsonData != null) {
+          await parent.history
+              .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
+        }
+      }
     }
   }
 
@@ -407,6 +421,25 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final before = [...?threadsDiff[boardData.id]];
     threadsDiff[boardData.id]?.clear();
     threadsDiff[boardData.id] = [];
+    final history = parent.historyList
+        .where((element) => element?.boardId == boardData.id)
+        .toList();
+    for (final h in history) {
+      if (h != null) {
+        final exist = newList.firstWhere(
+          (element) => element?.id == h.id,
+          orElse: () => null,
+        );
+        if (exist != null) {
+          final data = ThreadDataForDiff(
+              id: h.id,
+              before: h.resCount,
+              after: exist.resCount,
+              isNew: false);
+          threadsDiff[boardData.id]?.add(data);
+        }
+      }
+    }
     for (final e in newList) {
       if (e == null) return;
       final exist = before.firstWhere((element) => element?.id == e.id,
@@ -414,8 +447,12 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       if (exist != null) {
         final data = ThreadDataForDiff(
             id: e.id, before: exist.after, after: e.resCount, isNew: false);
-
-        threadsDiff[boardData.id]?.add(data);
+        final historyData = threadsDiff[boardData.id]?.firstWhere(
+            (element) => element?.id == data.id,
+            orElse: () => null);
+        if (historyData == null) {
+          threadsDiff[boardData.id]?.add(data);
+        }
       } else {
         // logger.d('_setThreads: isNew');
         final data = ThreadDataForDiff(
@@ -423,7 +460,12 @@ abstract class ForumMainStateBase with Store, WithDateTime {
             before: e.resCount,
             after: e.resCount,
             isNew: before.isEmpty ? false : true);
-        threadsDiff[boardData.id]?.add(data);
+        final historyData = threadsDiff[boardData.id]?.firstWhere(
+            (element) => element?.id == data.id,
+            orElse: () => null);
+        if (historyData == null) {
+          threadsDiff[boardData.id]?.add(data);
+        }
       }
     }
 
@@ -433,39 +475,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     // logger.i('_setThreads: 2 ${threadList.length}');
   }
 
-  // Future<void> _setArchived(
-  //     final List<ThreadData?> newList, final String boardId) async {
-  //   if (parent.type == Communities.futabaCh ||
-  //       parent.type == Communities.girlsCh) {
-  //     return;
-  //   }
-  //   final before = parent.history.markList
-  //       .where((element) => element?.boardId == boardId)
-  //       .toList();
-  //   for (final i in before) {
-  //     if (i != null) {
-  //       final exist = newList.firstWhere((element) => element?.id == i.id,
-  //           orElse: () => null);
-  //       if (exist == null) {
-  //         // final history = parent.history.markList
-  //         //     .firstWhere((element) => element?.id == i.id, orElse: () => null);
-  //         if (!i.archived) {
-  //           final newData = i.copyWith(archived: true);
-  //           await parent.parent.repository.updateThreadMark(newData);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
   @action
   Future<void> _setThreadsMetadata<T extends ThreadData>(
-      final List<T?> result, final BoardData boardData) async {
-    // final cache = await boardStorage.getBoardData(boardData.id);
-    // final oldList = [...threadList];
+    final List<T?> result,
+  ) async {
+    if (board == null) return;
 
-    _setThreads<T>(newList: result, boardData: boardData);
-    await parent.history.setArchived<T>(result, boardData.id);
+    _setThreads<T>(newList: result, boardData: board!);
+    await parent.history.setArchived<T>(result, board!.id);
     await parent.history.updateResCountWhenUpdateBoard(result);
   }
 
@@ -474,71 +491,74 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   //   threadsLastReadAt[item.id] = item.lastReadAt;
   // }
 
-  @action
-  Future<void> _getThreadsForFiveCh({final BoardData? value}) async {
-    final b = value ?? board;
+  // @action
+  Future<List<ThreadData?>?> _getThreadsForFiveCh() async {
+    final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
     if (b?.forum == Communities.fiveCh) {
       // b as FiveChBoardData;
       final domain = b!.fiveCh!.domain;
-      if (domain == null) return;
+      if (domain == null) return null;
 
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
-      final result = await FiveChHandler.getThreads(
+      return await FiveChHandler.getThreads(
           domain: domain,
           directoryName: b.fiveCh!.directoryName,
           boardName: b.name);
-      if (result == null) {
-        return;
-      }
-      await _setThreadsMetadata<FiveChThreadTitleData>(result, b);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<FiveChThreadTitleData>(result, b);
     }
+    return null;
   }
 
   // @action
-  Future<void> _getThreadsForPinkCh({final BoardData? value}) async {
-    final b = value ?? board;
+  Future<List<ThreadData?>?> _getThreadsForPinkCh() async {
+    final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
     if (b?.forum == Communities.pinkCh) {
       // b as FiveChBoardData;
       final domain = b!.fiveCh!.domain;
-      if (domain == null) return;
+      if (domain == null) return null;
 
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
-      final result = await PinkChHandler.getThreads(
+      return await PinkChHandler.getThreads(
           domain: domain,
           directoryName: b.fiveCh!.directoryName,
           boardName: b.name);
-      if (result == null) {
-        return;
-      }
-      await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
     }
+    return null;
   }
 
-  @action
-  Future<void> _getThreadsForGirlsCh() async {
+  // @action
+  Future<List<ThreadData?>?> _getThreadsForGirlsCh() async {
     if (board?.girlsCh != null) {
-      final result = await GirlsChHandler.getTitleList(board!.girlsCh!.url,
+      return await GirlsChHandler.getTitleList(board!.girlsCh!.url,
           categoryId: board!.id);
-      if (result == null) {
-        return;
-      }
-      await _setThreadsMetadata<GirlsChThread>(result, board!);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<GirlsChThread>(result, board!);
     }
+    return null;
   }
 
-  @action
-  Future<void> _getThreadsForFutabaCh() async {
+  // @action
+  Future<List<ThreadData?>?> _getThreadsForFutabaCh() async {
     if (board?.futabaCh != null) {
       // final futabaBoard = board as FutabaChBoard;
-      final result = await FutabaChHandler.getAllThreads(
+      return await FutabaChHandler.getAllThreads(
           catalog: board!.futabaCh!.catalogUrl,
           newer: board!.futabaCh!.newListUrl,
           hug: board!.futabaCh!.hugListUrl,
@@ -546,21 +566,23 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           directory: board!.futabaCh!.directory);
       // final result =
       //     await FutabaChHandler.getThreads(board!.futabaCh!.catalogUrl, board!);
-      if (result == null) {
-        return;
-      }
-      await _setThreadsMetadata<FutabaChThread>(result, board!);
-      final jsonData = await FutabaChHandler.fetchThreadsByJson(
-          board!.futabaCh!.directory, board!.id);
-      if (jsonData != null) {
-        await parent.history
-            .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
-      }
+      // if (result == null) {
+      //   return null;
+      // }
+      // await _setThreadsMetadata<FutabaChThread>(result, board!);
+      // final jsonData = await FutabaChHandler.fetchThreadsByJson(
+      //     board!.futabaCh!.directory, board!.id);
+      // if (jsonData != null) {
+      //   await parent.history
+      //       .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
+      // }
     }
+    return null;
   }
 
   Future<bool> postThread({required final PostData data}) async {
     bool result = false;
+    toggleThreadsLoading();
     switch (parent.type) {
       case Communities.fiveCh || Communities.pinkCh:
         final domain = board?.fiveCh?.domain;
@@ -595,11 +617,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       default:
     }
     if (result) {
-      toggleThreadsLoading();
       await Future.delayed(const Duration(milliseconds: 500));
       await getThreads();
-      toggleThreadsLoading();
     }
+    toggleThreadsLoading();
     return result;
   }
 

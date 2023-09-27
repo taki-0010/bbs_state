@@ -312,29 +312,30 @@ abstract class LibraryStateBase with Store, WithDateTime {
         'history: updateAll: currentRes:$currentRes, map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
     for (final b in markListByBoardIdFirstItemList) {
       if (b != null) {
+        List<ThreadData?>? result;
         switch (parent.type) {
           case Communities.fiveCh:
-            final result = await FiveChHandler.getThreads(
+            result = await FiveChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
             if (result != null) {
-              setArchived<FiveChThreadTitleData>(result, b.boardId);
-              _setDiff(
-                result,
-                currentRes,
-              );
+              setArchived<ThreadData>(result, b.boardId);
+              // _setDiff(
+              //   result,
+              //   currentRes,
+              // );
             }
 
             break;
           case Communities.girlsCh:
-            final result = await GirlsChHandler.getTitleList(
+            result = await GirlsChHandler.getTitleList(
                 'topics/category/${b.boardId}',
                 categoryId: b.boardId);
-            _setDiff(
-              result,
-              currentRes,
-            );
+            // _setDiff(
+            //   result,
+            //   currentRes,
+            // );
             break;
           case Communities.futabaCh:
             final selectedBoardThreads =
@@ -342,6 +343,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
             List<FutabaChThread?> threadsData = [];
             for (final i in selectedBoardThreads) {
               if (i != null) {
+                // final data =
+                //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
                 final data =
                     await FutabaChHandler.getContent(i.url, b.futabaDirectory);
                 if (data.result == FetchResult.error ||
@@ -358,6 +361,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 }
               }
             }
+            result = threadsData;
             // final result = await FutabaChHandler.getAllThreads(
             //     catalog: FutabaParser.getBoardPath(
             //         directory: b.futabaDirectory,
@@ -373,23 +377,24 @@ abstract class LibraryStateBase with Store, WithDateTime {
             //         order: ThreadsOrder.resCountDesc),
             //     boardId: b.boardId,
             //     directory: b.futabaDirectory);
-            _setDiff(
-              threadsData,
-              currentRes,
-            );
+            // _setDiff(
+            //   threadsData,
+            //   currentRes,
+            // );
             break;
           case Communities.pinkCh:
-            final result = await PinkChHandler.getThreads(
+            result = await PinkChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            _setDiff(
-              result,
-              currentRes,
-            );
+
             break;
           default:
         }
+        _setDiff(
+          result,
+          currentRes,
+        );
       }
     }
   }
@@ -402,7 +407,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
         if (exist != null && !exist.archived && exist.resCount != i.resCount) {
           final newData = exist.copyWith(resCount: i.resCount);
           deleteDiffField(newData.id);
-
           await parent.parent.repository.updateThreadMark(newData);
         }
       }
@@ -491,13 +495,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
         }
       }
     }
-    // if (willDeleteSet.isNotEmpty) {
-    //   for (final i in willDeleteSet) {
-    //     if (i != null) {
-    //       parent.parent.deleteThreadMarkData(i);
-    //     }
-    //   }
-    // }
   }
 
   @action
