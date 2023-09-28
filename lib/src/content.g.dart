@@ -150,8 +150,35 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$selectedTextAtom =
+      Atom(name: 'ContentStateBase.selectedText', context: context);
+
+  @override
+  String? get selectedText {
+    _$selectedTextAtom.reportRead();
+    return super.selectedText;
+  }
+
+  @override
+  set selectedText(String? value) {
+    _$selectedTextAtom.reportWrite(value, super.selectedText, () {
+      super.selectedText = value;
+    });
+  }
+
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
+
+  @override
+  void setSelectedText(String? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setSelectedText');
+    try {
+      return super.setSelectedText(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setLastResIndex(int? value) {
@@ -251,6 +278,7 @@ panY: ${panY},
 showSeekBar: ${showSeekBar},
 seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
+selectedText: ${selectedText},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},

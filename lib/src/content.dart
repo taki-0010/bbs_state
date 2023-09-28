@@ -41,6 +41,14 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   int currentContentItemIndex = 1;
 
+  @observable
+  String? selectedText;
+
+  @action
+  void setSelectedText(final String? value) {
+    selectedText = value;
+  }
+
   // @observable
   // String? filterWord;
 

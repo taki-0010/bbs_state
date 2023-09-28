@@ -531,7 +531,6 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   String get appBarTitle => selectedForumState?.appBarTitle ?? '';
 
-
   @computed
   List<ThreadBase?> get historyList => selectedForumState?.historyList ?? [];
 
@@ -623,9 +622,12 @@ abstract class MainStoreBase with Store, WithDateTime {
     return result ?? FetchResult.error;
   }
 
-
   List<int?>? setFilterWordForContent(final String value) =>
       selectedForumState?.currentContentState?.filterdIndexList(value);
+
+  void setSelectedText(final String? value) {
+    selectedForumState?.currentContentState?.setSelectedText(value);
+  }
 
   @action
   void setLaunchStatus(final LaunchStatus value) => launchStatus = value;
@@ -634,7 +636,6 @@ abstract class MainStoreBase with Store, WithDateTime {
           {final bool onLibraryView = false}) async =>
       await selectedForumState?.getThreadDiffById(value,
           onLibraryView: onLibraryView);
-
 
   Future<void> post(final PostData value) async {
     final result = await selectedForumState?.postComment(value);
@@ -791,7 +792,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     await selectedForumState?.sendAgree(value, good: good);
   }
 
-
   void _setInitialForum() {
     if (userData?.lastOpenedForum != null && selectedForumList != null) {
       final index = selectedForumList!.indexOf(userData!.lastOpenedForum);
@@ -866,8 +866,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     await _updateLastOpenedIndexWhenScreenTransition();
   }
 
-
-
   @action
   void setScreenSize(final bool value) {
     largeScreen = value;
@@ -909,9 +907,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     final newData = thread.copyWith(retentionPeriodSeconds: newValue);
     await repository.updateThreadMark(newData);
   }
-
-
-
 
   Future<(String?, String?, String?)?> fetch(final String url) async {
     return await FetchData.fetch(url);
@@ -1232,8 +1227,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleHistoryThreadsLoading();
   }
 
-
-
   Future<void> searchThreadsFromServer(final String keyword) async {
     await selectedForumState?.search.searchServerThreads(keyword);
     // switch (current) {
@@ -1335,5 +1328,13 @@ abstract class MainStoreBase with Store, WithDateTime {
 
     toggleContentLoading();
     return result;
+  }
+
+  // Future<Directory?> downloadDirectory() async {
+  //   return await getDownloadsDirectory();
+  // }
+
+  String getMediaFilePath(final String url) {
+    return repository.mediaLocal.getFullPath(url).path;
   }
 }

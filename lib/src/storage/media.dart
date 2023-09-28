@@ -45,6 +45,11 @@ abstract class MediaCacheStateBase with Store {
     Timer.periodic(const Duration(hours: 6), _deleteCacheAutomatically);
   }
 
+  File getFullPath(final String url){
+    final path = _getPath(url);
+   return _getFile(path);
+  }
+
   Future<void> putMediaData(final String? threadMarkId,
       {required final String url, required final Uint8List data}) async {
     final path = _getPath(url);
@@ -79,6 +84,7 @@ abstract class MediaCacheStateBase with Store {
         await store.findFirst(_db, finder: Finder(filter: Filter.byKey(path)));
     // final data = result?.value[_blob];
     // logger.i('cache: ${data.runtimeType}');
+    // result.ref.
     if (result != null) {
       final file = _getFile(path);
       if (file.existsSync()) {
