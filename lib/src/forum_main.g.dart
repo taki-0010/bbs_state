@@ -269,6 +269,15 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
         .run(() => super._getBoardsForFutaba());
   }
 
+  late final _$_getBoardsForMachiAsyncAction =
+      AsyncAction('ForumMainStateBase._getBoardsForMachi', context: context);
+
+  @override
+  Future<void> _getBoardsForMachi() {
+    return _$_getBoardsForMachiAsyncAction
+        .run(() => super._getBoardsForMachi());
+  }
+
   late final _$_setThreadsMetadataAsyncAction =
       AsyncAction('ForumMainStateBase._setThreadsMetadata', context: context);
 

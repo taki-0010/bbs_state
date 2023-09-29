@@ -478,7 +478,7 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   int? _getCreatedAtBySecounds(final ThreadContentData value) {
     switch (value.type) {
-      case Communities.fiveCh:
+      case Communities.fiveCh || Communities.pinkCh || Communities.machi:
         return int.tryParse(value.id);
       case Communities.girlsCh:
         final first = value.content.firstOrNull;
@@ -500,8 +500,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
         final datetime = first.createdAt;
         return (datetime.millisecondsSinceEpoch * 0.001).toInt();
-      case Communities.pinkCh:
-        return int.tryParse(value.id);
+      // case Communities.pinkCh:
+      //   return int.tryParse(value.id);
       default:
         return null;
     }
@@ -546,9 +546,8 @@ abstract class ForumStateBase with Store, WithDateTime {
           positionToGet: settings!.positionToGet,
           createdAtBySeconds: createdAtBySeconds ?? 0,
           lastReadAt: now.millisecondsSinceEpoch,
-          retentionPeriodSeconds: now
-              .add(Duration(hours: retention))
-              .millisecondsSinceEpoch);
+          retentionPeriodSeconds:
+              now.add(Duration(hours: retention)).millisecondsSinceEpoch);
 
       // history.setLog(newLog);
       logger.f(
@@ -684,8 +683,19 @@ abstract class ForumStateBase with Store, WithDateTime {
             // title: thread.title
           );
         }
-      // threadLength = result?.lastOrNull?.index;
-      // break;
+      case Communities.machi:
+        final id = FiveChParser.getId(url);
+        final host = MachiData.host;
+        final boardId = FiveChParser.getBoardIdFromDat(url);
+        if (id != null && boardId != null) {
+          return await _getContentForFiveCh(
+            id,
+            domain: host,
+            directoryName: boardId,
+            // title: thread.title
+          );
+        }
+
       default:
     }
     return FetchContentResultData();
@@ -866,12 +876,6 @@ abstract class ForumStateBase with Store, WithDateTime {
           directoryName: thread.boardId,
           // title: thread.title
         );
-      // result = data.$1;
-      // archived = data.$2;
-      // threadLength = result?.lastOrNull?.index;
-      // logger.i('_fetchData: five: ${result?.length}');
-      // // _toggleLoading();
-      // break;
       case Communities.girlsCh:
         // if (thread is! GirlsChThread) return null;
         // final positionToGet = settings!.positionToGet;
@@ -884,11 +888,6 @@ abstract class ForumStateBase with Store, WithDateTime {
           positionToGet: position,
           // title: thread.title
         );
-      // result = resultRecord?.$1;
-      // threadLength = resultRecord?.$2;
-      // // parent.setLog('_fetchData: $type, result: ${result?.length}');
-      // // _toggleLoading();
-      // break;
       case Communities.futabaCh:
         // if (thread is! FutabaChThread) return null;
         return await _getContentForFutabaCh(
@@ -897,9 +896,6 @@ abstract class ForumStateBase with Store, WithDateTime {
             // boardId: thread.boardId,
             // thumbnail: thread.thumbnailUrl
             );
-      // _toggleLoading();
-      // threadLength = result?.lastOrNull?.index;
-      // break;
       case Communities.pinkCh:
         // if (thread is! FiveChThreadTitleData) return null;
         return await _getContentForFiveCh(
@@ -908,12 +904,9 @@ abstract class ForumStateBase with Store, WithDateTime {
           directoryName: thread.boardId,
           // title: thread.title
         );
-      // result = data.$1;
-      // archived = data.$2;
-      // threadLength = result?.lastOrNull?.index;
-      // logger.i('_fetchData: five: ${result?.length}');
-      // // _toggleLoading();
-      // break;
+      case Communities.machi:
+        return await _getContentForMachi(
+            boardId: thread.boardId, threadId: thread.id);
       default:
       // _toggleLoading();
     }
@@ -1127,18 +1120,17 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
-  // @action
-  // void deleteDataById(final String id) {
-  //   // logList.removeWhere((element) => element?.id == id);
-  // }
-
-  // Future<void> post(final ContentMetaData value) async {
-  //   // if (board == null) return;
-  //   // final domain = currentBoardDomain;
-  //   // if (domain == null) return;
-  //   // logger.d('post: board: ${board?.directoryName}, domain: $currentBoardDomain');
-  //   // await FiveChHandler.post(value, domain, board!.directoryName);
-  // }
+  Future<FetchContentResultData> _getContentForMachi({
+    required final String boardId,
+    required final String threadId,
+  }) async {
+    // if (thread is! FutabaChThread) return;
+    final result = await MachiHandler.getContent(
+      boardId,
+      threadId,
+    );
+    return result;
+  }
 
   @action
   void disposeNonLargeContent() {

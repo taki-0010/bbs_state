@@ -12,8 +12,8 @@ environment:
 dependencies:
   path: ^1.8.0
   mobx: ^2.2.0
-  linkify: ^5.0.0
-  charset: ^2.0.1
+  # linkify: ^5.0.0
+  # charset: ^2.0.1
   # stash: ^5.0.1
   # stash_sembast: ^5.0.1
   # stash_sembast_web: ^5.0.0

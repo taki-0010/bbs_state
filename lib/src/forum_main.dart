@@ -260,6 +260,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.pinkCh:
         await _getBoardsForPinkCh();
         break;
+      case Communities.machi:
+        await _getBoardsForMachi();
+        break;
       default:
     }
   }
@@ -360,6 +363,17 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
   }
 
+  @action
+  Future<void> _getBoardsForMachi() async {
+    if (boards.isEmpty) {
+      final result = await MachiHandler.getBoards();
+      if (result == null) {
+        return;
+      }
+      boards.addAll(result);
+    }
+  }
+
   // @action
   Future<void> getThreads() async {
     if (board == null) return;
@@ -390,6 +404,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.pinkCh:
         result = await _getThreadsForPinkCh();
+        break;
+      case Communities.machi:
+        result = await _getThreadsForMachi();
         break;
       default:
     }
@@ -546,6 +563,29 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     if (board?.girlsCh != null) {
       return await GirlsChHandler.getTitleList(board!.girlsCh!.url,
           categoryId: board!.id);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<GirlsChThread>(result, board!);
+    }
+    return null;
+  }
+
+  Future<List<ThreadData?>?> _getThreadsForMachi() async {
+    if (board?.machi != null) {
+      final result = await MachiHandler.getThreads(board!.id);
+      return result?.thread
+          .map((e) => e == null
+              ? null
+              : MachiThreadData(
+                  id: e.key,
+                  title: e.subject,
+                  resCount: int.tryParse(e.res) ?? 1,
+                  boardId: board!.id,
+                  type: Communities.machi,
+                  url: e.getUrl(board!.id),
+                  updateAtStr: null))
+          .toList();
       // if (result == null) {
       //   return;
       // }

@@ -20,6 +20,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final girlsCh = ForumState(parent: this, type: Communities.girlsCh);
   late final futabaCh = ForumState(parent: this, type: Communities.futabaCh);
   late final pinkCh = ForumState(parent: this, type: Communities.pinkCh);
+  late final machi = ForumState(parent: this, type: Communities.machi);
 
   // late final SembastCacheStore store;
 
@@ -133,6 +134,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get showHot =>
       selectedForum == Communities.fiveCh ||
+      selectedForum == Communities.machi ||
       selectedForum == Communities.pinkCh;
 
   @computed
@@ -192,6 +194,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return futabaCh;
       case Communities.pinkCh:
         return pinkCh;
+      case Communities.machi:
+        return machi;
       default:
         return null;
     }
@@ -315,6 +319,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return 'https://$data/';
       case Communities.pinkCh:
         return board?.fiveCh?.url;
+      case Communities.machi:
+        return Uri.https('${selectedForum?.host}', '${board?.id}').toString();
       default:
     }
     return null;
@@ -434,6 +440,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     switch (selectedForum) {
       case Communities.futabaCh:
         return futabaCh.settings?.searchBoardIdForFutaba;
+      case Communities.machi:
+        return machi.settings?.searchBoardIdForMachi;
       default:
     }
     return null;
@@ -448,6 +456,14 @@ abstract class MainStoreBase with Store, WithDateTime {
           return boards;
         } else {
           final boards = await FutabaChHandler.getBoards();
+          return boards;
+        }
+      case Communities.machi:
+        final boards = machi.forumMain.boards;
+        if (boards.isNotEmpty) {
+          return boards;
+        } else {
+          final boards = await MachiHandler.getBoards();
           return boards;
         }
       default:
@@ -568,6 +584,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.girlsCh => GirlsChBoardNames.getById(id),
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
+        Communities.machi => MachiData.getBoardNameById(id),
         null => null
       };
 
@@ -998,6 +1015,11 @@ abstract class MainStoreBase with Store, WithDateTime {
         break;
       case Communities.pinkCh:
         mark = pinkCh.history.markList.firstWhere(
+            (element) => element?.id == threadId && element?.boardId == boardId,
+            orElse: () => null);
+        break;
+      case Communities.machi:
+        mark = machi.history.markList.firstWhere(
             (element) => element?.id == threadId && element?.boardId == boardId,
             orElse: () => null);
         break;

@@ -156,6 +156,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       case Communities.pinkCh:
         parent.pinkCh.clear();
         break;
+      case Communities.machi:
+        parent.pinkCh.clear();
+        break;
       default:
     }
   }
@@ -273,6 +276,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       case Communities.pinkCh:
         parent.pinkCh.setSettings(value);
         break;
+      case Communities.machi:
+        parent.machi.setSettings(value);
+        break;
       default:
     }
   }
@@ -291,6 +297,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
           break;
         case Communities.pinkCh:
           parent.pinkCh.history.setLog(value);
+          break;
+        case Communities.machi:
+          parent.machi.history.setLog(value);
           break;
         default:
       }
@@ -314,6 +323,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
           break;
         case Communities.pinkCh:
           parent.pinkCh.deleteContent(value);
+          break;
+        case Communities.machi:
+          parent.machi.deleteContent(value);
           break;
         default:
       }

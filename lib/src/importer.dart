@@ -1,6 +1,6 @@
 export 'package:mobx/mobx.dart';
-export 'package:charset/charset.dart';
-export 'package:linkify/linkify.dart';
+// export 'package:charset/charset.dart';
+// export 'package:linkify/linkify.dart';
 // export 'package:stash/stash_api.dart';
 export 'package:universal_io/io.dart';
 export 'package:sembast/sembast.dart';

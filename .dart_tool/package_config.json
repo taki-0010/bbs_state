@@ -57,7 +57,7 @@
     },
     {
       "name": "build_resolvers",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_resolvers-2.3.2",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_resolvers-2.4.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -69,7 +69,7 @@
     },
     {
       "name": "build_runner_core",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_runner_core-7.2.10",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_runner_core-7.2.11",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -81,7 +81,7 @@
     },
     {
       "name": "built_value",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/built_value-8.6.2",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/built_value-8.6.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -117,7 +117,7 @@
     },
     {
       "name": "code_builder",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/code_builder-4.6.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/code_builder-4.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-cde6cee1c24c8fe6f186c5524e0105202925a38b/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-08be3162795d4d94b77065aaabc2edb812ae804e/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -321,7 +321,7 @@
     },
     {
       "name": "logger",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/logger-2.0.2",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/logger-2.0.2+1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -369,7 +369,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-173868f302d4d45f0932ce94d1bb08b9ac3c3f7a/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-91ff3609e40140f20e4cee853f7b9c4a73066ef0/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -717,7 +717,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.0.8",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.0.9",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-28T11:42:30.332226Z",
+  "generated": "2023-09-29T12:48:22.201688Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

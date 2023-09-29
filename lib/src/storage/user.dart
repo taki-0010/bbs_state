@@ -24,7 +24,7 @@ abstract class UserStateForLocalBase with Store {
 
   static final _initialData = UserData(
       id: StringMethodData.generateRandomString(23),
-      forums: [Communities.fiveCh, Communities.girlsCh, ],
+      forums: [Communities.fiveCh, Communities.girlsCh, Communities.machi ],
       randomAvatar: StringMethodData.generateRandomString(15),
       lastOpenedForum: Communities.fiveCh,
       language: LangList.ja);
