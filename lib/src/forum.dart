@@ -1280,6 +1280,13 @@ abstract class ForumStateBase with Store, WithDateTime {
           }
         }
         return false;
+      case Communities.machi:
+        final thread = currentContentThreadData;
+        if (thread == null) return false;
+        final bbs = thread.boardId;
+        final threadId = FiveChParser.getId(thread.url);
+        if (threadId == null) return false;
+        return await MachiHandler.post(value, bbs, threadId);
 
       default:
     }

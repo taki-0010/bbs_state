@@ -60,12 +60,11 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   @action
   Future<void> loadInitialData() async {
     await userLocal.init();
+    await threadLocal.loadCache();
+    await forumLocal.load();
     final accountExist = await server.init();
     if (!accountExist) {
       connection = ConnectTo.local;
-
-      await threadLocal.loadCache();
-      await forumLocal.load();
     } else {
       connection = ConnectTo.server;
     }
@@ -93,7 +92,6 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     final postDraftCacheDbPath = path.join(cacheDir.path, postDraftCachePath);
     await postDraftLocal.init(postDraftCacheDbPath);
   }
-  
 
   @action
   void setUser(final UserData? value) => user = value;

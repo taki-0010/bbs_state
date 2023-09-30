@@ -259,4 +259,16 @@ abstract class ContentStateBase with Store, WithDateTime {
       updateContent(newContent);
     }
   }
+
+  String? getIdCount(final int currentIndex, final String? selfId) {
+    if (selfId == null) {
+      return null;
+    }
+    final count = content.content
+        .where((element) => element?.getPostId == selfId)
+        .toList();
+    final before = count.where((element) => element != null && element.index <= currentIndex).toList();
+    final result = '${before.length} / ${count.length}';
+    return count.length == 1 ? null : result;
+  }
 }

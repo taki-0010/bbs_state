@@ -123,6 +123,14 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<ListViewStyle>(() => super.currentViewStyle,
               name: 'MainStoreBase.currentViewStyle'))
       .value;
+  Computed<MovedToLastThreads>? _$currentMovedToLastThreadComputed;
+
+  @override
+  MovedToLastThreads get currentMovedToLastThread =>
+      (_$currentMovedToLastThreadComputed ??= Computed<MovedToLastThreads>(
+              () => super.currentMovedToLastThread,
+              name: 'MainStoreBase.currentMovedToLastThread'))
+          .value;
   Computed<PositionToGet>? _$currentPositionToGetComputed;
 
   @override
@@ -899,6 +907,7 @@ selectedForumState: ${selectedForumState},
 selectedTheme: ${selectedTheme},
 currentThreadsOrder: ${currentThreadsOrder},
 currentViewStyle: ${currentViewStyle},
+currentMovedToLastThread: ${currentMovedToLastThread},
 currentPositionToGet: ${currentPositionToGet},
 blurThumbnail: ${blurThumbnail},
 currentContent: ${currentContent},

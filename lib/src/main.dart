@@ -214,6 +214,11 @@ abstract class MainStoreBase with Store, WithDateTime {
       selectedForumState?.settings?.listViewStyle ?? ListViewStyle.list;
 
   @computed
+  MovedToLastThreads get currentMovedToLastThread =>
+      selectedForumState?.settings?.movedToLastThreads ??
+      MovedToLastThreads.none;
+
+  @computed
   PositionToGet get currentPositionToGet =>
       selectedForumState?.settings?.positionToGet ?? PositionToGet.first;
 
@@ -1094,9 +1099,14 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (settnigs.listViewStyle == value) return;
     final newData = settnigs.copyWith(listViewStyle: value);
     selectedForumState?.setSettings(newData);
-    // await repository.server.forumState.setPositionToGet(value);
+  }
 
-    // await userStorage.setPositionToGet(selected, value);
+  void setMovedToLastThreads(final MovedToLastThreads value) {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    if (settnigs.movedToLastThreads == value) return;
+    final newData = settnigs.copyWith(movedToLastThreads: value);
+    selectedForumState?.setSettings(newData);
   }
 
   void setBlurThumbnail(final bool value) {
@@ -1274,6 +1284,10 @@ abstract class MainStoreBase with Store, WithDateTime {
         final newData = current.copyWith(searchBoardIdForFutaba: id);
         futabaCh.setSettings(newData);
         break;
+      case Communities.machi:
+        final newData = current.copyWith(searchBoardIdForMachi: id);
+        machi.setSettings(newData);
+        break;
       default:
     }
     await updateForumSettings();
@@ -1359,4 +1373,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   String getMediaFilePath(final String url) {
     return repository.mediaLocal.getFullPath(url).path;
   }
+
+  // Future<void> postToMachi() async {
+  //   final data = PostData(body: 'テストした', name: '', title: '', sage: true);
+  //   await MachiHandler.post(data, 'hokkaidou', '1345674545');
+  // }
 }

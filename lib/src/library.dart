@@ -362,31 +362,20 @@ abstract class LibraryStateBase with Store, WithDateTime {
               }
             }
             result = threadsData;
-            // final result = await FutabaChHandler.getAllThreads(
-            //     catalog: FutabaParser.getBoardPath(
-            //         directory: b.futabaDirectory,
-            //         boardId: b.boardId,
-            //         order: ThreadsOrder.catalog),
-            //     newer: FutabaParser.getBoardPath(
-            //         directory: b.futabaDirectory,
-            //         boardId: b.boardId,
-            //         order: ThreadsOrder.newerThread),
-            //     hug: FutabaParser.getBoardPath(
-            //         directory: b.futabaDirectory,
-            //         boardId: b.boardId,
-            //         order: ThreadsOrder.resCountDesc),
-            //     boardId: b.boardId,
-            //     directory: b.futabaDirectory);
-            // _setDiff(
-            //   threadsData,
-            //   currentRes,
-            // );
             break;
           case Communities.pinkCh:
             result = await PinkChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
+            if (result != null) {
+              setArchived<ThreadData>(result, b.boardId);
+            }
+
+            break;
+          case Communities.machi:
+            final data = await MachiHandler.getThreads(b.boardId);
+            result = parent.forumMain.setMachiThreads(data);
 
             break;
           default:

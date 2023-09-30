@@ -18,9 +18,8 @@ abstract class SearchStateBase with Store {
   @observable
   bool threadsLoading = false;
 
-    // @observable
+  // @observable
   double? lastThreadsScrollOffset;
-
 
   @computed
   ForumSettingsData? get settings => parent.settings;
@@ -125,9 +124,7 @@ abstract class SearchStateBase with Store {
   ) {
     if (value != null && parent.parent.userData != null) {
       final data = ContentState(
-        content: value,
-        locale: parent.parent.userData!.language.name
-      );
+          content: value, locale: parent.parent.userData!.language.name);
       // data.setLastOpenedIndex(lastOpenedIndex);
       content = data;
     } else {
@@ -148,20 +145,20 @@ abstract class SearchStateBase with Store {
 
   Future<void> searchServerThreads<T extends ThreadData>(
       final String keyword) async {
-    // List<T?> result = [];
+    List<ThreadData?>? result = [];
     switch (parent.type) {
       case Communities.fiveCh:
-        final result = await FiveChHandler.searchTheads<T>(keyword);
-        _setSearchThreads(result);
+        result = await FiveChHandler.searchTheads<T>(keyword);
+        // _setSearchThreads(result);
         break;
       case Communities.girlsCh:
-        final result = await GirlsChHandler.searchThreads(keyword);
-        _setSearchThreads(result);
+        result = await GirlsChHandler.searchThreads(keyword);
+        // _setSearchThreads(result);
         break;
       case Communities.futabaCh:
         final board = await parent.parent.boardForSearch;
         if (board?.futabaCh == null) return;
-        final result = await FutabaChHandler.searchThreadsByJson(
+       result = await FutabaChHandler.searchThreadsByJson(
             keyword, board!.futabaCh!.directory, board.id);
         // final result = await FutabaChHandler.searchThreads(
         //   keyword: keyword,
@@ -180,14 +177,19 @@ abstract class SearchStateBase with Store {
         //   boardId: board.id,
         //   directory: board.futabaCh!.directory,
         // );
-        _setSearchThreads(result);
+        // _setSearchThreads(result);
         break;
       case Communities.pinkCh:
-        final result = await PinkChHandler.searchTheads<T>(keyword);
-        _setSearchThreads(result);
+        result = await PinkChHandler.searchTheads<T>(keyword);
+        
         break;
+      case Communities.machi:
+        final boardId = parent.parent.boardIdForSearch;
+        if (boardId == null) return;
+        result = await MachiHandler.searchThreads(keyword, boardId);
       default:
     }
+    _setSearchThreads(result);
     await setSearchWords(keyword);
     // await parent.parent.userStorage.setSearchWords(keyword);
   }

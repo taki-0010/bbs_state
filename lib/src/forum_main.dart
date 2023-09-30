@@ -163,7 +163,22 @@ abstract class ForumMainStateBase with Store, WithDateTime {
             .toList();
       default:
     }
-    return list;
+    if (settings?.movedToLastThreads == MovedToLastThreads.over1000) {
+      List<ThreadData?> over1000 = [];
+      List<ThreadData?> notOver1000 = [];
+      for (final i in list) {
+        if (i != null) {
+          if (i.resCount >= 1000) {
+            over1000.add(i);
+          } else {
+            notOver1000.add(i);
+          }
+        }
+      }
+      return [...notOver1000, ...over1000];
+    } else {
+      return list;
+    }
   }
 
   // int? _lastRead(final ThreadBase item) => threadsLastReadAt[item.id];
@@ -574,24 +589,24 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<List<ThreadData?>?> _getThreadsForMachi() async {
     if (board?.machi != null) {
       final result = await MachiHandler.getThreads(board!.id);
-      return result?.thread
-          .map((e) => e == null
-              ? null
-              : MachiThreadData(
-                  id: e.key,
-                  title: e.subject,
-                  resCount: int.tryParse(e.res) ?? 1,
-                  boardId: board!.id,
-                  type: Communities.machi,
-                  url: e.getUrl(board!.id),
-                  updateAtStr: null))
-          .toList();
-      // if (result == null) {
-      //   return;
-      // }
-      // await _setThreadsMetadata<GirlsChThread>(result, board!);
+      return setMachiThreads(result);
     }
     return null;
+  }
+
+  List<ThreadData?>? setMachiThreads(final MachiThreadsBaseData? value) {
+    return value?.thread
+        .map((e) => e == null
+            ? null
+            : MachiThreadData(
+                id: e.key,
+                title: e.subject,
+                resCount: int.tryParse(e.res) ?? 1,
+                boardId: value.bbs,
+                type: Communities.machi,
+                url: e.getUrl(value.bbs),
+                updateAtStr: null))
+        .toList();
   }
 
   // @action

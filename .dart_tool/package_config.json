@@ -57,9 +57,9 @@
     },
     {
       "name": "build_resolvers",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_resolvers-2.4.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_resolvers-2.4.1",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "build_runner",
@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-08be3162795d4d94b77065aaabc2edb812ae804e/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-d3f03dd7787d6813b761463159fc0c08afc701a7/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -369,7 +369,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-91ff3609e40140f20e4cee853f7b9c4a73066ef0/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-4fa30840ba31355fd20260c25da6c3b4c49ebfe1/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -758,7 +758,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-09-29T12:48:22.201688Z",
+  "generated": "2023-09-30T11:22:58.708029Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }
