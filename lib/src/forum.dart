@@ -651,14 +651,6 @@ abstract class ForumStateBase with Store, WithDateTime {
             positionToGet: position,
             // title: thread.title
           );
-          //   result = resultRecord?.$1;
-          //   threadLength = resultRecord?.$2;
-          //   if (result != null) {
-          //     final item = result.firstOrNull;
-          //     if (item is GirlsChContent) {
-          //       boardId = item.categoryId;
-          //     }
-          //   }
         }
       // break;
       case Communities.futabaCh:
@@ -685,15 +677,11 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       case Communities.machi:
         final id = FiveChParser.getId(url);
-        final host = MachiData.host;
-        final boardId = FiveChParser.getBoardIdFromDat(url);
+        // final host = MachiData.host;
+        final boardId = MachiData.getBoardIdFromUrl(url);
+        logger.d('url:machi: $id, boardId: $boardId');
         if (id != null && boardId != null) {
-          return await _getContentForFiveCh(
-            id,
-            domain: host,
-            directoryName: boardId,
-            // title: thread.title
-          );
+          return await _getContentForMachi(boardId: boardId, threadId: id);
         }
 
       default:
@@ -703,7 +691,7 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   String? _getThreadIdFromUrl(final String url) {
     switch (type) {
-      case Communities.fiveCh || Communities.pinkCh:
+      case Communities.fiveCh || Communities.pinkCh || Communities.machi:
         return FiveChParser.getId(url);
       case Communities.girlsCh:
         return GirlsChParser.getIdFromUrl(url);
@@ -724,6 +712,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       case Communities.futabaCh:
         return FutabaParser.getBoardIdFromUrl(url);
+      case Communities.machi:
+        return MachiData.getBoardIdFromUrl(url);
       default:
     }
     return null;
