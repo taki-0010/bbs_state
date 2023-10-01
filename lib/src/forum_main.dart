@@ -262,131 +262,191 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   @action
   Future<void> getBoards() async {
+    clearSearchWord();
+    FetchBoardsResultData? result;
     switch (parent.type) {
       case Communities.fiveCh:
-        await _getBoardsForFiveCh();
+        result = await _getBoardsForFiveCh();
         break;
       case Communities.girlsCh:
-        await _getBoardsForGirlsCh();
+        result = await _getBoardsForGirlsCh();
         break;
       case Communities.futabaCh:
-        await _getBoardsForFutaba();
+        result = await _getBoardsForFutaba();
         break;
       case Communities.pinkCh:
-        await _getBoardsForPinkCh();
+        result = await _getBoardsForPinkCh();
         break;
       case Communities.machi:
-        await _getBoardsForMachi();
+        result = await _getBoardsForMachi();
         break;
       default:
     }
-  }
-
-  @action
-  Future<void> _getBoardsForFiveCh() async {
-    if (boards.isEmpty) {
-      final boardsData = await FiveChHandler.getBoard();
-      if (boardsData == null) {
-        return;
-      }
-      final result = boardsData.menuList
-          .map((e) => e.categoryName != 'BBSPINK'
-              ? BoardData(
-                  id: '',
-                  name: e.categoryName,
-                  forum: Communities.fiveCh,
-                  fiveChCategory: FiveChCategoryData(
-                    categoryContent: _getFiveChBoardList(e.categoryContent),
-                    categoryNumber: e.categoryNumber,
-                  ))
-              : null)
-          .toList();
-      boards.addAll([...result]);
+    if (result != null && result.result == FetchResult.success) {
+      boards.addAll([...?result.boards]);
     }
   }
 
-  @action
-  Future<void> _getBoardsForPinkCh() async {
+  // @action
+  Future<FetchBoardsResultData?> _getBoardsForFiveCh() async {
     if (boards.isEmpty) {
-      final boardsData = await PinkChHandler.getBoard();
-      if (boardsData == null) {
-        return;
-      }
-      final category = boardsData
-          .map((e) => BoardData(
-              id: '',
-              name: e.categoryName,
-              forum: Communities.pinkCh,
-              fiveChCategory: FiveChCategoryData(
-                categoryContent: _getFiveChBoardList(e.categoryContent),
-                categoryNumber: e.categoryNumber,
-              )))
-          .toList();
-      final result = category.firstOrNull?.fiveChCategory?.categoryContent;
-      if (result == null) {
-        return;
-      }
-      final pink =
-          result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
-      // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
-      // final data = pink.where((element) => element.).toList();
-      boards.addAll([...pink]);
+      return await FiveChHandler.getBoard();
+      // if (boardsData.) {
+      //   return;
+      // }
+      // final result = boardsData.menuList
+      //     .map((e) => e.categoryName != 'BBSPINK'
+      //         ? BoardData(
+      //             id: '',
+      //             name: e.categoryName,
+      //             forum: Communities.fiveCh,
+      //             fiveChCategory: FiveChCategoryData(
+      //               categoryContent: _getFiveChBoardList(e.categoryContent),
+      //               categoryNumber: e.categoryNumber,
+      //             ))
+      //         : null)
+      //     .toList();
+      // boards.addAll([...result]);
     }
+    return null;
+  }
+  // @action
+  // Future<void> _getBoardsForFiveCh() async {
+  //   if (boards.isEmpty) {
+  //     final boardsData = await FiveChHandler.getBoard();
+  //     if (boardsData == null) {
+  //       return;
+  //     }
+  //     final result = boardsData.menuList
+  //         .map((e) => e.categoryName != 'BBSPINK'
+  //             ? BoardData(
+  //                 id: '',
+  //                 name: e.categoryName,
+  //                 forum: Communities.fiveCh,
+  //                 fiveChCategory: FiveChCategoryData(
+  //                   categoryContent: _getFiveChBoardList(e.categoryContent),
+  //                   categoryNumber: e.categoryNumber,
+  //                 ))
+  //             : null)
+  //         .toList();
+  //     boards.addAll([...result]);
+  //   }
+  // }
+
+  // @action
+  Future<FetchBoardsResultData?> _getBoardsForPinkCh() async {
+    if (boards.isEmpty) {
+      return await PinkChHandler.getBoard();
+      // if (boardsData == null) {
+      //   return;
+      // }
+      // final category = boardsData
+      //     .map((e) => BoardData(
+      //         id: '',
+      //         name: e.categoryName,
+      //         forum: Communities.pinkCh,
+      //         fiveChCategory: FiveChCategoryData(
+      //           categoryContent: _getFiveChBoardList(e.categoryContent),
+      //           categoryNumber: e.categoryNumber,
+      //         )))
+      //     .toList();
+      // final result = category.firstOrNull?.fiveChCategory?.categoryContent;
+      // if (result == null) {
+      //   return;
+      // }
+      // final pink =
+      //     result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
+      // // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
+      // // final data = pink.where((element) => element.).toList();
+      // boards.addAll([...pink]);
+    }
+    return null;
+  }
+  // @action
+  // Future<void> _getBoardsForPinkCh() async {
+  //   if (boards.isEmpty) {
+  //     final boardsData = await PinkChHandler.getBoard();
+  //     if (boardsData == null) {
+  //       return;
+  //     }
+  //     final category = boardsData
+  //         .map((e) => BoardData(
+  //             id: '',
+  //             name: e.categoryName,
+  //             forum: Communities.pinkCh,
+  //             fiveChCategory: FiveChCategoryData(
+  //               categoryContent: _getFiveChBoardList(e.categoryContent),
+  //               categoryNumber: e.categoryNumber,
+  //             )))
+  //         .toList();
+  //     final result = category.firstOrNull?.fiveChCategory?.categoryContent;
+  //     if (result == null) {
+  //       return;
+  //     }
+  //     final pink =
+  //         result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
+  //     // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
+  //     // final data = pink.where((element) => element.).toList();
+  //     boards.addAll([...pink]);
+  //   }
+  // }
+
+  // List<BoardData> _getFiveChBoardList(final List<FiveChBoardJsonData> value) {
+  //   final data = value
+  //       .map((e) => BoardData(
+  //           id: e.directoryName,
+  //           name: e.boardName,
+  //           forum: Communities.fiveCh,
+  //           fiveCh: FiveChBoardData(
+  //               // id: e.directoryName,
+  //               // name: e.boardName,
+  //               category: e.category,
+  //               categoryName: e.categoryName,
+  //               categoryOrder: e.categoryOrder,
+  //               url: e.url,
+  //               directoryName: e.directoryName)))
+  //       .toList();
+  //   return data
+  //       .where((element) =>
+  //           element.fiveCh?.directoryName != 'NONE' &&
+  //           !element.fiveCh!.url.contains('headline'))
+  //       .toList();
+  // }
+
+  // @action
+  Future<FetchBoardsResultData?> _getBoardsForGirlsCh() async {
+    if (boards.isEmpty) {
+      return await GirlsChHandler.getCategory();
+      // if (result == null) {
+      //   return;
+      // }
+      // boards.addAll(result);
+    }
+    return null;
   }
 
-  List<BoardData> _getFiveChBoardList(final List<FiveChBoardJsonData> value) {
-    final data = value
-        .map((e) => BoardData(
-            id: e.directoryName,
-            name: e.boardName,
-            forum: Communities.fiveCh,
-            fiveCh: FiveChBoardData(
-                // id: e.directoryName,
-                // name: e.boardName,
-                category: e.category,
-                categoryName: e.categoryName,
-                categoryOrder: e.categoryOrder,
-                url: e.url,
-                directoryName: e.directoryName)))
-        .toList();
-    return data
-        .where((element) =>
-            element.fiveCh?.directoryName != 'NONE' &&
-            !element.fiveCh!.url.contains('headline'))
-        .toList();
+  // @action
+  Future<FetchBoardsResultData?> _getBoardsForFutaba() async {
+    if (boards.isEmpty) {
+      return await FutabaChHandler.getBoards();
+      // if (result == null) {
+      //   return;
+      // }
+      // boards.addAll(result);
+    }
+    return null;
   }
 
-  @action
-  Future<void> _getBoardsForGirlsCh() async {
+  // @action
+  Future<FetchBoardsResultData?> _getBoardsForMachi() async {
     if (boards.isEmpty) {
-      final result = await GirlsChHandler.getCategory();
-      if (result == null) {
-        return;
-      }
-      boards.addAll(result);
+      return await MachiHandler.getBoards();
+      // if (result == null) {
+      //   return;
+      // }
+      // boards.addAll(result);
     }
-  }
-
-  @action
-  Future<void> _getBoardsForFutaba() async {
-    if (boards.isEmpty) {
-      final result = await FutabaChHandler.getBoards();
-      if (result == null) {
-        return;
-      }
-      boards.addAll(result);
-    }
-  }
-
-  @action
-  Future<void> _getBoardsForMachi() async {
-    if (boards.isEmpty) {
-      final result = await MachiHandler.getBoards();
-      if (result == null) {
-        return;
-      }
-      boards.addAll(result);
-    }
+    return null;
   }
 
   // @action
@@ -401,7 +461,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   Future<void> _fetchThreads() async {
-    List<ThreadData?>? result;
+    FetchThreadsResultData? result;
     switch (parent.type) {
       case Communities.fiveCh:
         // if (value == null || value.type == Communities.fiveCh) {
@@ -425,18 +485,28 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       default:
     }
-    if (result != null) {
-      await _setThreadsMetadata(
-        result,
-      );
-      if (parent.type == Communities.futabaCh) {
-        final jsonData = await FutabaChHandler.fetchThreadsByJson(
-            board!.futabaCh!.directory, board!.id);
-        if (jsonData != null) {
-          await parent.history
-              .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
+    logger.d('fetchThreads: ${result?.result}');
+
+    switch (result?.result) {
+      case FetchResult.error:
+        parent.setErrorMessage('Error!');
+        break;
+      case FetchResult.networkError:
+        parent.setErrorMessage('Status Code: ${result!.statusCode}');
+      case FetchResult.success:
+        await _setThreadsMetadata(
+          result!.threads!,
+        );
+        if (parent.type == Communities.futabaCh) {
+          final jsonData = await FutabaChHandler.fetchThreadsByJson(
+              board!.futabaCh!.directory, board!.id);
+          if (jsonData != null) {
+            await parent.history.deleteMarkDataWhenNotFound<FutabaChThread>(
+                jsonData, board!.id);
+          }
         }
-      }
+      default:
+        parent.setErrorMessage('Error!');
     }
   }
 
@@ -524,7 +594,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   // }
 
   // @action
-  Future<List<ThreadData?>?> _getThreadsForFiveCh() async {
+  Future<FetchThreadsResultData?> _getThreadsForFiveCh() async {
     final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
@@ -549,7 +619,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   // @action
-  Future<List<ThreadData?>?> _getThreadsForPinkCh() async {
+  Future<FetchThreadsResultData?> _getThreadsForPinkCh() async {
     final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
@@ -574,7 +644,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   // @action
-  Future<List<ThreadData?>?> _getThreadsForGirlsCh() async {
+  Future<FetchThreadsResultData?> _getThreadsForGirlsCh() async {
     if (board?.girlsCh != null) {
       return await GirlsChHandler.getTitleList(board!.girlsCh!.url,
           categoryId: board!.id);
@@ -586,31 +656,31 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
-  Future<List<ThreadData?>?> _getThreadsForMachi() async {
+  Future<FetchThreadsResultData?> _getThreadsForMachi() async {
     if (board?.machi != null) {
-      final result = await MachiHandler.getThreads(board!.id);
-      return setMachiThreads(result);
+      return await MachiHandler.getThreads(board!.id);
+      // return setMachiThreads(result);
     }
     return null;
   }
 
-  List<ThreadData?>? setMachiThreads(final MachiThreadsBaseData? value) {
-    return value?.thread
-        .map((e) => e == null
-            ? null
-            : MachiThreadData(
-                id: e.key,
-                title: e.subject,
-                resCount: int.tryParse(e.res) ?? 1,
-                boardId: value.bbs,
-                type: Communities.machi,
-                url: e.getUrl(value.bbs),
-                updateAtStr: null))
-        .toList();
-  }
+  // List<ThreadData?>? setMachiThreads(final MachiThreadsBaseData? value) {
+  //   return value?.thread
+  //       .map((e) => e == null
+  //           ? null
+  //           : MachiThreadData(
+  //               id: e.key,
+  //               title: e.subject,
+  //               resCount: int.tryParse(e.res) ?? 1,
+  //               boardId: value.bbs,
+  //               type: Communities.machi,
+  //               url: e.getUrl(value.bbs),
+  //               updateAtStr: null))
+  //       .toList();
+  // }
 
   // @action
-  Future<List<ThreadData?>?> _getThreadsForFutabaCh() async {
+  Future<FetchThreadsResultData?> _getThreadsForFutabaCh() async {
     if (board?.futabaCh != null) {
       // final futabaBoard = board as FutabaChBoard;
       return await FutabaChHandler.getAllThreads(

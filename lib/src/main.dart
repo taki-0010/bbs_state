@@ -102,6 +102,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   @observable
   String? addForumName;
 
+  @computed
+  String? get snackMessage =>
+      deletedThreadTitle ?? addForumName ?? selectedForumState?.errorMessage;
+
   // @observable
   // bool cancelInitialScroll = false;
 
@@ -461,7 +465,7 @@ abstract class MainStoreBase with Store, WithDateTime {
           return boards;
         } else {
           final boards = await FutabaChHandler.getBoards();
-          return boards;
+          return boards.boards;
         }
       case Communities.machi:
         final boards = machi.forumMain.boards;
@@ -469,7 +473,7 @@ abstract class MainStoreBase with Store, WithDateTime {
           return boards;
         } else {
           final boards = await MachiHandler.getBoards();
-          return boards;
+          return boards.boards;
         }
       default:
     }
@@ -619,14 +623,15 @@ abstract class MainStoreBase with Store, WithDateTime {
     selectedForumState?.setLastThreadsScrollOffset(screen, value);
   }
 
-  // Future<void> saveLastIndexBeforeSetContent() async {
-  //   if (currentContentState == null) return;
-  //   await setLastOpenedContentIndexById(
-  //       currentContentState!.currentContentIndex,
-  //       type: currentContentState!.content.type,
-  //       threadId: currentContentState!.content.id,
-  //       boardId: currentContentState!.content.boardId);
-  // }
+  void removeSnackMessage() {
+    if (addForumName != null) {
+      removeAddForumName();
+    } else if (deletedThreadTitle != null) {
+      removeDeletedThreadTitle();
+    } else {
+      selectedForumState?.setErrorMessage(null);
+    }
+  }
 
   @action
   void setLog(final String value) {

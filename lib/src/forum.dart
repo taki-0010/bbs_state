@@ -58,6 +58,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   @observable
   double? hoverdItemY;
 
+  @observable
+  String? errorMessage;
+
   @action
   void setHoverdItemPosition(
       final ThreadBase? item, final double? x, final double? y) {
@@ -78,6 +81,11 @@ abstract class ForumStateBase with Store, WithDateTime {
     hoverdItemX = null;
     hoverdItemY = null;
   }
+
+  @action
+  void setErrorMessage(final String? value) => errorMessage = value;
+
+
 
   // @computed
   // Future<String?> get currentSessionId async =>

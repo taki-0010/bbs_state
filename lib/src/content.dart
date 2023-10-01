@@ -267,8 +267,93 @@ abstract class ContentStateBase with Store, WithDateTime {
     final count = content.content
         .where((element) => element?.getPostId == selfId)
         .toList();
-    final before = count.where((element) => element != null && element.index <= currentIndex).toList();
+    final before = count
+        .where((element) => element != null && element.index <= currentIndex)
+        .toList();
     final result = '${before.length} / ${count.length}';
     return count.length == 1 ? null : result;
   }
+
+  List<int?> getResCount(
+    final int index,
+  ) {
+    final list = content.content;
+    List<int?> result = [];
+    final target = '>>$index';
+    for (final i in list) {
+      if (i != null && i.anchorList.contains(target)) {
+        result.add(i.index);
+      }
+    }
+    return result;
+  }
+
+    List<int?> getResCountForFutaba(
+      final FutabaChContent self, final List<String> targetBody) {
+    final list = content.content;
+    final targetNumber = 'No.${self.number}';
+    // final targetBody = self.body.splitLines();
+    final targetSrc = self.srcContent;
+    // final targetBody = self.body.replaceAll(RegExp(r'>+.+'), '');
+    // logger.d('getResCountForFutaba: index: ${self.index}, targetbody: $targetBody, raw: ${self.body}');
+    final result = list.map((final e) {
+      if (e is FutabaChContent && e.anchorList.isNotEmpty) {
+        final existNum = e.anchorList.firstWhere(
+          (final element) {
+            return element != null &&
+                element.isNotEmpty &&
+                e.index != self.index &&
+                targetNumber.contains(element);
+          },
+          orElse: () => null,
+        );
+        final existSrc = e.anchorList.firstWhere(
+          (final element) {
+            return element != null &&
+                element.isNotEmpty &&
+                e.index != self.index &&
+                targetSrc != null &&
+                targetSrc.contains(element);
+          },
+          orElse: () => null,
+        );
+        final existText = e.anchorList.firstWhere(
+          (final element) {
+            return element != null &&
+                element.isNotEmpty &&
+                e.index != self.index &&
+                targetBody
+                    .firstWhere(
+                      (final el) => el.isNotEmpty && el == element,
+                      orElse: () => '',
+                    )
+                    .isNotEmpty;
+          },
+          orElse: () => null,
+        );
+        return (existNum != null || existText != null || existSrc != null)
+            ? e.index
+            : null;
+      }
+    }).toList();
+    return result.whereType<int>().toList();
+  }
+
+    String? getUserIdList(
+      final int index, final String? selfId,) {
+    if (selfId == null) return null;
+    final list = content.content;
+    final idList =
+        list.map((e) => e?.getUserId == selfId ? e?.getUserId : null).toList();
+    final total = idList.where((element) => element == selfId).toList().length;
+    List<String?> beforeList = [];
+    idList.asMap().forEach((final key, final value) {
+      if (key < index && value != null) {
+        beforeList.add(value);
+      }
+    });
+    final result = '${beforeList.length} / $total';
+    return result;
+  }
+
 }

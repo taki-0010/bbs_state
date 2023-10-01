@@ -312,15 +312,15 @@ abstract class LibraryStateBase with Store, WithDateTime {
         'history: updateAll: currentRes:$currentRes, map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
     for (final b in markListByBoardIdFirstItemList) {
       if (b != null) {
-        List<ThreadData?>? result;
+        FetchThreadsResultData? result;
         switch (parent.type) {
           case Communities.fiveCh:
             result = await FiveChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            if (result != null) {
-              setArchived<ThreadData>(result, b.boardId);
+            if (result.result == FetchResult.success) {
+              setArchived<ThreadData>(result.threads!, b.boardId);
               // _setDiff(
               //   result,
               //   currentRes,
@@ -361,27 +361,27 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 }
               }
             }
-            result = threadsData;
+            result = FetchThreadsResultData(threads: threadsData);
             break;
           case Communities.pinkCh:
             result = await PinkChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
-            if (result != null) {
-              setArchived<ThreadData>(result, b.boardId);
+            if (result.result == FetchResult.success) {
+              setArchived<ThreadData>(result.threads!, b.boardId);
             }
 
             break;
           case Communities.machi:
-            final data = await MachiHandler.getThreads(b.boardId);
-            result = parent.forumMain.setMachiThreads(data);
+            result = await MachiHandler.getThreads(b.boardId);
+            // result = parent.forumMain.setMachiThreads(data);
 
             break;
           default:
         }
         _setDiff(
-          result,
+          result?.threads,
           currentRes,
         );
       }

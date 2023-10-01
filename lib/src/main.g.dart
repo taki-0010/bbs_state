@@ -9,6 +9,13 @@ part of 'main.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$MainStore on MainStoreBase, Store {
+  Computed<String?>? _$snackMessageComputed;
+
+  @override
+  String? get snackMessage =>
+      (_$snackMessageComputed ??= Computed<String?>(() => super.snackMessage,
+              name: 'MainStoreBase.snackMessage'))
+          .value;
   Computed<bool>? _$contentLoadingComputed;
 
   @override
@@ -891,6 +898,7 @@ deletedThreadTitle: ${deletedThreadTitle},
 addForumName: ${addForumName},
 reverseForumSwitchAnimation: ${reverseForumSwitchAnimation},
 reverseAnimationForPrymaryScreen: ${reverseAnimationForPrymaryScreen},
+snackMessage: ${snackMessage},
 contentLoading: ${contentLoading},
 selectedForumIndex: ${selectedForumIndex},
 currentContentThreadData: ${currentContentThreadData},

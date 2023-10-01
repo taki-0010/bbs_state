@@ -204,6 +204,22 @@ mixin _$ForumState on ForumStateBase, Store {
     });
   }
 
+  late final _$errorMessageAtom =
+      Atom(name: 'ForumStateBase.errorMessage', context: context);
+
+  @override
+  String? get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String? value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
+    });
+  }
+
   late final _$boardsScrollAtom =
       Atom(name: 'ForumStateBase.boardsScroll', context: context);
 
@@ -298,6 +314,17 @@ mixin _$ForumState on ForumStateBase, Store {
   }
 
   @override
+  void setErrorMessage(String? value) {
+    final _$actionInfo = _$ForumStateBaseActionController.startAction(
+        name: 'ForumStateBase.setErrorMessage');
+    try {
+      return super.setErrorMessage(value);
+    } finally {
+      _$ForumStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void computeBoardScrol(double? value) {
     final _$actionInfo = _$ForumStateBaseActionController.startAction(
         name: 'ForumStateBase.computeBoardScrol');
@@ -360,6 +387,7 @@ loading: ${loading},
 hoverdItem: ${hoverdItem},
 hoverdItemX: ${hoverdItemX},
 hoverdItemY: ${hoverdItemY},
+errorMessage: ${errorMessage},
 boardsScroll: ${boardsScroll},
 currentTotal: ${currentTotal},
 currentContentThreadData: ${currentContentThreadData},

@@ -233,51 +233,6 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
     return _$getBoardsAsyncAction.run(() => super.getBoards());
   }
 
-  late final _$_getBoardsForFiveChAsyncAction =
-      AsyncAction('ForumMainStateBase._getBoardsForFiveCh', context: context);
-
-  @override
-  Future<void> _getBoardsForFiveCh() {
-    return _$_getBoardsForFiveChAsyncAction
-        .run(() => super._getBoardsForFiveCh());
-  }
-
-  late final _$_getBoardsForPinkChAsyncAction =
-      AsyncAction('ForumMainStateBase._getBoardsForPinkCh', context: context);
-
-  @override
-  Future<void> _getBoardsForPinkCh() {
-    return _$_getBoardsForPinkChAsyncAction
-        .run(() => super._getBoardsForPinkCh());
-  }
-
-  late final _$_getBoardsForGirlsChAsyncAction =
-      AsyncAction('ForumMainStateBase._getBoardsForGirlsCh', context: context);
-
-  @override
-  Future<void> _getBoardsForGirlsCh() {
-    return _$_getBoardsForGirlsChAsyncAction
-        .run(() => super._getBoardsForGirlsCh());
-  }
-
-  late final _$_getBoardsForFutabaAsyncAction =
-      AsyncAction('ForumMainStateBase._getBoardsForFutaba', context: context);
-
-  @override
-  Future<void> _getBoardsForFutaba() {
-    return _$_getBoardsForFutabaAsyncAction
-        .run(() => super._getBoardsForFutaba());
-  }
-
-  late final _$_getBoardsForMachiAsyncAction =
-      AsyncAction('ForumMainStateBase._getBoardsForMachi', context: context);
-
-  @override
-  Future<void> _getBoardsForMachi() {
-    return _$_getBoardsForMachiAsyncAction
-        .run(() => super._getBoardsForMachi());
-  }
-
   late final _$_setThreadsMetadataAsyncAction =
       AsyncAction('ForumMainStateBase._setThreadsMetadata', context: context);
 
