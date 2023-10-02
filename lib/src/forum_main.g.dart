@@ -16,6 +16,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'ForumMainStateBase.settings'))
           .value;
+  Computed<List<ThreadDataForDiff?>?>? _$currentBoardDiffComputed;
+
+  @override
+  List<ThreadDataForDiff?>? get currentBoardDiff =>
+      (_$currentBoardDiffComputed ??= Computed<List<ThreadDataForDiff?>?>(
+              () => super.currentBoardDiff,
+              name: 'ForumMainStateBase.currentBoardDiff'))
+          .value;
   Computed<Map<String, int?>>? _$threadsLastReadAtComputed;
 
   @override
@@ -118,6 +126,22 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   set threadsLoading(bool value) {
     _$threadsLoadingAtom.reportWrite(value, super.threadsLoading, () {
       super.threadsLoading = value;
+    });
+  }
+
+  late final _$boardLoadingAtom =
+      Atom(name: 'ForumMainStateBase.boardLoading', context: context);
+
+  @override
+  bool get boardLoading {
+    _$boardLoadingAtom.reportRead();
+    return super.boardLoading;
+  }
+
+  @override
+  set boardLoading(bool value) {
+    _$boardLoadingAtom.reportWrite(value, super.boardLoading, () {
+      super.boardLoading = value;
     });
   }
 
@@ -268,11 +292,33 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   }
 
   @override
+  void toggleBoardLoading() {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase.toggleBoardLoading');
+    try {
+      return super.toggleBoardLoading();
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setBoard(BoardData value) {
     final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
         name: 'ForumMainStateBase.setBoard');
     try {
       return super.setBoard(value);
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void deleteDiffField(String? id) {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase.deleteDiffField');
+    try {
+      return super.deleteDiffField(id);
     } finally {
       _$ForumMainStateBaseActionController.endAction(_$actionInfo);
     }
@@ -290,12 +336,12 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   }
 
   @override
-  void _setThreads<T extends ThreadData>(
+  void _setThreadsDiff<T extends ThreadData>(
       {required List<T?> newList, required BoardData boardData}) {
     final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
-        name: 'ForumMainStateBase._setThreads<T extends ThreadData>');
+        name: 'ForumMainStateBase._setThreadsDiff<T extends ThreadData>');
     try {
-      return super._setThreads<T>(newList: newList, boardData: boardData);
+      return super._setThreadsDiff<T>(newList: newList, boardData: boardData);
     } finally {
       _$ForumMainStateBaseActionController.endAction(_$actionInfo);
     }
@@ -362,6 +408,7 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
 content: ${content},
 contentLoading: ${contentLoading},
 threadsLoading: ${threadsLoading},
+boardLoading: ${boardLoading},
 selectedPrimaryView: ${selectedPrimaryView},
 boards: ${boards},
 board: ${board},
@@ -369,6 +416,7 @@ threadList: ${threadList},
 threadsDiff: ${threadsDiff},
 searchThreadWord: ${searchThreadWord},
 settings: ${settings},
+currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
 sortedThreads: ${sortedThreads},

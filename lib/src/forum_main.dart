@@ -17,6 +17,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   bool contentLoading = false;
   @observable
   bool threadsLoading = false;
+  @observable
+  bool boardLoading = false;
 
   // @observable
   double? lastThreadsScrollIndex;
@@ -38,6 +40,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   @observable
   ObservableMap<String, List<ThreadDataForDiff?>> threadsDiff = ObservableMap();
+
+  @computed
+  List<ThreadDataForDiff?>? get currentBoardDiff => threadsDiff[board?.id];
 
   @computed
   Map<String, int?> get threadsLastReadAt {
@@ -241,6 +246,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   void toggleThreadsLoading() => threadsLoading = !threadsLoading;
 
   @action
+  void toggleBoardLoading() => boardLoading = !boardLoading;
+
+  @action
   Future<void> setPrimaryView(final PrimaryViewState value) async {
     final beforIsConent = selectedPrimaryView == PrimaryViewState.content;
     selectedPrimaryView = value;
@@ -263,6 +271,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   @action
   Future<void> getBoards() async {
     clearSearchWord();
+    if (boards.isNotEmpty) return;
+    toggleBoardLoading();
     FetchBoardsResultData? result;
     switch (parent.type) {
       case Communities.fiveCh:
@@ -282,8 +292,18 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       default:
     }
-    if (result != null && result.result == FetchResult.success) {
-      boards.addAll([...?result.boards]);
+    toggleBoardLoading();
+    // if (result == null)
+    switch (result?.result) {
+      case FetchResult.error:
+        parent.setErrorMessage('Error!');
+        break;
+      case FetchResult.networkError:
+        parent.setErrorMessage('Status Code: ${result!.statusCode}');
+      case FetchResult.success:
+        boards.addAll([...?result?.boards]);
+      default:
+        parent.setErrorMessage('Error!');
     }
   }
 
@@ -310,28 +330,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
     return null;
   }
-  // @action
-  // Future<void> _getBoardsForFiveCh() async {
-  //   if (boards.isEmpty) {
-  //     final boardsData = await FiveChHandler.getBoard();
-  //     if (boardsData == null) {
-  //       return;
-  //     }
-  //     final result = boardsData.menuList
-  //         .map((e) => e.categoryName != 'BBSPINK'
-  //             ? BoardData(
-  //                 id: '',
-  //                 name: e.categoryName,
-  //                 forum: Communities.fiveCh,
-  //                 fiveChCategory: FiveChCategoryData(
-  //                   categoryContent: _getFiveChBoardList(e.categoryContent),
-  //                   categoryNumber: e.categoryNumber,
-  //                 ))
-  //             : null)
-  //         .toList();
-  //     boards.addAll([...result]);
-  //   }
-  // }
 
   // @action
   Future<FetchBoardsResultData?> _getBoardsForPinkCh() async {
@@ -362,56 +360,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
     return null;
   }
-  // @action
-  // Future<void> _getBoardsForPinkCh() async {
-  //   if (boards.isEmpty) {
-  //     final boardsData = await PinkChHandler.getBoard();
-  //     if (boardsData == null) {
-  //       return;
-  //     }
-  //     final category = boardsData
-  //         .map((e) => BoardData(
-  //             id: '',
-  //             name: e.categoryName,
-  //             forum: Communities.pinkCh,
-  //             fiveChCategory: FiveChCategoryData(
-  //               categoryContent: _getFiveChBoardList(e.categoryContent),
-  //               categoryNumber: e.categoryNumber,
-  //             )))
-  //         .toList();
-  //     final result = category.firstOrNull?.fiveChCategory?.categoryContent;
-  //     if (result == null) {
-  //       return;
-  //     }
-  //     final pink =
-  //         result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
-  //     // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
-  //     // final data = pink.where((element) => element.).toList();
-  //     boards.addAll([...pink]);
-  //   }
-  // }
-
-  // List<BoardData> _getFiveChBoardList(final List<FiveChBoardJsonData> value) {
-  //   final data = value
-  //       .map((e) => BoardData(
-  //           id: e.directoryName,
-  //           name: e.boardName,
-  //           forum: Communities.fiveCh,
-  //           fiveCh: FiveChBoardData(
-  //               // id: e.directoryName,
-  //               // name: e.boardName,
-  //               category: e.category,
-  //               categoryName: e.categoryName,
-  //               categoryOrder: e.categoryOrder,
-  //               url: e.url,
-  //               directoryName: e.directoryName)))
-  //       .toList();
-  //   return data
-  //       .where((element) =>
-  //           element.fiveCh?.directoryName != 'NONE' &&
-  //           !element.fiveCh!.url.contains('headline'))
-  //       .toList();
-  // }
 
   // @action
   Future<FetchBoardsResultData?> _getBoardsForGirlsCh() async {
@@ -449,18 +397,43 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
+  @action
+  void deleteDiffField(final String? id) {
+    threadsDiff[board?.id]?.removeWhere((element) => element?.id == id);
+  }
+
+  Future<void> setThreads(final BoardData value) async {
+    setBoard(value);
+    toggleBoardLoading();
+    final result = await getThreads();
+    toggleBoardLoading();
+    switch (result?.result) {
+      case FetchResult.success:
+        setPrimaryView(PrimaryViewState.threads);
+        break;
+      case FetchResult.error:
+        parent.setErrorMessage('Error!');
+        break;
+      case FetchResult.networkError:
+        parent.setErrorMessage('Status Code: ${result!.statusCode}');
+      default:
+        parent.setErrorMessage('Error!');
+    }
+  }
+
   // @action
-  Future<void> getThreads() async {
-    if (board == null) return;
+  Future<FetchThreadsResultData?> getThreads() async {
+    if (board == null) return null;
     final currentBoard = threadList.firstOrNull?.boardId;
     if (threadList.isNotEmpty && currentBoard != board?.id) {
       _clearThreads();
     }
     logger.d('getThreads: type:${board?.forum}');
-    await _fetchThreads();
+    final result = await _fetchThreads();
+    return result;
   }
 
-  Future<void> _fetchThreads() async {
+  Future<FetchThreadsResultData?> _fetchThreads() async {
     FetchThreadsResultData? result;
     switch (parent.type) {
       case Communities.fiveCh:
@@ -508,13 +481,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       default:
         parent.setErrorMessage('Error!');
     }
+    return result;
   }
 
   @action
   void _clearThreads() => threadList.clear();
 
   @action
-  void _setThreads<T extends ThreadData>(
+  void _setThreadsDiff<T extends ThreadData>(
       {
       // required final List<T?> oldList,
       required final List<T?> newList,
@@ -539,6 +513,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
               after: exist.resCount,
               isNew: false);
           threadsDiff[boardData.id]?.add(data);
+          parent.history.deleteDiffField(h.id);
+          parent.history.setDiffValue(h.id, (exist.resCount - h.resCount));
         }
       }
     }
@@ -571,10 +547,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
     }
 
-    _clearThreads();
-    // logger.i('_setThreads: 1 ${threadList.length}');
-    threadList.addAll(newList);
-    // logger.i('_setThreads: 2 ${threadList.length}');
+    // _clearThreads();
+    // // logger.i('_setThreads: 1 ${threadList.length}');
+    // threadList.addAll(newList);
+    // // logger.i('_setThreads: 2 ${threadList.length}');
   }
 
   @action
@@ -583,7 +559,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   ) async {
     if (board == null) return;
 
-    _setThreads<T>(newList: result, boardData: board!);
+    _setThreadsDiff<T>(newList: result, boardData: board!);
+    _clearThreads();
+    threadList.addAll(result);
     await parent.history.setArchived<T>(result, board!.id);
     await parent.history.updateResCountWhenUpdateBoard(result);
   }

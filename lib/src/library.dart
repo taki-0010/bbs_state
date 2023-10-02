@@ -74,13 +74,14 @@ abstract class LibraryStateBase with Store, WithDateTime {
 
   @computed
   Set<String?> get boardIdSetOfContentList {
-    final boardIdSet = markList.map((element) => element?.boardId).toSet();
+    final boardIdSet = markList.map((element) => element?.boardId).toList();
     // final boardsData = boardIdSet
     //     .map((e) => boards.firstWhere((element) => element?.id == e,
     //         orElse: () => null))
     //     .toList();
     logger.d('historyListByBoard: ${boardIdSet.map((e) => e)},');
-    return boardIdSet;
+    boardIdSet.sort((a, b) => (a ?? '').compareTo((b ?? '')));
+    return boardIdSet.toSet();
   }
 
   @computed
@@ -131,20 +132,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
       };
 
   List<ThreadMarkData?> _sort(final List<ThreadMarkData?> list) {
-    // switch (sortHistory) {
-    //   // case SortHistory.hot:
-    //   //   list.sort((a, b) => (getIkioi(
-    //   //           b?.createdAtBySeconds ?? 0, b?.resCount ?? 0))
-    //   //       .compareTo(getIkioi(a?.createdAtBySeconds ?? 0, a?.resCount ?? 0)));
-    //   //   break;
-    //   // case SortHistory.deletionDate:
-    //   //   list.sort((a, b) => (a?.retentionPeriodSeconds ?? 0)
-    //   //       .compareTo((b?.retentionPeriodSeconds ?? 0)));
-    //   case SortHistoryList.history:
-    //     list.sort(
-    //         (a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
-    //   default:
-    // }
     list.sort((a, b) => (b?.lastReadAt ?? 0).compareTo((a?.lastReadAt ?? 0)));
 
     return list;
@@ -240,6 +227,31 @@ abstract class LibraryStateBase with Store, WithDateTime {
     await _clearThreads([...markList]);
   }
 
+  Future<void> updateThreadsByBoard(final String boardId) async {
+    final data = markList.firstWhere(
+      (element) => element?.boardId == boardId,
+      orElse: () => null,
+    );
+    await _updateThreadsByBoard([data]);
+  }
+
+  Future<void> updateThreadsByLastReadAt(final String keyName) async {
+    final list = [...?markListByLastReadAt[keyName]];
+    List<ThreadMarkData?> byBoard = [];
+    for (final i in list) {
+      if (i != null) {
+        final exist = byBoard.firstWhere(
+          (element) => element?.boardId == i.boardId,
+          orElse: () => null,
+        );
+        if (exist == null) {
+          byBoard.add(i);
+        }
+      }
+    }
+    await _updateThreadsByBoard(byBoard, willUpdateList: list);
+  }
+
   // @action
   Future<void> clearThreadsByBoard(final String boardId) async {
     final list = [...?markListByBoardId[boardId]];
@@ -305,12 +317,90 @@ abstract class LibraryStateBase with Store, WithDateTime {
     //     // await parent.updateContent(i);
     //   }
     // }
-    final currentRes = {...currentMarksResCount};
+    // final currentRes = {...currentMarksResCount};
     final markListByBoardIdFirstItemList =
         markListByBoardId.values.map((e) => e?.firstOrNull).toList();
     logger.d(
-        'history: updateAll: currentRes:$currentRes, map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
-    for (final b in markListByBoardIdFirstItemList) {
+        'history: updateAll:  map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
+    await _updateThreadsByBoard(markListByBoardIdFirstItemList);
+    // for (final b in markListByBoardIdFirstItemList) {
+    //   if (b != null) {
+    //     FetchThreadsResultData? result;
+    //     switch (parent.type) {
+    //       case Communities.fiveCh:
+    //         result = await FiveChHandler.getThreads(
+    //             domain: b.uri.host,
+    //             directoryName: b.boardId,
+    //             boardName: b.boardName ?? '');
+    //         if (result.result == FetchResult.success) {
+    //           setArchived<ThreadData>(result.threads!, b.boardId);
+    //         }
+
+    //         break;
+    //       case Communities.girlsCh:
+    //         result = await GirlsChHandler.getTitleList(
+    //             'topics/category/${b.boardId}',
+    //             categoryId: b.boardId);
+    //         // _setDiff(
+    //         //   result,
+    //         //   currentRes,
+    //         // );
+    //         break;
+    //       case Communities.futabaCh:
+    //         final selectedBoardThreads =
+    //             markList.where((e) => e?.boardId == b.boardId).toList();
+    //         List<FutabaChThread?> threadsData = [];
+    //         for (final i in selectedBoardThreads) {
+    //           if (i != null) {
+    //             // final data =
+    //             //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
+    //             final data =
+    //                 await FutabaChHandler.getContent(i.url, b.futabaDirectory);
+    //             if (data.result == FetchResult.error ||
+    //                 data.statusCode == 404) {
+    //               await parent.parent.deleteThreadMarkData(i);
+    //             } else {
+    //               final rescount = data.contentList?.lastOrNull?.index;
+    //               if (rescount != null && i.resCount != 1001) {
+    //                 final newData = FutabaParser.parseFromJson(rescount, i);
+    //                 threadsData
+    //                     .removeWhere((element) => element?.id == newData?.id);
+    //                 threadsData.add(newData);
+    //               }
+    //             }
+    //           }
+    //         }
+    //         result = FetchThreadsResultData(threads: threadsData);
+    //         break;
+    //       case Communities.pinkCh:
+    //         result = await PinkChHandler.getThreads(
+    //             domain: b.uri.host,
+    //             directoryName: b.boardId,
+    //             boardName: b.boardName ?? '');
+    //         if (result.result == FetchResult.success) {
+    //           setArchived<ThreadData>(result.threads!, b.boardId);
+    //         }
+
+    //         break;
+    //       case Communities.machi:
+    //         result = await MachiHandler.getThreads(b.boardId);
+    //         // result = parent.forumMain.setMachiThreads(data);
+
+    //         break;
+    //       default:
+    //     }
+    //     _setDiff(
+    //       result?.threads,
+    //       currentRes,
+    //     );
+    //   }
+    // }
+  }
+
+  Future<void> _updateThreadsByBoard(final List<ThreadMarkData?> list,
+      {final List<ThreadMarkData?>? willUpdateList}) async {
+    final currentRes = {...currentMarksResCount};
+    for (final b in list) {
       if (b != null) {
         FetchThreadsResultData? result;
         switch (parent.type) {
@@ -320,11 +410,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
             if (result.result == FetchResult.success) {
-              setArchived<ThreadData>(result.threads!, b.boardId);
-              // _setDiff(
-              //   result,
-              //   currentRes,
-              // );
+              await setArchived<ThreadData>(result.threads!, b.boardId);
             }
 
             break;
@@ -353,7 +439,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 } else {
                   final rescount = data.contentList?.lastOrNull?.index;
                   if (rescount != null && i.resCount != 1001) {
-                    final newData = FutabaParser.parseFromJson(rescount, i);
+                    final newData = FutabaData.parseFromJson(rescount, i);
                     threadsData
                         .removeWhere((element) => element?.id == newData?.id);
                     threadsData.add(newData);
@@ -369,7 +455,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 directoryName: b.boardId,
                 boardName: b.boardName ?? '');
             if (result.result == FetchResult.success) {
-              setArchived<ThreadData>(result.threads!, b.boardId);
+              await setArchived<ThreadData>(result.threads!, b.boardId);
             }
 
             break;
@@ -380,8 +466,22 @@ abstract class LibraryStateBase with Store, WithDateTime {
             break;
           default:
         }
+        List<ThreadData?> threads = [];
+        if (willUpdateList != null) {
+          for (final i in willUpdateList) {
+            final exist = result?.threads?.firstWhere(
+                (element) =>
+                    element?.id == i?.id && element?.boardId == i?.boardId,
+                orElse: () => null);
+            if (exist != null) {
+              threads.add(exist);
+            }
+          }
+        } else {
+          threads.addAll([...?result?.threads]);
+        }
         _setDiff(
-          result?.threads,
+          threads,
           currentRes,
         );
       }
@@ -395,7 +495,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
         final exist = getSelectedMarkData(i);
         if (exist != null && !exist.archived && exist.resCount != i.resCount) {
           final newData = exist.copyWith(resCount: i.resCount);
-          deleteDiffField(newData.id);
+          // deleteDiffField(newData.id);
           await parent.parent.repository.updateThreadMark(newData);
         }
       }
@@ -452,6 +552,11 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   @action
+  void setDiffValue(final String id, final int value) {
+    markListDiff[id] = value;
+  }
+
+  // @action
   void _setDiff<T extends ThreadData>(
     final List<T?>? result,
     final Map<String, int> currentRes,
@@ -463,13 +568,16 @@ abstract class LibraryStateBase with Store, WithDateTime {
     for (final m in markList) {
       if (m != null) {
         final exist = result.firstWhere(
-          (element) => element?.id == m.id && element?.boardId == m.boardId,
+          (element) =>
+              element?.id == m.id &&
+              element?.boardId == m.boardId &&
+              !m.archived,
           orElse: () => null,
         );
         if (exist != null) {
           final current = currentRes[m.id];
           final diff = exist.resCount - (current ?? exist.resCount);
-          markListDiff[m.id] = diff;
+          setDiffValue(m.id, diff);
 
           if (diff != 0) {
             final retention = parent.getRetentionSinceEpoch(exist.resCount, m);

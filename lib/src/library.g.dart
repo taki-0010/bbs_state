@@ -267,12 +267,11 @@ mixin _$LibraryState on LibraryStateBase, Store {
   }
 
   @override
-  void _setDiff<T extends ThreadData>(
-      List<T?>? result, Map<String, int> currentRes) {
+  void setDiffValue(String id, int value) {
     final _$actionInfo = _$LibraryStateBaseActionController.startAction(
-        name: 'LibraryStateBase._setDiff<T extends ThreadData>');
+        name: 'LibraryStateBase.setDiffValue');
     try {
-      return super._setDiff<T>(result, currentRes);
+      return super.setDiffValue(id, value);
     } finally {
       _$LibraryStateBaseActionController.endAction(_$actionInfo);
     }

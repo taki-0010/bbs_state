@@ -322,7 +322,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         return board?.fiveCh?.url;
       case Communities.girlsCh:
         final data = board?.girlsCh?.url;
-        return 'https://${GirlsChHandler.main}/$data';
+        return Uri.https(GirlsChData.host, data ?? '').toString();
       case Communities.futabaCh:
         final data = board?.futabaCh?.path;
         return 'https://$data/';
@@ -590,7 +590,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   String? boardNameById(final String id) => switch (selectedForum) {
         Communities.fiveCh => FiveChBoardNames.getById(id),
-        Communities.girlsCh => GirlsChBoardNames.getById(id),
+        Communities.girlsCh => GirlsChData.getBoardNameById(id),
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
@@ -1315,6 +1315,18 @@ abstract class MainStoreBase with Store, WithDateTime {
     await selectedForumState?.history.clearAllThreads();
   }
 
+  Future<void> updateThreadsByBoard(final String boardId) async {
+    selectedForumState?.history.toggleThreadsLoading();
+    await selectedForumState?.history.updateThreadsByBoard(boardId);
+    selectedForumState?.history.toggleThreadsLoading();
+  }
+
+  Future<void> updateThreadsByHistory(final String history) async {
+    selectedForumState?.history.toggleThreadsLoading();
+    await selectedForumState?.history.updateThreadsByLastReadAt(history);
+    selectedForumState?.history.toggleThreadsLoading();
+  }
+
   Future<void> clearThreadsByBoard(final String boardId) async {
     selectedForumState?.history.toggleThreadsLoading();
     await selectedForumState?.history.clearThreadsByBoard(boardId);
@@ -1346,9 +1358,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? parsedUrl(final String url) {
     switch (selectedForum) {
       case Communities.fiveCh:
-        return FiveChParser.toDatUrl(url);
+        return FiveChData.toDatUrl(url);
       case Communities.pinkCh:
-        return FiveChParser.toDatUrl(url);
+        return FiveChData.toDatUrl(url);
       default:
         return url;
     }

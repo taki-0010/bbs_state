@@ -85,8 +85,6 @@ abstract class ForumStateBase with Store, WithDateTime {
   @action
   void setErrorMessage(final String? value) => errorMessage = value;
 
-
-
   // @computed
   // Future<String?> get currentSessionId async =>
   //     await parent.repository.server.userState.currentSessionId;
@@ -410,8 +408,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   Future<FetchResult> setContent(final String id,
       {required final ThreadBase thread}) async {
     // _toggleLoading();
+    final position = thread is ThreadMarkData ? thread.positionToGet : null;
 
-    final result = await _fetchData(id, thread: thread);
+    final result = await _fetchData(id, thread: thread, positionToGet: position);
     if (result == null) {
       logger.e('setContent: null');
       return FetchResult.error;
@@ -436,7 +435,15 @@ abstract class ForumStateBase with Store, WithDateTime {
       if (exist != null) {
         switch (currentScreen) {
           case BottomMenu.forums:
-            forumMain.content?.setLastResIndex(exist.resCount);
+            final diff = forumMain.currentBoardDiff?.firstWhere(
+              (element) => element?.id == thread.id,
+              orElse: () => null,
+            );
+            if (diff != null) {
+              forumMain.content?.setLastResIndex(diff.before);
+              logger.d('setContent: exist.resCount: ${diff.before}');
+            }
+
             break;
           case BottomMenu.search:
             search.content?.setLastResIndex(exist.resCount);
@@ -597,6 +604,7 @@ abstract class ForumStateBase with Store, WithDateTime {
             : thread.lastReadAt,
         retentionPeriodSeconds: getRetentionSinceEpoch(resCount, thread));
     await parent.repository.updateThreadMark(newMark);
+    forumMain.deleteDiffField(newMark.id);
     history.deleteDiffField(newMark.id);
     return FetchResult.success;
   }
@@ -633,9 +641,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   Future<FetchContentResultData> _fetchDataByUrl(final String url) async {
     switch (type) {
       case Communities.fiveCh:
-        final id = FiveChParser.getId(url);
+        final id = FiveChData.getId(url);
         final host = Uri.parse(url).host;
-        final boardId = FiveChParser.getBoardIdFromDat(url);
+        final boardId = FiveChData.getBoardIdFromDat(url);
         logger.i('getDataByUrl: $url, id:$id, $boardId, host:$host');
         if (id != null && boardId != null) {
           return await _getContentForFiveCh(
@@ -662,9 +670,9 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       // break;
       case Communities.futabaCh:
-        final id = FutabaParser.getIdFromUrl(url);
-        final boardId = FutabaParser.getBoardIdFromUrl(url);
-        final directory = FutabaParser.getDirectory(Uri.parse(url));
+        final id = FutabaData.getIdFromUrl(url);
+        final boardId = FutabaData.getBoardIdFromUrl(url);
+        final directory = FutabaData.getDirectory(Uri.parse(url));
         if (id != null && boardId != null && directory != null) {
           return await _getContentForFutabaCh(
               url: url.replaceAll('https://', ''), directory: directory);
@@ -672,9 +680,9 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
         break;
       case Communities.pinkCh:
-        final id = FiveChParser.getId(url);
+        final id = FiveChData.getId(url);
         final host = Uri.parse(url).host;
-        final boardId = FiveChParser.getBoardIdFromDat(url);
+        final boardId = FiveChData.getBoardIdFromDat(url);
         if (id != null && boardId != null) {
           return await _getContentForFiveCh(
             id,
@@ -684,7 +692,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           );
         }
       case Communities.machi:
-        final id = FiveChParser.getId(url);
+        final id = FiveChData.getId(url);
         // final host = MachiData.host;
         final boardId = MachiData.getBoardIdFromUrl(url);
         logger.d('url:machi: $id, boardId: $boardId');
@@ -700,11 +708,11 @@ abstract class ForumStateBase with Store, WithDateTime {
   String? _getThreadIdFromUrl(final String url) {
     switch (type) {
       case Communities.fiveCh || Communities.pinkCh || Communities.machi:
-        return FiveChParser.getId(url);
+        return FiveChData.getId(url);
       case Communities.girlsCh:
         return GirlsChParser.getIdFromUrl(url);
       case Communities.futabaCh:
-        return FutabaParser.getIdFromUrl(url);
+        return FutabaData.getIdFromUrl(url);
       default:
     }
     return null;
@@ -713,13 +721,13 @@ abstract class ForumStateBase with Store, WithDateTime {
   String? _getBoardIdFromUrl(final String url, final ContentData? item) {
     switch (type) {
       case Communities.fiveCh || Communities.pinkCh:
-        return FiveChParser.getBoardIdFromDat(url);
+        return FiveChData.getBoardIdFromDat(url);
       case Communities.girlsCh:
         if (item is GirlsChContent) {
           return item.categoryId;
         }
       case Communities.futabaCh:
-        return FutabaParser.getBoardIdFromUrl(url);
+        return FutabaData.getBoardIdFromUrl(url);
       case Communities.machi:
         return MachiData.getBoardIdFromUrl(url);
       default:
@@ -762,9 +770,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
     // switch (type) {
     //   case Communities.fiveCh:
-    //     id = FiveChParser.getId(url);
+    //     id = FiveChData.getId(url);
     //     final host = Uri.parse(url).host;
-    //     boardId = FiveChParser.getBoardIdFromDat(url);
+    //     boardId = FiveChData.getBoardIdFromDat(url);
     //     logger.i('getDataByUrl: $url, id:$id, $boardId, host:$host');
     //     if (id != null && boardId != null) {
     //       (result, archived) = await _getContentForFiveCh(
@@ -799,9 +807,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     //     }
     //     break;
     //   case Communities.futabaCh:
-    //     id = FutabaParser.getIdFromUrl(url);
-    //     boardId = FutabaParser.getBoardIdFromUrl(url);
-    //     final directory = FutabaParser.getDirectory(Uri.parse(url));
+    //     id = FutabaData.getIdFromUrl(url);
+    //     boardId = FutabaData.getBoardIdFromUrl(url);
+    //     final directory = FutabaData.getDirectory(Uri.parse(url));
     //     if (id != null && boardId != null && directory != null) {
     //       result = await _getContentForFutabaCh(
     //           url: url.replaceAll('https://', ''), directory: directory);
@@ -809,9 +817,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     //     }
     //     break;
     //   case Communities.pinkCh:
-    //     id = FiveChParser.getId(url);
+    //     id = FiveChData.getId(url);
     //     final host = Uri.parse(url).host;
-    //     boardId = FiveChParser.getBoardIdFromDat(url);
+    //     boardId = FiveChData.getBoardIdFromDat(url);
     //     if (id != null && boardId != null) {
     //       (result, archived) = await _getContentForFiveCh(
     //         id,
@@ -1211,8 +1219,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.fiveCh || Communities.pinkCh:
         final domain = currentContentThreadData?.uri.host;
         final bbs = currentContentThreadData?.boardId;
-        final threadId =
-            FiveChParser.getId(currentContentThreadData?.url ?? '');
+        final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
         if (domain != null && bbs != null && threadId != null) {
           final result = await FiveChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
@@ -1243,8 +1250,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       //   }
       //   return false;
       case Communities.girlsCh:
-        final threadId =
-            FiveChParser.getId(currentContentThreadData?.url ?? '');
+        final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
         if (threadId == null) {
           return false;
         }
@@ -1262,8 +1268,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         final contentData = currentContent?.content.firstOrNull;
         final thread = currentContentThreadData;
         if (thread == null) return false;
-        final directory = FutabaParser.getDirectory(thread.uri);
-        final id = FutabaParser.getIdFromUrl(thread.url);
+        final directory = FutabaData.getDirectory(thread.uri);
+        final id = FutabaData.getIdFromUrl(thread.url);
         final boardId = thread.boardId;
         final deleteKey = settings?.deleteKeyForFutaba;
         if (directory == null || id == null || deleteKey == null) {
@@ -1282,7 +1288,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         final thread = currentContentThreadData;
         if (thread == null) return false;
         final bbs = thread.boardId;
-        final threadId = FiveChParser.getId(thread.url);
+        final threadId = FiveChData.getId(thread.url);
         if (threadId == null) return false;
         return await MachiHandler.post(value, bbs, threadId);
 
@@ -1301,8 +1307,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
         final thread = currentContentThreadData;
         if (thread == null) return result;
-        final directory = FutabaParser.getDirectory(thread.uri);
-        final id = FutabaParser.getIdFromUrl(thread.url);
+        final directory = FutabaData.getDirectory(thread.uri);
+        final id = FutabaData.getIdFromUrl(thread.url);
         final boardId = thread.boardId;
         final deleteKey = settings?.deleteKeyForFutaba;
         if (directory == null || id == null || deleteKey == null) {
