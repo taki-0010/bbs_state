@@ -665,7 +665,9 @@ abstract class MainStoreBase with Store, WithDateTime {
           onLibraryView: onLibraryView);
 
   Future<void> post(final PostData value) async {
+    toggleContentLoading();
     final result = await selectedForumState?.postComment(value);
+    toggleContentLoading();
     if (result != null && result) {
       await updateContent();
     }
@@ -1391,8 +1393,15 @@ abstract class MainStoreBase with Store, WithDateTime {
     return repository.mediaLocal.getFullPath(url).path;
   }
 
-  // Future<void> postToMachi() async {
-  //   final data = PostData(body: 'テストした', name: '', title: '', sage: true);
-  //   await MachiHandler.post(data, 'hokkaidou', '1345674545');
-  // }
+  Future<List<ContentData?>?> getRes(
+      final int index, final String threadId) async {
+    // final data = PostData(body: 'テストした', name: '', title: '', sage: true);
+    final result = await GirlsChHandler.getRes(threadId, index);
+    switch (result.result) {
+      case FetchResult.success:
+        return result.contentList;
+      default:
+    }
+    return null;
+  }
 }

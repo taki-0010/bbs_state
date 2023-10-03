@@ -410,7 +410,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     // _toggleLoading();
     final position = thread is ThreadMarkData ? thread.positionToGet : null;
 
-    final result = await _fetchData(id, thread: thread, positionToGet: position);
+    final result =
+        await _fetchData(id, thread: thread, positionToGet: position);
     if (result == null) {
       logger.e('setContent: null');
       return FetchResult.error;
@@ -428,7 +429,19 @@ abstract class ForumStateBase with Store, WithDateTime {
       content,
     );
     if (thread is ThreadMarkData && currentScreen == BottomMenu.history) {
-      history.content?.setLastResIndex(thread.resCount);
+      int lastResIndex = thread.resCount;
+      final contains = history.markListDiff.keys.contains(thread.id);
+      if (contains) {
+        final exist = history.markListDiff[thread.id];
+        if (exist != null) {
+          lastResIndex -= exist;
+        }
+        logger.i(
+            'lastResIndex: thread: ${thread.resCount}, exist: $exist, lastResIndex:$lastResIndex');
+      }
+      if (!lastResIndex.isNegative) {
+        history.content?.setLastResIndex(lastResIndex);
+      }
     }
     if (thread is ThreadData) {
       final exist = getThreadMarkDataByThreadData(thread);
@@ -768,89 +781,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (setContent) {
       search.setPrimaryView(PrimaryViewState.content);
     }
-    // switch (type) {
-    //   case Communities.fiveCh:
-    //     id = FiveChData.getId(url);
-    //     final host = Uri.parse(url).host;
-    //     boardId = FiveChData.getBoardIdFromDat(url);
-    //     logger.i('getDataByUrl: $url, id:$id, $boardId, host:$host');
-    //     if (id != null && boardId != null) {
-    //       (result, archived) = await _getContentForFiveCh(
-    //         id,
-    //         domain: host,
-    //         directoryName: boardId,
-    //         // title: thread.title
-    //       );
-    //     }
-    //     threadLength = result?.lastOrNull?.index;
-    //     break;
-    //   case Communities.girlsCh:
-    //     id = GirlsChParser.getIdFromUrl(url);
 
-    //     final position = settings?.positionToGet;
-    //     if (id != null && position != null) {
-    //       final resultRecord = await _getContentForGirlsCh(
-    //         id,
-    //         // categoryId: thread.boardId,
-    //         // thumbnail: thread.thumbnailUrl,
-    //         positionToGet: position,
-    //         // title: thread.title
-    //       );
-    //       result = resultRecord?.$1;
-    //       threadLength = resultRecord?.$2;
-    //       if (result != null) {
-    //         final item = result.firstOrNull;
-    //         if (item is GirlsChContent) {
-    //           boardId = item.categoryId;
-    //         }
-    //       }
-    //     }
-    //     break;
-    //   case Communities.futabaCh:
-    //     id = FutabaData.getIdFromUrl(url);
-    //     boardId = FutabaData.getBoardIdFromUrl(url);
-    //     final directory = FutabaData.getDirectory(Uri.parse(url));
-    //     if (id != null && boardId != null && directory != null) {
-    //       result = await _getContentForFutabaCh(
-    //           url: url.replaceAll('https://', ''), directory: directory);
-    //       threadLength = result?.lastOrNull?.index;
-    //     }
-    //     break;
-    //   case Communities.pinkCh:
-    //     id = FiveChData.getId(url);
-    //     final host = Uri.parse(url).host;
-    //     boardId = FiveChData.getBoardIdFromDat(url);
-    //     if (id != null && boardId != null) {
-    //       (result, archived) = await _getContentForFiveCh(
-    //         id,
-    //         domain: host,
-    //         directoryName: boardId,
-    //         // title: thread.title
-    //       );
-    //     }
-    //     threadLength = result?.lastOrNull?.index;
-    //     break;
-    //   default:
-    // }
-    // if (result != null && threadLength != null) {
-    //   final content = ThreadContentData(
-    //       id: id!,
-    //       boardId: boardId!,
-    //       type: type,
-    //       content: result,
-    //       threadLength: threadLength,
-    //       archived: archived);
-    //   if (setContent) {
-    //     _setContent(content);
-    //   }
-
-    //   final success = await _setInitialThreadMarkData(
-    //       content, url.replaceAll('https://', ''), null);
-    //   if (setContent) {
-    //     search.setPrimaryView(PrimaryViewState.content);
-    //   }
-    //   return success;
-    // }
     return FetchResult.success;
   }
 
@@ -971,8 +902,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
   }
 
-  Future<FetchResult> updateContent() async {
-    final thread = currentContentThreadData;
+  Future<FetchResult> updateContent(
+      {final ThreadMarkData? changedPositiontoGet}) async {
+    final thread = changedPositiontoGet ?? currentContentThreadData;
     if (thread == null) return FetchResult.error;
     // logger.d('position: 2: ${thread.positionToGet}');
     final result = await _fetchData<ThreadMarkData>(thread.id,
@@ -980,9 +912,12 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (result == null) return FetchResult.error;
     final content = _getData(result, thread.id, thread.boardId);
     if (content == null) return FetchResult.error;
-    final lastReadIndex =
-        currentContentState?.content.content.lastOrNull?.index;
-    final lastIndex = currentContentState?.currentContentIndex;
+    final lastReadIndex = changedPositiontoGet != null
+        ? null
+        : currentContentState?.content.content.lastOrNull?.index;
+    final lastIndex = changedPositiontoGet != null
+        ? null
+        : currentContentState?.currentContentIndex;
     currentContentState?.setLastResIndex(lastReadIndex);
     // if (!parent.cancelInitialScroll) {
     //   parent.toggleCancelInitialScroll();
@@ -997,8 +932,10 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (thread == null) return;
     final current = thread.positionToGet;
     if (current == value) return;
-    final newData = thread.copyWith(positionToGet: value);
-    await parent.repository.updateThreadMark(newData);
+    final newData = thread.copyWith(
+        positionToGet: value, lastOpendIndex: null, lastReadAt: null);
+    await updateContent(changedPositiontoGet: newData);
+    // await parent.repository.updateThreadMark(newData);
   }
 
   Future<void> updateMark(final ResMarkData value) async {
