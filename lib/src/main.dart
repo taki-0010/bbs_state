@@ -210,8 +210,9 @@ abstract class MainStoreBase with Store, WithDateTime {
       selectedForumState?.selectedTheme ?? ThemeList.m3Purple;
 
   @computed
-  ThreadsOrder get currentThreadsOrder =>
-      selectedForumState?.settings?.threadsOrder ?? ThreadsOrder.newOrder;
+  ThreadsOrderType get currentThreadsOrder =>
+      selectedForumState?.settings?.threadsOrderType ??
+      ThreadsOrderType.newerResponce;
 
   @computed
   ListViewStyle get currentViewStyle =>
@@ -400,32 +401,32 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   @computed
-  List<ThreadsOrder> get enabledOrder {
+  List<ThreadsOrderType> get enabledOrder {
     switch (selectedForum) {
       case Communities.futabaCh:
-        return ThreadsOrder.values
+        return ThreadsOrderType.values
             .where((element) =>
-                element == ThreadsOrder.catalog ||
-                element == ThreadsOrder.newerThread ||
-                element == ThreadsOrder.importance ||
-                element == ThreadsOrder.resCountDesc)
+                element == ThreadsOrderType.catalog ||
+                element == ThreadsOrderType.newerThread ||
+                element == ThreadsOrderType.importance ||
+                element == ThreadsOrderType.resCountDesc)
             .toList();
       case Communities.girlsCh:
-        return ThreadsOrder.values
+        return ThreadsOrderType.values
             .where((element) =>
-                element == ThreadsOrder.hot ||
-                element == ThreadsOrder.newerResponce ||
-                element == ThreadsOrder.importance ||
-                element == ThreadsOrder.resCountDesc)
+                // element == ThreadsOrderType.hot ||
+                element == ThreadsOrderType.newerResponce ||
+                element == ThreadsOrderType.importance ||
+                element == ThreadsOrderType.resCountDesc)
             .toList();
       default:
-        return ThreadsOrder.values
+        return ThreadsOrderType.values
             .where((element) =>
-                element == ThreadsOrder.hot ||
-                element == ThreadsOrder.newerThread ||
-                element == ThreadsOrder.importance ||
-                // element == ThreadsOrder.oldOrder ||
-                element == ThreadsOrder.resCountDesc)
+                element == ThreadsOrderType.hot ||
+                element == ThreadsOrderType.newerThread ||
+                element == ThreadsOrderType.importance ||
+                // element == ThreadsOrderType.oldOrder ||
+                element == ThreadsOrderType.resCountDesc)
             .toList();
     }
   }
@@ -624,6 +625,8 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   void removeSnackMessage() {
+    logger.d(
+        'removeSnackMessage 0: addForumName:$addForumName, deletedThreadTitle: $deletedThreadTitle, error: ${selectedForumState?.errorMessage}');
     if (addForumName != null) {
       removeAddForumName();
     } else if (deletedThreadTitle != null) {
@@ -631,6 +634,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     } else {
       selectedForumState?.setErrorMessage(null);
     }
+    logger.d(
+        'removeSnackMessage: addForumName:$addForumName, deletedThreadTitle: $deletedThreadTitle, error: ${selectedForumState?.errorMessage}');
   }
 
   @action
@@ -1127,10 +1132,10 @@ abstract class MainStoreBase with Store, WithDateTime {
     // await userStorage.setPositionToGet(selected, value);
   }
 
-  Future<void> setThreadsOrder(final ThreadsOrder value) async {
+  Future<void> setThreadsOrder(final ThreadsOrderType value) async {
     final current = selectedForumState?.settings;
     if (current == null) return;
-    final newData = current.copyWith(threadsOrder: value);
+    final newData = current.copyWith(threadsOrderType: value);
     selectedForumState?.setSettings(newData);
   }
 
@@ -1153,15 +1158,15 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<Uint8List?> getMediaData(final String url) async {
     final cache = await _getMediaFromCache(url);
     if (cache != null) {
-      // logger.i('get media from cache: $url');
+      logger.i('get media from cache: $url');
       return cache;
     }
     final data = await FetchData.getMediaData(url);
     if (data == null) return null;
-    // logger.i('get media from network: $url');
+    logger.i('get media from network: $url');
     final currentThread = currentContentThreadData;
-    await repository.mediaLocal
-        .putMediaData(currentThread?.documentId, url: url, data: data);
+    await repository.mediaLocal.putMediaData(currentThread?.documentId,
+        url: url, forum: selectedForum, data: data);
     return data;
   }
 
@@ -1182,14 +1187,14 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
-  Future<void> setSortHistoryByExpire(final bool value) async {
-    final settnigs = selectedForumState?.settings;
-    if (settnigs == null) return;
-    if (settnigs.sortHistoryByRetention == value) return;
-    final newData = settnigs.copyWith(sortHistoryByRetention: value);
-    selectedForumState?.setSettings(newData);
-    await updateForumSettings();
-  }
+  // Future<void> setSortHistoryByExpire(final bool value) async {
+  //   final settnigs = selectedForumState?.settings;
+  //   if (settnigs == null) return;
+  //   if (settnigs.sortHistoryByRetention == value) return;
+  //   final newData = settnigs.copyWith(sortHistoryByRetention: value);
+  //   selectedForumState?.setSettings(newData);
+  //   await updateForumSettings();
+  // }
 
   Future<void> setSortHistory(final SortHistoryList value) async {
     final settnigs = selectedForumState?.settings;

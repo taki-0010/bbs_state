@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a7454533751da5483c58f776a435c6da4afbaaa8
+      resolved-ref: ae0f689e9b43b747b84bacc59e57c8487ffaaf83
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -274,6 +274,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
+  filesize:
+    dependency: "direct main"
+    description:
+      name: filesize
+      sha256: f53df1f27ff60e466eefcd9df239e02d4722d5e2debee92a87dfd99ac66de2af
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   fixnum:
     dependency: transitive
     description:
@@ -489,7 +497,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "61625b2f7fba131c70baab71ae02d1daffdf79c5"
+      resolved-ref: "51aa60e3383da523cbbded241b4fe9477b2ded2c"
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"

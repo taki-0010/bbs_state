@@ -100,24 +100,24 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     // list.sort((a, b) => (b?.ikioi ?? 0).compareTo(a?.ikioi ?? 0));
     // return list;
     switch (threadsOrder) {
-      case ThreadsOrder.hot:
+      case ThreadsOrderType.hot:
         list.sort((a, b) => (b?.ikioi ?? 0).compareTo(a?.ikioi ?? 0));
         break;
-      case ThreadsOrder.newerResponce:
+      case ThreadsOrderType.newerResponce:
         list.sort(
             (a, b) => (b?.updateAtStr ?? '').compareTo(a?.updateAtStr ?? ''));
         break;
-      case ThreadsOrder.newerThread:
+      case ThreadsOrderType.newerThread:
         list.sort((a, b) => (b?.createdAt ?? 0).compareTo(a?.createdAt ?? 0));
         // logger.i('oder: ${list.map((e) => e?.createdAt).toList()}');
         break;
-      case ThreadsOrder.resCountDesc:
+      case ThreadsOrderType.resCountDesc:
         list.sort((a, b) => (b?.resCount ?? 0).compareTo(a?.resCount ?? 0));
         break;
-      case ThreadsOrder.resCountAsc:
+      case ThreadsOrderType.resCountAsc:
         list.sort((a, b) => (a?.resCount ?? 0).compareTo(b?.resCount ?? 0));
         break;
-      case ThreadsOrder.importance:
+      case ThreadsOrderType.importance:
         final importances = parent.settings!.boardImportanceList;
         final veryIm = importances
             .where((element) => element?.level == ImportanceList.veryImportant)
@@ -162,7 +162,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         // logger.i(
         //     'importance: im: ${imList.length}, ${im.length},  very: ${veryImList.length}, ${veryIm.length}');
         break;
-      case ThreadsOrder.catalog:
+      case ThreadsOrderType.catalog:
         return list
             .where((element) => element != null && element.catalog)
             .toList();
@@ -236,8 +236,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   List<String?> get favoritesBoards => settings?.favoritesBoardList ?? [];
 
   @computed
-  ThreadsOrder get threadsOrder =>
-      settings?.threadsOrder ?? ThreadsOrder.newOrder;
+  ThreadsOrderType get threadsOrder =>
+      settings?.threadsOrderType ?? ThreadsOrderType.newerResponce;
 
   @action
   void toggleContentLoading() => contentLoading = !contentLoading;

@@ -9,6 +9,20 @@ part of 'forum.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ForumState on ForumStateBase, Store {
+  Computed<String>? _$thumbnailCacheSizeStrComputed;
+
+  @override
+  String get thumbnailCacheSizeStr => (_$thumbnailCacheSizeStrComputed ??=
+          Computed<String>(() => super.thumbnailCacheSizeStr,
+              name: 'ForumStateBase.thumbnailCacheSizeStr'))
+      .value;
+  Computed<String>? _$allCacheSizeStrComputed;
+
+  @override
+  String get allCacheSizeStr => (_$allCacheSizeStrComputed ??= Computed<String>(
+          () => super.allCacheSizeStr,
+          name: 'ForumStateBase.allCacheSizeStr'))
+      .value;
   Computed<int>? _$currentTotalComputed;
 
   @override
@@ -220,6 +234,38 @@ mixin _$ForumState on ForumStateBase, Store {
     });
   }
 
+  late final _$thumbnailCacheSizeAtom =
+      Atom(name: 'ForumStateBase.thumbnailCacheSize', context: context);
+
+  @override
+  int get thumbnailCacheSize {
+    _$thumbnailCacheSizeAtom.reportRead();
+    return super.thumbnailCacheSize;
+  }
+
+  @override
+  set thumbnailCacheSize(int value) {
+    _$thumbnailCacheSizeAtom.reportWrite(value, super.thumbnailCacheSize, () {
+      super.thumbnailCacheSize = value;
+    });
+  }
+
+  late final _$allCacheSizeAtom =
+      Atom(name: 'ForumStateBase.allCacheSize', context: context);
+
+  @override
+  int get allCacheSize {
+    _$allCacheSizeAtom.reportRead();
+    return super.allCacheSize;
+  }
+
+  @override
+  set allCacheSize(int value) {
+    _$allCacheSizeAtom.reportWrite(value, super.allCacheSize, () {
+      super.allCacheSize = value;
+    });
+  }
+
   late final _$boardsScrollAtom =
       Atom(name: 'ForumStateBase.boardsScroll', context: context);
 
@@ -234,6 +280,23 @@ mixin _$ForumState on ForumStateBase, Store {
     _$boardsScrollAtom.reportWrite(value, super.boardsScroll, () {
       super.boardsScroll = value;
     });
+  }
+
+  late final _$getAllCacheSizeAsyncAction =
+      AsyncAction('ForumStateBase.getAllCacheSize', context: context);
+
+  @override
+  Future<void> getAllCacheSize() {
+    return _$getAllCacheSizeAsyncAction.run(() => super.getAllCacheSize());
+  }
+
+  late final _$getAllThumbnailCacheSizeAsyncAction =
+      AsyncAction('ForumStateBase.getAllThumbnailCacheSize', context: context);
+
+  @override
+  Future<void> getAllThumbnailCacheSize() {
+    return _$getAllThumbnailCacheSizeAsyncAction
+        .run(() => super.getAllThumbnailCacheSize());
   }
 
   late final _$setContentAsyncAction =
@@ -388,7 +451,11 @@ hoverdItem: ${hoverdItem},
 hoverdItemX: ${hoverdItemX},
 hoverdItemY: ${hoverdItemY},
 errorMessage: ${errorMessage},
+thumbnailCacheSize: ${thumbnailCacheSize},
+allCacheSize: ${allCacheSize},
 boardsScroll: ${boardsScroll},
+thumbnailCacheSizeStr: ${thumbnailCacheSizeStr},
+allCacheSizeStr: ${allCacheSizeStr},
 currentTotal: ${currentTotal},
 currentContentThreadData: ${currentContentThreadData},
 currentContentDiff: ${currentContentDiff},

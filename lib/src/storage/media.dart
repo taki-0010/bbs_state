@@ -26,6 +26,8 @@ abstract class MediaCacheStateBase with Store {
   // String get _blob => 'blob';
   String get _url => 'url';
   String get _threadMarkId => 'threadMarkId';
+  String get _forum => 'forum';
+  String get _size => 'size';
   String get _retentionPeriod => 'retentionPeriod';
 
   String _getPath(final String url) {
@@ -34,49 +36,79 @@ abstract class MediaCacheStateBase with Store {
     return path.replaceAll('/', '_');
   }
 
-  File _getFile(final String path){
-    return File('$_cacheFolderPath$path');
+  File _getFile(final String path) {
+    final pathData = '$_cacheFolderPath$path';
+    // logger.d('pathData: $pathData');
+    return File(pathData);
   }
 
   Future<void> init(final String dbPath) async {
-    
     mediaCacheInfo = await databaseFactoryIo.openDatabase(dbPath);
     logger.i('cacheState: path: $dbPath');
-    Timer.periodic(const Duration(hours: 6), _deleteCacheAutomatically);
+    await _deleteCacheAutomatically(null);
+
+    Timer.periodic(const Duration(minutes: 15), _deleteCacheAutomatically);
   }
 
-  File getFullPath(final String url){
+  File getFullPath(final String url) {
     final path = _getPath(url);
-   return _getFile(path);
+    return _getFile(path);
   }
 
   Future<void> putMediaData(final String? threadMarkId,
-      {required final String url, required final Uint8List data}) async {
+      {required final String url,
+      required final Communities? forum,
+      required final Uint8List data}) async {
     final path = _getPath(url);
     final file = _getFile(path);
     if (!file.existsSync()) {
       await file.writeAsBytes(data);
-      final retentionPeriod = DateTime.now().add(Duration(days: 14));
+      final length = data.lengthInBytes;
+      final retentionPeriod =
+          DateTime.now().add(Duration(days: 14)).millisecondsSinceEpoch;
       await store.record(path).put(_db, {
         _threadMarkId: threadMarkId,
-        _retentionPeriod: retentionPeriod.millisecondsSinceEpoch,
+        _forum: forum?.name,
+        _retentionPeriod: retentionPeriod,
+        _size: length,
         _url: path
       });
-      logger.i('putMediaData: path: ${file.path}');
+      logger.i('putMediaData: size: ${filesize(length)}  path: ${file.path}');
     }
 
     // final blob = Blob(data);
   }
-  // Future<void> putMediaData(final String? threadMarkId,
-  //     {required final String url, required final Uint8List data}) async {
-  //   final blob = Blob(data);
-  //   final retentionPeriod = DateTime.now().add(Duration(days: 14));
-  //   await store.record(url).put(_db, {
-  //     _threadMarkId: threadMarkId,
-  //     _retentionPeriod: retentionPeriod.millisecondsSinceEpoch,
-  //     _blob: blob
-  //   });
-  // }
+
+  Finder _getFilterdByForum(final Communities forum) =>
+      Finder(filter: Filter.equals(_forum, forum.name));
+  Finder _getFinderOfForumThumbnail(final Communities forum) => Finder(
+      filter: Filter.and(
+          [Filter.equals(_forum, forum.name), Filter.isNull(_threadMarkId)]));
+
+  Future<int> getTotalSize(
+    final Communities forum,
+  ) async {
+    final result = await store.find(_db, finder: _getFilterdByForum(forum));
+    return _total(result);
+  }
+
+  Future<int> getThumbnailTotalSize(
+    final Communities forum,
+  ) async {
+    final result = await store.find(_db,
+        finder: _getFinderOfForumThumbnail(forum));
+    return _total(result);
+  }
+
+  int _total(final List<RecordSnapshot<String, Map<String, Object?>>> list) {
+    final totalList = list.map((e) => e.value[_size]).whereType<int>();
+    if (totalList.isNotEmpty) {
+      final total = totalList.reduce((value, element) => value + element);
+      logger.d('totalsize: total:$total, ${totalList.length}');
+      return total;
+    }
+    return 0;
+  }
 
   Future<Uint8List?> getDataByUrl(final String srcPath) async {
     final path = _getPath(srcPath);
@@ -117,33 +149,29 @@ abstract class MediaCacheStateBase with Store {
     logger.i('media cache delete: ${result.length}');
     await _deleteList(result);
   }
-  // Future<void> deleteCacheWhenThreadDeleted(final ThreadMarkData? value) async {
-  //   if (value == null) {
-  //     return;
-  //   }
-  //   final threadMarkId = value.documentId;
-  //   final result = await store.delete(_db,
-  //       finder: Finder(filter: Filter.equals(_threadMarkId, threadMarkId)));
-  //   logger.i('media cache delete: $result');
 
-  // }
+  Future<void> deleteForumData(final Communities forum) async {
+    final result = await store.find(_db, finder: _getFilterdByForum(forum));
+    await _deleteList(result);
+  }
+  
+  Future<void> deleteForumThumbnailData(final Communities forum) async {
+    final result = await store.find(_db, finder: _getFinderOfForumThumbnail(forum));
+    await _deleteList(result);
+  }
 
-  Future<void> _deleteCacheAutomatically(final Timer value) async {
+  Future<void> _deleteCacheAutomatically(final Timer? value) async {
+    // final now = DateTime.now().subtract(Duration(days: 30)).millisecondsSinceEpoch;
     final now = DateTime.now().millisecondsSinceEpoch;
     final query =
         Finder(filter: Filter.lessThanOrEquals(_retentionPeriod, now));
     final result = await store.find(_db, finder: query);
     await _deleteList(result);
-    logger.i('media cache auto delete: ${result.length}');
+    logger.i(
+        'media cache auto delete: ${result.length}, now:${DateTime.fromMillisecondsSinceEpoch(now)}');
   }
-  // Future<void> deleteCacheAutomatically() async {
-  //   final now = DateTime.now().millisecondsSinceEpoch;
-  //   final query =
-  //       Finder(filter: Filter.lessThanOrEquals(_retentionPeriod, now));
 
-  //   final result = await store.delete(_db, finder: query);
-  //   logger.i('media cache auto delete: $result');
-  // }
+  // Future<>
 
   Future<void> _deleteList(
       final List<RecordSnapshot<String, Map<String, Object?>>> list) async {
@@ -154,8 +182,7 @@ abstract class MediaCacheStateBase with Store {
         if (file.existsSync()) {
           file.deleteSync();
         }
-        final deleted =
-            await store.record(path).delete(_db);
+        final deleted = await store.record(path).delete(_db);
         logger.i('_deleteList: deleted: $deleted, $path');
       }
     }

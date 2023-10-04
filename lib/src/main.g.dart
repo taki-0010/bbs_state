@@ -116,11 +116,11 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<ThemeList>(() => super.selectedTheme,
               name: 'MainStoreBase.selectedTheme'))
       .value;
-  Computed<ThreadsOrder>? _$currentThreadsOrderComputed;
+  Computed<ThreadsOrderType>? _$currentThreadsOrderComputed;
 
   @override
-  ThreadsOrder get currentThreadsOrder => (_$currentThreadsOrderComputed ??=
-          Computed<ThreadsOrder>(() => super.currentThreadsOrder,
+  ThreadsOrderType get currentThreadsOrder => (_$currentThreadsOrderComputed ??=
+          Computed<ThreadsOrderType>(() => super.currentThreadsOrder,
               name: 'MainStoreBase.currentThreadsOrder'))
       .value;
   Computed<ListViewStyle>? _$currentViewStyleComputed;
@@ -317,11 +317,11 @@ mixin _$MainStore on MainStoreBase, Store {
                       () => super.importanceMapDataForCurrentThreads,
                       name: 'MainStoreBase.importanceMapDataForCurrentThreads'))
               .value;
-  Computed<List<ThreadsOrder>>? _$enabledOrderComputed;
+  Computed<List<ThreadsOrderType>>? _$enabledOrderComputed;
 
   @override
-  List<ThreadsOrder> get enabledOrder => (_$enabledOrderComputed ??=
-          Computed<List<ThreadsOrder>>(() => super.enabledOrder,
+  List<ThreadsOrderType> get enabledOrder => (_$enabledOrderComputed ??=
+          Computed<List<ThreadsOrderType>>(() => super.enabledOrder,
               name: 'MainStoreBase.enabledOrder'))
       .value;
   Computed<List<RetentionPeriodList>>? _$selectableRetentionPeriodComputed;

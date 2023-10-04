@@ -138,6 +138,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     setUser(newUserData);
     parent.setSelectedForum(0);
     _clearForumThreads(value);
+    mediaLocal.deleteForumData(value);
   }
 
   void _clearForumThreads(final Communities value) {

@@ -73,11 +73,11 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<List<String?>>(() => super.favoritesBoards,
               name: 'ForumMainStateBase.favoritesBoards'))
       .value;
-  Computed<ThreadsOrder>? _$threadsOrderComputed;
+  Computed<ThreadsOrderType>? _$threadsOrderComputed;
 
   @override
-  ThreadsOrder get threadsOrder => (_$threadsOrderComputed ??=
-          Computed<ThreadsOrder>(() => super.threadsOrder,
+  ThreadsOrderType get threadsOrder => (_$threadsOrderComputed ??=
+          Computed<ThreadsOrderType>(() => super.threadsOrder,
               name: 'ForumMainStateBase.threadsOrder'))
       .value;
 

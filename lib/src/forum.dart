@@ -61,6 +61,18 @@ abstract class ForumStateBase with Store, WithDateTime {
   @observable
   String? errorMessage;
 
+  @observable
+  int thumbnailCacheSize = 0;
+
+  @observable
+  int allCacheSize = 0;
+
+  @computed
+  String get thumbnailCacheSizeStr => filesize(thumbnailCacheSize);
+
+  @computed
+  String get allCacheSizeStr => filesize(allCacheSize);
+
   @action
   void setHoverdItemPosition(
       final ThreadBase? item, final double? x, final double? y) {
@@ -190,6 +202,30 @@ abstract class ForumStateBase with Store, WithDateTime {
       default:
         return false;
     }
+  }
+
+  @action
+  Future<void> getAllCacheSize() async {
+    final data = await parent.repository.mediaLocal.getTotalSize(type);
+    allCacheSize = data;
+  }
+
+  @action
+  Future<void> getAllThumbnailCacheSize() async {
+    final data = await parent.repository.mediaLocal.getThumbnailTotalSize(type);
+    thumbnailCacheSize = data;
+  }
+
+  Future<void> deleteAllCacheOnForum() async {
+    await parent.repository.mediaLocal.deleteForumData(type);
+    await getAllCacheSize();
+    await getAllThumbnailCacheSize();
+  }
+
+  Future<void> deleteThumbnailCacheOnForum() async {
+    await parent.repository.mediaLocal.deleteForumThumbnailData(type);
+    await getAllThumbnailCacheSize();
+    await getAllCacheSize();
   }
 
   void toggleContentLoading() {
