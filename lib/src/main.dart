@@ -106,6 +106,11 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get snackMessage =>
       deletedThreadTitle ?? addForumName ?? selectedForumState?.errorMessage;
 
+  @computed
+  AutoDownloadableSizeLimit get autoDownloadableSizeLimit =>
+      selectedForumState?.settings?.autoDownloadableSizeLimit ??
+      AutoDownloadableSizeLimit.noLimit;
+
   // @observable
   // bool cancelInitialScroll = false;
 
@@ -217,6 +222,11 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   ListViewStyle get currentViewStyle =>
       selectedForumState?.settings?.listViewStyle ?? ListViewStyle.list;
+
+  @computed
+  AutoDownloadableSizeLimit get currentAutoDLSizeLimit =>
+      selectedForumState?.settings?.autoDownloadableSizeLimit ??
+      AutoDownloadableSizeLimit.noLimit;
 
   @computed
   MovedToLastThreads get currentMovedToLastThread =>
@@ -1113,6 +1123,14 @@ abstract class MainStoreBase with Store, WithDateTime {
     selectedForumState?.setSettings(newData);
   }
 
+  void setAutoDownloadableSizeLimit(final AutoDownloadableSizeLimit value) {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    if (settnigs.autoDownloadableSizeLimit == value) return;
+    final newData = settnigs.copyWith(autoDownloadableSizeLimit: value);
+    selectedForumState?.setSettings(newData);
+  }
+
   void setMovedToLastThreads(final MovedToLastThreads value) {
     final settnigs = selectedForumState?.settings;
     if (settnigs == null) return;
@@ -1155,15 +1173,41 @@ abstract class MainStoreBase with Store, WithDateTime {
     return await FetchData.getFavicon(uri);
   }
 
-  Future<Uint8List?> getMediaData(final String url) async {
+  Future<(Uint8List?, String?)?> getMediaData(final String url) async {
     final cache = await _getMediaFromCache(url);
     if (cache != null) {
       logger.i('get media from cache: $url');
-      return cache;
+      return (cache, null);
     }
+    if (currentAutoDLSizeLimit == AutoDownloadableSizeLimit.noLimit) {
+      final data = await _getMedia(url);
+      return (data, null);
+    }
+    final bytes = await FetchData.getMediaSize(url);
+    if (bytes != null) {
+      if (bytes <= currentAutoDLSizeLimit.value) {
+        final data = await _getMedia(url);
+        // final data = await FetchData.getMediaData(url);
+        // if (data == null) return null;
+        // logger.i('get media from network: $bytes, $url');
+        // final currentThread = currentContentThreadData;
+        // await repository.mediaLocal.putMediaData(currentThread?.documentId,
+        //     url: url, forum: selectedForum, data: data);
+        return (data, filesize(bytes));
+      } else {
+        logger.i('not get media from network: $bytes, $url');
+        return (null, filesize(bytes));
+      }
+    }
+    return (null, null);
+  }
+
+  Future<Uint8List?> getMediaManually(final String url) async => _getMedia(url);
+
+  Future<Uint8List?> _getMedia(final String url) async {
     final data = await FetchData.getMediaData(url);
     if (data == null) return null;
-    logger.i('get media from network: $url');
+    // logger.i('get media from network: $bytes, $url');
     final currentThread = currentContentThreadData;
     await repository.mediaLocal.putMediaData(currentThread?.documentId,
         url: url, forum: selectedForum, data: data);
@@ -1409,4 +1453,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
     return null;
   }
+
+  String getFilesize(final int value) => filesize(value);
 }

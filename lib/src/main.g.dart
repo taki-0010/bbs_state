@@ -16,6 +16,15 @@ mixin _$MainStore on MainStoreBase, Store {
       (_$snackMessageComputed ??= Computed<String?>(() => super.snackMessage,
               name: 'MainStoreBase.snackMessage'))
           .value;
+  Computed<AutoDownloadableSizeLimit>? _$autoDownloadableSizeLimitComputed;
+
+  @override
+  AutoDownloadableSizeLimit get autoDownloadableSizeLimit =>
+      (_$autoDownloadableSizeLimitComputed ??=
+              Computed<AutoDownloadableSizeLimit>(
+                  () => super.autoDownloadableSizeLimit,
+                  name: 'MainStoreBase.autoDownloadableSizeLimit'))
+          .value;
   Computed<bool>? _$contentLoadingComputed;
 
   @override
@@ -130,6 +139,14 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<ListViewStyle>(() => super.currentViewStyle,
               name: 'MainStoreBase.currentViewStyle'))
       .value;
+  Computed<AutoDownloadableSizeLimit>? _$currentAutoDLSizeLimitComputed;
+
+  @override
+  AutoDownloadableSizeLimit get currentAutoDLSizeLimit =>
+      (_$currentAutoDLSizeLimitComputed ??= Computed<AutoDownloadableSizeLimit>(
+              () => super.currentAutoDLSizeLimit,
+              name: 'MainStoreBase.currentAutoDLSizeLimit'))
+          .value;
   Computed<MovedToLastThreads>? _$currentMovedToLastThreadComputed;
 
   @override
@@ -899,6 +916,7 @@ addForumName: ${addForumName},
 reverseForumSwitchAnimation: ${reverseForumSwitchAnimation},
 reverseAnimationForPrymaryScreen: ${reverseAnimationForPrymaryScreen},
 snackMessage: ${snackMessage},
+autoDownloadableSizeLimit: ${autoDownloadableSizeLimit},
 contentLoading: ${contentLoading},
 selectedForumIndex: ${selectedForumIndex},
 currentContentThreadData: ${currentContentThreadData},
@@ -915,6 +933,7 @@ selectedForumState: ${selectedForumState},
 selectedTheme: ${selectedTheme},
 currentThreadsOrder: ${currentThreadsOrder},
 currentViewStyle: ${currentViewStyle},
+currentAutoDLSizeLimit: ${currentAutoDLSizeLimit},
 currentMovedToLastThread: ${currentMovedToLastThread},
 currentPositionToGet: ${currentPositionToGet},
 blurThumbnail: ${blurThumbnail},
