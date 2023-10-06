@@ -542,7 +542,10 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   int? _getCreatedAtBySecounds(final ThreadContentData value) {
     switch (value.type) {
-      case Communities.fiveCh || Communities.pinkCh || Communities.machi:
+      case Communities.fiveCh ||
+            Communities.pinkCh ||
+            Communities.machi ||
+            Communities.shitaraba:
         return int.tryParse(value.id);
       case Communities.girlsCh:
         final first = value.content.firstOrNull;
@@ -756,7 +759,10 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   String? _getThreadIdFromUrl(final String url) {
     switch (type) {
-      case Communities.fiveCh || Communities.pinkCh || Communities.machi:
+      case Communities.fiveCh ||
+            Communities.pinkCh ||
+            Communities.machi ||
+            Communities.shitaraba:
         return FiveChData.getId(url);
       case Communities.girlsCh:
         return GirlsChParser.getIdFromUrl(url);
@@ -826,16 +832,6 @@ abstract class ForumStateBase with Store, WithDateTime {
       final String dataId,
       {required final T thread,
       final PositionToGet? positionToGet}) async {
-    // if (board == null) return;
-    // _toggleLoading();
-    // List<ContentData?>? result;
-    // bool archived = false;
-    // int? threadLength;
-    // final boardId = thread.boardId;
-    // final title = thread.title;
-    // final thumbnail = SrcData(thumbnailUri: thread.thumbnailUrl);
-    // final positionToGet =
-    //     T is ThreadMarkData ? thread.positionToGet : settings!.positionToGet;
     final position =
         positionToGet ?? settings?.positionToGet ?? PositionToGet.first;
     switch (type) {
@@ -880,6 +876,11 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.machi:
         return await _getContentForMachi(
             boardId: thread.boardId, threadId: thread.id);
+      case Communities.shitaraba:
+        return await _getContentForShitaraba(
+            category: thread.shitarabaCategory,
+            boardId: thread.boardId,
+            threadId: dataId);
       default:
       // _toggleLoading();
     }
@@ -1099,6 +1100,13 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
+  Future<FetchContentResultData> _getContentForShitaraba(
+      {required final String category,
+      required final String boardId,
+      required final String threadId}) async {
+    return await ShitarabaHandler.getContent(category, boardId, threadId);
+  }
+
   Future<FetchContentResultData> _getContentForMachi({
     required final String boardId,
     required final String threadId,
@@ -1144,39 +1152,6 @@ abstract class ForumStateBase with Store, WithDateTime {
     clearHoverdItem();
   }
 
-  Future<int?> getThreadDiffById(final String value,
-      {final bool onLibraryView = false}) async {
-    // if (!onLibraryView) {
-    //   final current = threadList.firstWhere((element) => element?.id == value,
-    //       orElse: () => null);
-    //   if (current != null) {
-    //     return current.difference;
-    //   }
-    // } else {
-    //   final content = logList.firstWhere((element) => element?.id == value,
-    //       orElse: () => null);
-    //   if (content == null) return null;
-    //   // return content.difference;
-    //   final lastResCount = content.resCount;
-    //   final boardData = await boardStorage.getBoardData(content.boardId);
-    //   if (boardData == null) return null;
-    //   final thread = boardData.threads
-    //       .firstWhere((element) => element?.id == value, orElse: () => null);
-    //   if (thread == null) return null;
-    //   return thread.resCount - lastResCount;
-    // }
-    return null;
-  }
-
-  // Future<bool> existThreadFromStrorage(
-  //     final String threadId, final String boardId) async {
-  //   // final boardData = await boardStorage.getBoardData(boardId);
-  //   // if (boardData == null) return false;
-  //   // final thread = boardData.threads
-  //   //     .firstWhere((element) => element?.id == threadId, orElse: () => null);
-  //   // if (thread == null) return false;
-  //   return true;
-  // }
 
   Future<void> setLastOpenedContentIndex(
       final int? index, final String? contentId) async {

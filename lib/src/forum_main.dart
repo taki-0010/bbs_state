@@ -83,6 +83,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
                   (final element) => element?.id == e,
                   orElse: () => null))
               .toList();
+        //  case Communities.shitaraba:
+
         default:
           return favoritesBoards
               .map((e) => boards.firstWhere((final element) => element?.id == e,
@@ -95,13 +97,38 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @computed
+  Future<List<BoardData?>> get boardDataByFetched async {
+    if (userFavoritesBoards) {
+      switch (parent.type) {
+        case Communities.shitaraba:
+          final favorites = settings?.favoritesBoardList;
+
+          if (favorites == null || favorites.isEmpty) {
+            return [];
+          }
+
+          final result = await ShitarabaHandler.getBoardInfoList(favorites);
+          logger.d('shitaraba f: $favorites, result: ${result?.length}');
+          return result ?? [];
+
+        // break;
+        default:
+      }
+    }
+    return boards;
+  }
+
+  @computed
   List<ThreadData?> get sortedThreads {
     final list = [...threadList];
     // list.sort((a, b) => (b?.ikioi ?? 0).compareTo(a?.ikioi ?? 0));
     // return list;
+
     switch (threadsOrder) {
       case ThreadsOrderType.hot:
         list.sort((a, b) => (b?.ikioi ?? 0).compareTo(a?.ikioi ?? 0));
+        // logger
+        //     .i('shitarabaThreads: 1: ${list[0]?.title}, 2: ${list[1]?.title}');
         break;
       case ThreadsOrderType.newerResponce:
         list.sort(
@@ -163,15 +190,24 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         //     'importance: im: ${imList.length}, ${im.length},  very: ${veryImList.length}, ${veryIm.length}');
         break;
       case ThreadsOrderType.catalog:
-        return list
-            .where((element) => element != null && element.catalog)
-            .toList();
+        list.removeWhere((element) => element != null && !element.catalog);
+        break;
       default:
+    }
+    List<ThreadData?> removeSameId = [];
+    for (final i in list) {
+      final exist = removeSameId.firstWhere(
+        (element) => element?.id == i?.id,
+        orElse: () => null,
+      );
+      if (exist == null) {
+        removeSameId.add(i);
+      }
     }
     if (settings?.movedToLastThreads == MovedToLastThreads.over1000) {
       List<ThreadData?> over1000 = [];
       List<ThreadData?> notOver1000 = [];
-      for (final i in list) {
+      for (final i in removeSameId) {
         if (i != null) {
           if (i.resCount >= 1000) {
             over1000.add(i);
@@ -182,34 +218,29 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
       return [...notOver1000, ...over1000];
     } else {
-      return list;
+      return removeSameId;
     }
   }
 
   // int? _lastRead(final ThreadBase item) => threadsLastReadAt[item.id];
 
-  // @computed
-  // List<ThreadData?> get displayThreads {
-  //   final list = [...filterdThreads];
-  //   List<(ThreadData, int)> historyList = [];
-  //   for (final i in list) {
-  //     if (i != null) {
-  //       final lastRead = _lastRead(i);
-  //       if (lastRead != null) {
-  //         historyList.add((i, lastRead));
-  //         list.removeWhere((element) => element?.id == i.id);
-  //       }
-  //     }
-  //   }
-  //   // historyList.sort((a, b) => a.$2.compareTo(b.$2));
-  //   // final newList = historyList.map((e) => e.$1).toList();
-  //   // list.insertAll(0, newList);
-  //   // logger.i('displayTreads: histry: $historyList');
-  //   return list;
-  // }
+  @computed
+  bool get currentBoardIsFavorite {
+    if (board == null) return false;
+    switch (parent.type) {
+      case Communities.shitaraba:
+        final str = ShitarabaData.favoriteBoardStr(
+            category: board!.shitarabaBoard!.category, boardId: board!.id);
+        return favoritesBoards.contains(str);
+      default:
+        return favoritesBoards.contains(board!.id);
+    }
+  }
 
   @computed
   List<ThreadData?> get displayThreads {
+    // logger
+    //     .i('shitarabaThreads: 1: ${sortedThreads[0]?.title}, 2: ${sortedThreads[1]?.title}');
     if (searchThreadWord == null) {
       return sortedThreads;
     }
@@ -289,6 +320,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.machi:
         result = await _getBoardsForMachi();
+        break;
+      case Communities.shitaraba:
+        result = await _getBoardsForShitaraba();
         break;
       default:
     }
@@ -397,6 +431,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
+  Future<FetchBoardsResultData?> _getBoardsForShitaraba() async {
+    if (boards.isEmpty) {
+      return await ShitarabaHandler.getCategories();
+    }
+    return null;
+  }
+
   @action
   void deleteDiffField(final String? id) {
     threadsDiff[board?.id]?.removeWhere((element) => element?.id == id);
@@ -455,6 +496,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.machi:
         result = await _getThreadsForMachi();
+        break;
+      case Communities.shitaraba:
+        result = await _getThreadsForShitaraba();
         break;
       default:
     }
@@ -642,20 +686,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
-  // List<ThreadData?>? setMachiThreads(final MachiThreadsBaseData? value) {
-  //   return value?.thread
-  //       .map((e) => e == null
-  //           ? null
-  //           : MachiThreadData(
-  //               id: e.key,
-  //               title: e.subject,
-  //               resCount: int.tryParse(e.res) ?? 1,
-  //               boardId: value.bbs,
-  //               type: Communities.machi,
-  //               url: e.getUrl(value.bbs),
-  //               updateAtStr: null))
-  //       .toList();
-  // }
+  Future<FetchThreadsResultData?> _getThreadsForShitaraba() async {
+    if (board?.shitarabaBoard != null) {
+      return await ShitarabaHandler.getThreads(
+          board!.shitarabaBoard!.category, board!.id);
+      // return setMachiThreads(result);
+    }
+    return null;
+  }
 
   // @action
   Future<FetchThreadsResultData?> _getThreadsForFutabaCh() async {
@@ -679,6 +717,44 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       //   await parent.history
       //       .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
       // }
+    }
+    return null;
+  }
+
+  List<String?>? toggleFavoriteBoard() {
+    if (board == null) return null;
+    String? boardId;
+    switch (parent.type) {
+      case Communities.shitaraba:
+        boardId = ShitarabaData.favoriteBoardStr(
+            category: board!.shitarabaBoard!.category, boardId: board!.id);
+      default:
+        boardId = board?.id;
+    }
+    if (boardId == null) return null;
+    return _setFavorite(boardId);
+  }
+
+  List<String?> _setFavorite(final String boardId) {
+    List<String?> current = [...favoritesBoards];
+    if (current.contains(boardId)) {
+      current.removeWhere((element) => element == boardId);
+    } else {
+      current.insert(0, boardId);
+    }
+    return current;
+  }
+
+  List<String?>? addBoard(final String url) {
+    if (parent.type != Communities.shitaraba) {
+      return null;
+    }
+    final result = ShitarabaData.validateUrl(url);
+    if (result) {
+      final favoriteStr = ShitarabaData.getFavoriteStr(url);
+      if (favoriteStr != null) {
+        return _setFavorite(favoriteStr);
+      }
     }
     return null;
   }

@@ -21,6 +21,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final futabaCh = ForumState(parent: this, type: Communities.futabaCh);
   late final pinkCh = ForumState(parent: this, type: Communities.pinkCh);
   late final machi = ForumState(parent: this, type: Communities.machi);
+  late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
 
   // late final SembastCacheStore store;
 
@@ -144,6 +145,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   bool get showHot =>
       selectedForum == Communities.fiveCh ||
       selectedForum == Communities.machi ||
+      selectedForum == Communities.shitaraba ||
       selectedForum == Communities.pinkCh;
 
   @computed
@@ -205,6 +207,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return pinkCh;
       case Communities.machi:
         return machi;
+      case Communities.shitaraba:
+        return shitaraba;
       default:
         return null;
     }
@@ -341,6 +345,10 @@ abstract class MainStoreBase with Store, WithDateTime {
         return board?.fiveCh?.url;
       case Communities.machi:
         return Uri.https('${selectedForum?.host}', '${board?.id}').toString();
+      case Communities.shitaraba:
+        return Uri.https('${ShitarabaData.sub}.${ShitarabaData.host}',
+                '${board?.shitarabaBoard?.category}/${board?.id}')
+            .toString();
       default:
     }
     return null;
@@ -447,6 +455,8 @@ abstract class MainStoreBase with Store, WithDateTime {
       case Communities.fiveCh:
         return RetentionPeriodList.values;
       case Communities.pinkCh:
+        return RetentionPeriodList.values;
+      case Communities.shitaraba:
         return RetentionPeriodList.values;
       default:
         return RetentionPeriodList.values
@@ -605,6 +615,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
+        Communities.shitaraba => 'shitaraba',
         null => null
       };
 
@@ -674,10 +685,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   @action
   void setLaunchStatus(final LaunchStatus value) => launchStatus = value;
 
-  Future<int?> getThreadDiffById(final String value,
-          {final bool onLibraryView = false}) async =>
-      await selectedForumState?.getThreadDiffById(value,
-          onLibraryView: onLibraryView);
+  // Future<int?> getThreadDiffById(final String value,
+  //         {final bool onLibraryView = false}) async =>
+  //     await selectedForumState?.getThreadDiffById(value,
+  //         onLibraryView: onLibraryView);
 
   Future<void> post(final PostData value) async {
     toggleContentLoading();
@@ -1050,6 +1061,11 @@ abstract class MainStoreBase with Store, WithDateTime {
             (element) => element?.id == threadId && element?.boardId == boardId,
             orElse: () => null);
         break;
+      case Communities.shitaraba:
+        mark = shitaraba.history.markList.firstWhere(
+            (element) => element?.id == threadId && element?.boardId == boardId,
+            orElse: () => null);
+        break;
       default:
     }
     if (mark == null) return;
@@ -1296,6 +1312,22 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
+  Future<void> toggleFavoriteBoard() async {
+    final list = selectedForumState?.forumMain.toggleFavoriteBoard();
+    if (list != null) {
+      await setFavoritesBoards(list);
+    }
+  }
+
+  Future<bool> addBoard(final String url) async {
+    final list = selectedForumState?.forumMain.addBoard(url);
+    if (list != null) {
+      await setFavoritesBoards(list);
+      return true;
+    }
+    return false;
+  }
+
   Future<void> removeSearchWord(final String value) async {
     final settings = selectedForumState?.settings;
     if (settings == null) return;
@@ -1444,15 +1476,30 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<List<ContentData?>?> getRes(
       final int index, final String threadId) async {
-    // final data = PostData(body: 'テストした', name: '', title: '', sage: true);
-    final result = await GirlsChHandler.getRes(threadId, index);
-    switch (result.result) {
+    FetchContentResultData? result;
+    switch (selectedForum) {
+      case Communities.girlsCh:
+        result = await GirlsChHandler.getRes(threadId, index);
+        break;
+      default:
+    }
+    // final result = await GirlsChHandler.getRes(threadId, index);
+    switch (result?.result) {
       case FetchResult.success:
-        return result.contentList;
+        return result?.contentList;
       default:
     }
     return null;
   }
 
   String getFilesize(final int value) => filesize(value);
+
+  Future<List<BoardData?>> shitarabaBoards(final String category) async {
+    return await ShitarabaHandler.getBoards(category);
+  }
+
+  Future<void> shitarabaRes() async {
+    await ShitarabaHandler.getRes(
+        'bbs/read.cgi/netgame/16797/1694834704', 4940);
+  }
 }

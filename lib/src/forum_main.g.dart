@@ -38,12 +38,27 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<List<BoardData?>>(() => super.boardsData,
               name: 'ForumMainStateBase.boardsData'))
       .value;
+  Computed<Future<List<BoardData?>>>? _$boardDataByFetchedComputed;
+
+  @override
+  Future<List<BoardData?>> get boardDataByFetched =>
+      (_$boardDataByFetchedComputed ??= Computed<Future<List<BoardData?>>>(
+              () => super.boardDataByFetched,
+              name: 'ForumMainStateBase.boardDataByFetched'))
+          .value;
   Computed<List<ThreadData?>>? _$sortedThreadsComputed;
 
   @override
   List<ThreadData?> get sortedThreads => (_$sortedThreadsComputed ??=
           Computed<List<ThreadData?>>(() => super.sortedThreads,
               name: 'ForumMainStateBase.sortedThreads'))
+      .value;
+  Computed<bool>? _$currentBoardIsFavoriteComputed;
+
+  @override
+  bool get currentBoardIsFavorite => (_$currentBoardIsFavoriteComputed ??=
+          Computed<bool>(() => super.currentBoardIsFavorite,
+              name: 'ForumMainStateBase.currentBoardIsFavorite'))
       .value;
   Computed<List<ThreadData?>>? _$displayThreadsComputed;
 
@@ -419,7 +434,9 @@ settings: ${settings},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
+boardDataByFetched: ${boardDataByFetched},
 sortedThreads: ${sortedThreads},
+currentBoardIsFavorite: ${currentBoardIsFavorite},
 displayThreads: ${displayThreads},
 primaryViewDiff: ${primaryViewDiff},
 userFavoritesBoards: ${userFavoritesBoards},
