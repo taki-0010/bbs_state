@@ -66,6 +66,14 @@ mixin _$ForumState on ForumStateBase, Store {
           Computed<ThemeList>(() => super.selectedTheme,
               name: 'ForumStateBase.selectedTheme'))
       .value;
+  Computed<ListViewStyle>? _$selectedListViewStyleComputed;
+
+  @override
+  ListViewStyle get selectedListViewStyle =>
+      (_$selectedListViewStyleComputed ??= Computed<ListViewStyle>(
+              () => super.selectedListViewStyle,
+              name: 'ForumStateBase.selectedListViewStyle'))
+          .value;
   Computed<RetentionPeriodList>? _$retentionPeriodComputed;
 
   @override
@@ -462,6 +470,7 @@ currentContentDiff: ${currentContentDiff},
 currentScreen: ${currentScreen},
 selectedFonts: ${selectedFonts},
 selectedTheme: ${selectedTheme},
+selectedListViewStyle: ${selectedListViewStyle},
 retentionPeriod: ${retentionPeriod},
 getBoardsScrollTotal: ${getBoardsScrollTotal},
 currentContentState: ${currentContentState},

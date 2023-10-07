@@ -228,11 +228,9 @@ packages:
   data:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "470af4a82a77abbf4bf2362bc4d0364380278a20"
-      url: "https://github.com/taki-0010/bbs_data.git"
-    source: git
+      path: "../data"
+      relative: true
+    source: path
     version: "1.0.0"
   device_info_plus:
     dependency: transitive
@@ -495,11 +493,9 @@ packages:
   model:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: cc54ebcf4e8a9ecd8ba7b26fdba943ae2d4f2b9c
-      url: "https://github.com/taki-0010/bbs_model.git"
-    source: git
+      path: "../model"
+      relative: true
+    source: path
     version: "1.0.0"
   node_preamble:
     dependency: transitive

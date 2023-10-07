@@ -135,6 +135,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   @computed
   ThemeList get selectedTheme => settings?.theme ?? ThemeList.m3Purple;
 
+  @computed
+  ListViewStyle get selectedListViewStyle =>
+      settings?.listViewStyle ?? ListViewStyle.list;
+
   // @computed
   // bool get userFavoritesBoards => settings?.useFavoritesBoards ?? false;
 
@@ -533,10 +537,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       return _updateMarkData(exist, content);
     } else {
       return await _setInitialThreadMarkData(
-        content,
-        thread.url,
-        thread.thumbnailStr,
-      );
+          content, thread.url, thread.thumbnailStr, thread.boardName);
     }
   }
 
@@ -577,10 +578,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   // Future<void> setThreadMarkDataToHistoryList(final String url) async {}
 
   Future<FetchResult> _setInitialThreadMarkData(
-    final ThreadContentData content,
-    final String url,
-    final String? thumbnailData,
-  ) async {
+      final ThreadContentData content,
+      final String url,
+      final String? thumbnailData,
+      final String? boardName) async {
     final session = '';
     // final session = await currentSessionId;
     final user = parent.repository.user;
@@ -601,6 +602,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           documentId: documentId,
           userId: user.id,
           type: type,
+          boardName: boardName,
           // gotAt: DateTime.now().toIso8601String(),
           resCount: resCount,
           url: url.replaceAll('https://', ''),
@@ -751,6 +753,25 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (id != null && boardId != null) {
           return await _getContentForMachi(boardId: boardId, threadId: id);
         }
+      case Communities.shitaraba:
+        final category = ShitarabaData.getCategoryFromUrl(url);
+        final boardId = ShitarabaData.getBoardIdFromUrl(url);
+        final threadId = ShitarabaData.getThreadIdFromUrl(url);
+        logger.d('shitaraba: url: $category, $boardId, $threadId');
+        if (category != null && boardId != null && threadId != null) {
+          final position = settings?.positionToGet;
+          final thread = await _getContentForShitaraba(
+              category: category,
+              boardId: boardId,
+              threadId: threadId,
+              position: position ?? PositionToGet.first);
+          if (thread.result == FetchResult.success) {
+            final uri = Uri.https('${ShitarabaData.sub}.${ShitarabaData.host}',
+                '${ShitarabaData.htmlPath}/$category/$boardId/$threadId');
+            await parent.addBoard(uri.toString());
+            return thread;
+          }
+        }
 
       default:
     }
@@ -785,6 +806,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         return FutabaData.getBoardIdFromUrl(url);
       case Communities.machi:
         return MachiData.getBoardIdFromUrl(url);
+      case Communities.shitaraba:
+        return ShitarabaData.getBoardIdFromUrl(url);
       default:
     }
     return null;
@@ -816,7 +839,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       _setContent(content);
     }
     final markResult = await _setInitialThreadMarkData(
-        content, url.replaceAll('https://', ''), null);
+        content, url.replaceAll('https://', ''), null, null);
     if (markResult != FetchResult.success) {
       return result.result;
     }
@@ -880,7 +903,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         return await _getContentForShitaraba(
             category: thread.shitarabaCategory,
             boardId: thread.boardId,
-            threadId: dataId);
+            threadId: dataId,
+            position: position);
       default:
       // _toggleLoading();
     }
@@ -943,7 +967,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       {final ThreadMarkData? changedPositiontoGet}) async {
     final thread = changedPositiontoGet ?? currentContentThreadData;
     if (thread == null) return FetchResult.error;
-    // logger.d('position: 2: ${thread.positionToGet}');
+    logger.d('position: 2: ${thread.positionToGet}');
     final result = await _fetchData<ThreadMarkData>(thread.id,
         thread: thread, positionToGet: thread.positionToGet);
     if (result == null) return FetchResult.error;
@@ -970,7 +994,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     final current = thread.positionToGet;
     if (current == value) return;
     final newData = thread.copyWith(
-        positionToGet: value, lastOpendIndex: null, lastReadAt: null);
+      positionToGet: value,
+      lastOpendIndex: null,
+    );
     await updateContent(changedPositiontoGet: newData);
     // await parent.repository.updateThreadMark(newData);
   }
@@ -1103,8 +1129,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   Future<FetchContentResultData> _getContentForShitaraba(
       {required final String category,
       required final String boardId,
-      required final String threadId}) async {
-    return await ShitarabaHandler.getContent(category, boardId, threadId);
+      required final String threadId,
+      required final PositionToGet position}) async {
+    return await ShitarabaHandler.getContent(
+        category, boardId, threadId, position);
   }
 
   Future<FetchContentResultData> _getContentForMachi({
@@ -1152,7 +1180,6 @@ abstract class ForumStateBase with Store, WithDateTime {
     clearHoverdItem();
   }
 
-
   Future<void> setLastOpenedContentIndex(
       final int? index, final String? contentId) async {
     final id = contentId ?? currentContent?.id;
@@ -1163,12 +1190,14 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<bool> postComment(final PostData value) async {
+    final thread = currentContentThreadData;
+    if (thread == null) return false;
     switch (type) {
       case Communities.fiveCh || Communities.pinkCh:
-        final domain = currentContentThreadData?.uri.host;
-        final bbs = currentContentThreadData?.boardId;
+        final domain = thread.uri.host;
+        final bbs = thread.boardId;
         final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
-        if (domain != null && bbs != null && threadId != null) {
+        if (threadId != null) {
           final result = await FiveChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
             final resnum = result.resnum;
@@ -1198,7 +1227,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       //   }
       //   return false;
       case Communities.girlsCh:
-        final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
+        final threadId = FiveChData.getId(thread.url);
         if (threadId == null) {
           return false;
         }
@@ -1214,8 +1243,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         return false;
       case Communities.futabaCh:
         final contentData = currentContent?.content.firstOrNull;
-        final thread = currentContentThreadData;
-        if (thread == null) return false;
+        // final thread = currentContentThreadData;
+        // if (thread == null) return false;
         final directory = FutabaData.getDirectory(thread.uri);
         final id = FutabaData.getIdFromUrl(thread.url);
         final boardId = thread.boardId;
@@ -1233,12 +1262,16 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
         return false;
       case Communities.machi:
-        final thread = currentContentThreadData;
-        if (thread == null) return false;
         final bbs = thread.boardId;
         final threadId = FiveChData.getId(thread.url);
         if (threadId == null) return false;
         return await MachiHandler.post(value, bbs, threadId);
+      case Communities.shitaraba:
+        await ShitarabaHandler.post(value,
+            category: thread.shitarabaCategory,
+            boardId: thread.boardId,
+            threadId: thread.id);
+        break;
 
       default:
     }

@@ -33,7 +33,11 @@ abstract class MediaCacheStateBase with Store {
   String _getPath(final String url) {
     final parsed = Uri.parse(url);
     final path = '${parsed.host}${parsed.path}';
-    return path.replaceAll('/', '_');
+    final replaced = path.replaceAll('/', '_');
+    if (replaced.length > 40) {
+      return replaced.substring(0, 40);
+    }
+    return replaced;
   }
 
   File _getFile(final String path) {
@@ -95,8 +99,8 @@ abstract class MediaCacheStateBase with Store {
   Future<int> getThumbnailTotalSize(
     final Communities forum,
   ) async {
-    final result = await store.find(_db,
-        finder: _getFinderOfForumThumbnail(forum));
+    final result =
+        await store.find(_db, finder: _getFinderOfForumThumbnail(forum));
     return _total(result);
   }
 
@@ -154,9 +158,10 @@ abstract class MediaCacheStateBase with Store {
     final result = await store.find(_db, finder: _getFilterdByForum(forum));
     await _deleteList(result);
   }
-  
+
   Future<void> deleteForumThumbnailData(final Communities forum) async {
-    final result = await store.find(_db, finder: _getFinderOfForumThumbnail(forum));
+    final result =
+        await store.find(_db, finder: _getFinderOfForumThumbnail(forum));
     await _deleteList(result);
   }
 

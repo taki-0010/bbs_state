@@ -109,13 +109,16 @@ abstract class ContentStateBase with Store, WithDateTime {
     logger.f('groupList: list: ${list.length}');
     list.asMap().forEach((final key, final v) {
       if (v != null && v.createdAt != null) {
-        final timeago = getTimeago(v.createdAt!, locale);
-        final exist = result.firstWhere((element) => element?.date == timeago,
-            orElse: () => null);
-        // logger.i('groupList: item: key:$key, timeAgo: $timeago v:${v.createdAt}');
-        if (exist == null) {
-          final data = GroupData(date: timeago, firstIndex: key);
-          result.add(data);
+        final timeago = getTimeago(v.createdAt!, locale,
+            settings: TimeagoList.enable);
+        if (timeago != null) {
+          final exist = result.firstWhere((element) => element?.date == timeago,
+              orElse: () => null);
+          // logger.i('groupList: item: key:$key, timeAgo: $timeago v:${v.createdAt}');
+          if (exist == null) {
+            final data = GroupData(date: timeago, firstIndex: key);
+            result.add(data);
+          }
         }
       }
     });
@@ -288,7 +291,7 @@ abstract class ContentStateBase with Store, WithDateTime {
     return result;
   }
 
-    List<int?> getResCountForFutaba(
+  List<int?> getResCountForFutaba(
       final FutabaChContent self, final List<String> targetBody) {
     final list = content.content;
     final targetNumber = 'No.${self.number}';
@@ -339,8 +342,10 @@ abstract class ContentStateBase with Store, WithDateTime {
     return result.whereType<int>().toList();
   }
 
-    String? getUserIdList(
-      final int index, final String? selfId,) {
+  String? getUserIdList(
+    final int index,
+    final String? selfId,
+  ) {
     if (selfId == null) return null;
     final list = content.content;
     final idList =
@@ -355,5 +360,4 @@ abstract class ContentStateBase with Store, WithDateTime {
     final result = '${beforeList.length} / $total';
     return result;
   }
-
 }

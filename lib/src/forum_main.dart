@@ -33,6 +33,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   ObservableList<BoardData?> boards = ObservableList<BoardData?>();
 
   @observable
+  ObservableList<BoardData?> favoriteBoardsData = ObservableList<BoardData?>();
+
+  @observable
   BoardData? board;
 
   @observable
@@ -83,7 +86,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
                   (final element) => element?.id == e,
                   orElse: () => null))
               .toList();
-        //  case Communities.shitaraba:
+        case Communities.shitaraba:
+          return favoriteBoardsData;
 
         default:
           return favoritesBoards
@@ -96,27 +100,27 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
   }
 
-  @computed
-  Future<List<BoardData?>> get boardDataByFetched async {
-    if (userFavoritesBoards) {
-      switch (parent.type) {
-        case Communities.shitaraba:
-          final favorites = settings?.favoritesBoardList;
+  // @computed
+  // Future<List<BoardData?>> get boardDataByFetched async {
+  //   if (userFavoritesBoards) {
+  //     switch (parent.type) {
+  //       case Communities.shitaraba:
+  //         final favorites = settings?.favoritesBoardList;
 
-          if (favorites == null || favorites.isEmpty) {
-            return [];
-          }
+  //         if (favorites == null || favorites.isEmpty) {
+  //           return [];
+  //         }
 
-          final result = await ShitarabaHandler.getBoardInfoList(favorites);
-          logger.d('shitaraba f: $favorites, result: ${result?.length}');
-          return result ?? [];
+  //         final result = await ShitarabaHandler.getBoardInfoList(favorites);
+  //         logger.d('shitaraba f: $favorites, result: ${result?.length}');
+  //         return result ?? [];
 
-        // break;
-        default:
-      }
-    }
-    return boards;
-  }
+  //       // break;
+  //       default:
+  //     }
+  //   }
+  //   return boards;
+  // }
 
   @computed
   List<ThreadData?> get sortedThreads {
@@ -216,6 +220,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           }
         }
       }
+      over1000.sort((a, b) => (a?.resCount ?? 1).compareTo((b?.resCount ?? 1)));
       return [...notOver1000, ...over1000];
     } else {
       return removeSameId;
@@ -323,6 +328,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.shitaraba:
         result = await _getBoardsForShitaraba();
+        await getFavBoards();
+
         break;
       default:
     }
@@ -338,6 +345,18 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         boards.addAll([...?result?.boards]);
       default:
         parent.setErrorMessage('Error!');
+    }
+  }
+
+  Future<void> getFavBoards() async {
+    final favorites = settings?.favoritesBoardList;
+
+    if (favorites != null || favorites!.isNotEmpty) {
+      toggleBoardLoading();
+      final fav = await ShitarabaHandler.getBoardInfoList(favorites);
+      favoriteBoardsData.clear();
+      favoriteBoardsData.addAll([...?fav]);
+      toggleBoardLoading();
     }
   }
 
@@ -689,7 +708,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForShitaraba() async {
     if (board?.shitarabaBoard != null) {
       return await ShitarabaHandler.getThreads(
-          board!.shitarabaBoard!.category, board!.id);
+          board!.shitarabaBoard!.category, board!.id, board!.name);
       // return setMachiThreads(result);
     }
     return null;
@@ -752,7 +771,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final result = ShitarabaData.validateUrl(url);
     if (result) {
       final favoriteStr = ShitarabaData.getFavoriteStr(url);
-      if (favoriteStr != null) {
+      if (favoriteStr != null && !favoritesBoards.contains(favoriteStr)) {
         return _setFavorite(favoriteStr);
       }
     }
@@ -791,7 +810,16 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.girlsCh:
         final postResult = await GirlsChHandler.postThread(data);
         if (postResult != null && postResult) {
-          return true;
+          result = true;
+        }
+      case Communities.shitaraba:
+        if (board?.shitarabaBoard == null) {
+          return false;
+        }
+        final postResult = await ShitarabaHandler.postThread(data,
+            boardId: board!.id, category: board!.shitarabaBoard!.category);
+        if (postResult) {
+          result = true;
         }
       default:
     }

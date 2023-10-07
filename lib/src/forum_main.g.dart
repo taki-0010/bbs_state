@@ -38,14 +38,6 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<List<BoardData?>>(() => super.boardsData,
               name: 'ForumMainStateBase.boardsData'))
       .value;
-  Computed<Future<List<BoardData?>>>? _$boardDataByFetchedComputed;
-
-  @override
-  Future<List<BoardData?>> get boardDataByFetched =>
-      (_$boardDataByFetchedComputed ??= Computed<Future<List<BoardData?>>>(
-              () => super.boardDataByFetched,
-              name: 'ForumMainStateBase.boardDataByFetched'))
-          .value;
   Computed<List<ThreadData?>>? _$sortedThreadsComputed;
 
   @override
@@ -189,6 +181,22 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   set boards(ObservableList<BoardData?> value) {
     _$boardsAtom.reportWrite(value, super.boards, () {
       super.boards = value;
+    });
+  }
+
+  late final _$favoriteBoardsDataAtom =
+      Atom(name: 'ForumMainStateBase.favoriteBoardsData', context: context);
+
+  @override
+  ObservableList<BoardData?> get favoriteBoardsData {
+    _$favoriteBoardsDataAtom.reportRead();
+    return super.favoriteBoardsData;
+  }
+
+  @override
+  set favoriteBoardsData(ObservableList<BoardData?> value) {
+    _$favoriteBoardsDataAtom.reportWrite(value, super.favoriteBoardsData, () {
+      super.favoriteBoardsData = value;
     });
   }
 
@@ -426,6 +434,7 @@ threadsLoading: ${threadsLoading},
 boardLoading: ${boardLoading},
 selectedPrimaryView: ${selectedPrimaryView},
 boards: ${boards},
+favoriteBoardsData: ${favoriteBoardsData},
 board: ${board},
 threadList: ${threadList},
 threadsDiff: ${threadsDiff},
@@ -434,7 +443,6 @@ settings: ${settings},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
-boardDataByFetched: ${boardDataByFetched},
 sortedThreads: ${sortedThreads},
 currentBoardIsFavorite: ${currentBoardIsFavorite},
 displayThreads: ${displayThreads},

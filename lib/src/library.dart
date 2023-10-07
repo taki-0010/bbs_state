@@ -109,14 +109,20 @@ abstract class LibraryStateBase with Store, WithDateTime {
     list.sort((a, b) => (b ?? 0).compareTo((a ?? 0)));
     for (final b in list) {
       if (b != null) {
-        final daysago = getTimeago(epochToDateTime(b), locale);
+        final daysago = getTimeago(
+          epochToDateTime(b),
+          locale,
+        );
         final list = markList
             .where((element) =>
                 element?.lastReadAt != null &&
-                getTimeago(epochToDateTime(element!.lastReadAt!), locale) ==
+                getTimeago(
+                      epochToDateTime(element!.lastReadAt!),
+                      locale,
+                    ) ==
                     daysago)
             .toList();
-        result[daysago] = [];
+        result[daysago ?? ''] = [];
         final sorted = _sort(list);
         result[daysago]?.addAll(sorted);
       }

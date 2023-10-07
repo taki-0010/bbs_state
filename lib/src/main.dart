@@ -104,6 +104,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? addForumName;
 
   @computed
+  bool get disableSearch => selectedForum == Communities.shitaraba;
+
+  @computed
   String? get snackMessage =>
       deletedThreadTitle ?? addForumName ?? selectedForumState?.errorMessage;
 
@@ -225,7 +228,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   ListViewStyle get currentViewStyle =>
-      selectedForumState?.settings?.listViewStyle ?? ListViewStyle.list;
+      selectedForumState?.selectedListViewStyle ?? ListViewStyle.list;
 
   @computed
   AutoDownloadableSizeLimit get currentAutoDLSizeLimit =>
@@ -615,7 +618,12 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
-        Communities.shitaraba => 'shitaraba',
+        Communities.shitaraba => selectedForumState?.history.markList
+            .firstWhere(
+              (element) => element?.boardId == id,
+              orElse: () => null,
+            )
+            ?.boardName,
         null => null
       };
 
@@ -1310,6 +1318,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     final newData = settnigs.copyWith(favoritesBoardList: value);
     selectedForumState?.setSettings(newData);
     await updateForumSettings();
+    await selectedForumState?.forumMain.getFavBoards();
   }
 
   Future<void> toggleFavoriteBoard() async {
@@ -1475,11 +1484,19 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<List<ContentData?>?> getRes(
-      final int index, final String threadId) async {
+      final int index, final ThreadMarkData thread) async {
     FetchContentResultData? result;
     switch (selectedForum) {
       case Communities.girlsCh:
-        result = await GirlsChHandler.getRes(threadId, index);
+        result = await GirlsChHandler.getRes(thread.id, index);
+        break;
+      case Communities.shitaraba:
+        result = await ShitarabaHandler.getRes(
+            ShitarabaData.getThreadUrlPath(
+                category: thread.shitarabaCategory,
+                boardId: thread.boardId,
+                threadId: thread.id),
+            index);
         break;
       default:
     }
@@ -1498,8 +1515,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     return await ShitarabaHandler.getBoards(category);
   }
 
-  Future<void> shitarabaRes() async {
-    await ShitarabaHandler.getRes(
-        'bbs/read.cgi/netgame/16797/1694834704', 4940);
-  }
+  // Future<void> shitarabaRes() async {
+  // await ShitarabaHandler.getRes(
+  //     'bbs/read.cgi/netgame/16797/1694834704', 4940);
+  // }
 }
