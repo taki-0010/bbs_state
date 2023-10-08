@@ -34,9 +34,9 @@ abstract class MediaCacheStateBase with Store {
     final parsed = Uri.parse(url);
     final path = '${parsed.host}${parsed.path}';
     final replaced = path.replaceAll('/', '_');
-    if (replaced.length > 40) {
-      return replaced.substring(0, 40);
-    }
+    // if (replaced.length > 40) {
+    //   return replaced.substring(0, 40);
+    // }
     return replaced;
   }
 
