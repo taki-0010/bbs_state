@@ -20,15 +20,17 @@ abstract class UserStateForLocalBase with Store {
   static const _userKey = 'user_key';
   // static const searchWords = ['ニュース', 'スポーツ', '天気'];
 
-
-
   static final _initialData = UserData(
       id: StringMethodData.generateRandomString(23),
-      forums: [Communities.fiveCh, Communities.girlsCh, Communities.machi ],
+      forums: [
+        Communities.fiveCh,
+        Communities.girlsCh,
+        Communities.machi,
+        Communities.shitaraba
+      ],
       randomAvatar: StringMethodData.generateRandomString(15),
       lastOpenedForum: Communities.fiveCh,
       language: LangList.ja);
-
 
   Future<void> init() async {
     await _loadCache();
@@ -43,7 +45,7 @@ abstract class UserStateForLocalBase with Store {
     } else {
       // final data = await store.record(_userKey).get(parent.db);
       // if (data != null) {
-        user = UserData.fromJson(data);
+      user = UserData.fromJson(data);
       // }
     }
     parent.setUser(user);
@@ -58,6 +60,4 @@ abstract class UserStateForLocalBase with Store {
     await store.record(_userKey).update(parent.db, value.toJson());
     // await cache.put(_userKey, value);
   }
-
-
 }
