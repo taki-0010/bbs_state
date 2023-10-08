@@ -74,6 +74,13 @@ mixin _$ForumState on ForumStateBase, Store {
               () => super.selectedListViewStyle,
               name: 'ForumStateBase.selectedListViewStyle'))
           .value;
+  Computed<TimeagoList>? _$selectedTimeagoListComputed;
+
+  @override
+  TimeagoList get selectedTimeagoList => (_$selectedTimeagoListComputed ??=
+          Computed<TimeagoList>(() => super.selectedTimeagoList,
+              name: 'ForumStateBase.selectedTimeagoList'))
+      .value;
   Computed<RetentionPeriodList>? _$retentionPeriodComputed;
 
   @override
@@ -471,6 +478,7 @@ currentScreen: ${currentScreen},
 selectedFonts: ${selectedFonts},
 selectedTheme: ${selectedTheme},
 selectedListViewStyle: ${selectedListViewStyle},
+selectedTimeagoList: ${selectedTimeagoList},
 retentionPeriod: ${retentionPeriod},
 getBoardsScrollTotal: ${getBoardsScrollTotal},
 currentContentState: ${currentContentState},

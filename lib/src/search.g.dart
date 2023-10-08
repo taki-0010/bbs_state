@@ -162,7 +162,7 @@ mixin _$SearchState on SearchStateBase, Store {
   }
 
   @override
-  void setContent(ThreadContentData? value) {
+  void setContent(ContentState? value) {
     final _$actionInfo = _$SearchStateBaseActionController.startAction(
         name: 'SearchStateBase.setContent');
     try {

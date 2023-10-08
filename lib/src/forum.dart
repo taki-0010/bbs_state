@@ -139,6 +139,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   ListViewStyle get selectedListViewStyle =>
       settings?.listViewStyle ?? ListViewStyle.list;
 
+  @computed
+  TimeagoList get selectedTimeagoList =>
+      settings?.timeago ?? TimeagoList.enable;
+
   // @computed
   // bool get userFavoritesBoards => settings?.useFavoritesBoards ?? false;
 
@@ -431,14 +435,16 @@ abstract class ForumStateBase with Store, WithDateTime {
   ThreadContentData? _getData(final FetchContentResultData value,
       final String threadId, final String boardId) {
     if (value.contentList != null && value.threadLength != null) {
+      final hot = getIkioi(int.tryParse(threadId) ?? 0, value.threadLength!);
       final content = ThreadContentData(
-        id: threadId,
-        boardId: boardId,
-        type: type,
-        content: value.contentList!,
-        threadLength: value.threadLength!,
-        // archived: value.archived ?? false
-      );
+          id: threadId,
+          boardId: boardId,
+          type: type,
+          content: value.contentList!,
+          threadLength: value.threadLength!,
+          hot: hot
+          // archived: value.archived ?? false
+          );
       return content;
     }
     return null;
@@ -923,22 +929,36 @@ abstract class ForumStateBase with Store, WithDateTime {
     return null;
   }
 
+  ContentState? _getContentState(
+    final ThreadContentData value,
+  ) {
+    if (parent.userData != null) {
+      final data =
+          ContentState(content: value, locale: parent.userData!.language.name);
+      data.setHot(value.hot);
+      data.setTimeago(selectedTimeagoList);
+      return data;
+    }
+    return null;
+  }
+
   @action
   void _setContent(
     final ThreadContentData value,
   ) {
+    final data = _getContentState(value);
     if (parent.largeScreen) {
-      history.setContent(value);
+      history.setContent(data);
     } else {
       switch (currentScreen) {
         case BottomMenu.forums:
-          forumMain.setContent(value);
+          forumMain.setContent(data);
           break;
         case BottomMenu.history:
-          history.setContent(value);
+          history.setContent(data);
           break;
         case BottomMenu.search:
-          search.setContent(value);
+          search.setContent(data);
         default:
       }
     }

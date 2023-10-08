@@ -139,6 +139,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<ThreadsOrderType>(() => super.currentThreadsOrder,
               name: 'MainStoreBase.currentThreadsOrder'))
       .value;
+  Computed<TimeagoList>? _$currentTimeagoComputed;
+
+  @override
+  TimeagoList get currentTimeago => (_$currentTimeagoComputed ??=
+          Computed<TimeagoList>(() => super.currentTimeago,
+              name: 'MainStoreBase.currentTimeago'))
+      .value;
   Computed<ListViewStyle>? _$currentViewStyleComputed;
 
   @override
@@ -347,6 +354,13 @@ mixin _$MainStore on MainStoreBase, Store {
   List<ThreadsOrderType> get enabledOrder => (_$enabledOrderComputed ??=
           Computed<List<ThreadsOrderType>>(() => super.enabledOrder,
               name: 'MainStoreBase.enabledOrder'))
+      .value;
+  Computed<List<TimeagoList>>? _$selectableTimeagoComputed;
+
+  @override
+  List<TimeagoList> get selectableTimeago => (_$selectableTimeagoComputed ??=
+          Computed<List<TimeagoList>>(() => super.selectableTimeago,
+              name: 'MainStoreBase.selectableTimeago'))
       .value;
   Computed<List<RetentionPeriodList>>? _$selectableRetentionPeriodComputed;
 
@@ -940,6 +954,7 @@ fontsList: ${fontsList},
 selectedForumState: ${selectedForumState},
 selectedTheme: ${selectedTheme},
 currentThreadsOrder: ${currentThreadsOrder},
+currentTimeago: ${currentTimeago},
 currentViewStyle: ${currentViewStyle},
 currentAutoDLSizeLimit: ${currentAutoDLSizeLimit},
 currentMovedToLastThread: ${currentMovedToLastThread},
@@ -967,6 +982,7 @@ importanceMapDataForCurrentContent: ${importanceMapDataForCurrentContent},
 importanceMapDataForCurrentBoard: ${importanceMapDataForCurrentBoard},
 importanceMapDataForCurrentThreads: ${importanceMapDataForCurrentThreads},
 enabledOrder: ${enabledOrder},
+selectableTimeago: ${selectableTimeago},
 selectableRetentionPeriod: ${selectableRetentionPeriod},
 boardIdForSearch: ${boardIdForSearch},
 boardListForSearch: ${boardListForSearch},

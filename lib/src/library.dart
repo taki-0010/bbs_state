@@ -187,17 +187,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   @action
-  void setContent(
-    final ThreadContentData? value,
-  ) {
-    if (value != null && parent.parent.userData != null) {
-      final data = ContentState(
-          content: value, locale: parent.parent.userData!.language.name);
-      // data.setLastOpenedIndex(lastOpenedIndex);
-      content = data;
-    } else {
-      content = null;
-    }
+  void setContent(final ContentState? value) {
+    content = value;
   }
 
   String? boardNameById(final String id) {
@@ -467,9 +458,13 @@ abstract class LibraryStateBase with Store, WithDateTime {
             break;
           case Communities.machi:
             result = await MachiHandler.getThreads(b.boardId);
-            // result = parent.forumMain.setMachiThreads(data);
-
             break;
+          case Communities.shitaraba:
+            final boardId = b.boardId;
+            final category = b.shitarabaCategory;
+            final boardName = b.boardName ?? parent.parent.boardNameById(boardId);
+            result =
+                await ShitarabaHandler.getThreads(category, boardId, boardName ?? '');
           default:
         }
         List<ThreadData?> threads = [];

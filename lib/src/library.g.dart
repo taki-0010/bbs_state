@@ -245,7 +245,7 @@ mixin _$LibraryState on LibraryStateBase, Store {
   }
 
   @override
-  void setContent(ThreadContentData? value) {
+  void setContent(ContentState? value) {
     final _$actionInfo = _$LibraryStateBaseActionController.startAction(
         name: 'LibraryStateBase.setContent');
     try {

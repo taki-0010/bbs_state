@@ -371,7 +371,7 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   }
 
   @override
-  void setContent(ThreadContentData? value) {
+  void setContent(ContentState? value) {
     final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
         name: 'ForumMainStateBase.setContent');
     try {

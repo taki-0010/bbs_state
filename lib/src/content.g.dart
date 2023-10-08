@@ -166,6 +166,37 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$timeagoAtom =
+      Atom(name: 'ContentStateBase.timeago', context: context);
+
+  @override
+  TimeagoList get timeago {
+    _$timeagoAtom.reportRead();
+    return super.timeago;
+  }
+
+  @override
+  set timeago(TimeagoList value) {
+    _$timeagoAtom.reportWrite(value, super.timeago, () {
+      super.timeago = value;
+    });
+  }
+
+  late final _$hotAtom = Atom(name: 'ContentStateBase.hot', context: context);
+
+  @override
+  double? get hot {
+    _$hotAtom.reportRead();
+    return super.hot;
+  }
+
+  @override
+  set hot(double? value) {
+    _$hotAtom.reportWrite(value, super.hot, () {
+      super.hot = value;
+    });
+  }
+
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
 
@@ -203,11 +234,33 @@ mixin _$ContentState on ContentStateBase, Store {
   }
 
   @override
+  void setTimeago(TimeagoList value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setTimeago');
+    try {
+      return super.setTimeago(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void updateContent(ThreadContentData? value) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
         name: 'ContentStateBase.updateContent');
     try {
       return super.updateContent(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setHot(double value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setHot');
+    try {
+      return super.setHot(value);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -279,6 +332,8 @@ showSeekBar: ${showSeekBar},
 seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
 selectedText: ${selectedText},
+timeago: ${timeago},
+hot: ${hot},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},

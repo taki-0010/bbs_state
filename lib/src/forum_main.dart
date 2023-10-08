@@ -832,17 +832,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @action
-  void setContent(
-    final ThreadContentData? value,
-  ) {
-    if (value != null && parent.parent.userData != null) {
-      final data = ContentState(
-          content: value, locale: parent.parent.userData!.language.name);
-      // data.setLastOpenedIndex(lastOpenedIndex);
-      content = data;
-    } else {
-      content = null;
-    }
+  void setContent(final ContentState? value) {
+    content = value;
   }
 
   // void updateMarkData(final ThreadMarkData value) =>

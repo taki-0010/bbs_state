@@ -44,6 +44,12 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   String? selectedText;
 
+  @observable
+  TimeagoList timeago = TimeagoList.enable;
+
+  @observable
+  double? hot;
+
   @action
   void setSelectedText(final String? value) {
     selectedText = value;
@@ -106,17 +112,17 @@ abstract class ContentStateBase with Store, WithDateTime {
     if (list.isEmpty) {
       return result;
     }
-    logger.f('groupList: list: ${list.length}');
+    logger.f('groupList: list: ${list.length}, hot:$hot, timeago: $timeago');
     list.asMap().forEach((final key, final v) {
       if (v != null && v.createdAt != null) {
-        final timeago = getTimeago(v.createdAt!, locale,
-            settings: TimeagoList.enable);
-        if (timeago != null) {
-          final exist = result.firstWhere((element) => element?.date == timeago,
+        final ta =
+            getTimeago(v.createdAt!, locale, settings: timeago, hot: hot);
+        if (ta != null) {
+          final exist = result.firstWhere((element) => element?.date == ta,
               orElse: () => null);
           // logger.i('groupList: item: key:$key, timeAgo: $timeago v:${v.createdAt}');
           if (exist == null) {
-            final data = GroupData(date: timeago, firstIndex: key);
+            final data = GroupData(date: ta, firstIndex: key);
             result.add(data);
           }
         }
@@ -125,6 +131,9 @@ abstract class ContentStateBase with Store, WithDateTime {
     logger.f('groupList: result: ${result.length}');
     return result;
   }
+
+  @action
+  void setTimeago(final TimeagoList value) => timeago = value;
 
   // @computed
   // List<ContentData?> get filterd {
@@ -164,7 +173,15 @@ abstract class ContentStateBase with Store, WithDateTime {
   void updateContent(final ThreadContentData? value) {
     if (value != null) {
       content = value;
+      setHot(value.hot);
     }
+   
+  }
+
+  @action
+  void setHot(final double value){
+    hot = value;
+     logger.d('updateContent: hot: $hot');
   }
 
   // @action

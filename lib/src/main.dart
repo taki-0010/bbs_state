@@ -227,6 +227,10 @@ abstract class MainStoreBase with Store, WithDateTime {
       ThreadsOrderType.newerResponce;
 
   @computed
+  TimeagoList get currentTimeago =>
+      selectedForumState?.settings?.timeago ?? TimeagoList.enable;
+
+  @computed
   ListViewStyle get currentViewStyle =>
       selectedForumState?.selectedListViewStyle ?? ListViewStyle.list;
 
@@ -448,6 +452,18 @@ abstract class MainStoreBase with Store, WithDateTime {
                 element == ThreadsOrderType.importance ||
                 // element == ThreadsOrderType.oldOrder ||
                 element == ThreadsOrderType.resCountDesc)
+            .toList();
+    }
+  }
+
+  @computed
+  List<TimeagoList> get selectableTimeago {
+    switch (selectedForum) {
+      case Communities.fiveCh || Communities.pinkCh || Communities.shitaraba:
+        return TimeagoList.values;
+      default:
+        return TimeagoList.values
+            .where((element) => element != TimeagoList.disableWhenHotIsOver2000)
             .toList();
     }
   }
@@ -1179,6 +1195,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (current == null) return;
     final newData = current.copyWith(threadsOrderType: value);
     selectedForumState?.setSettings(newData);
+  }
+
+  Future<void> setTimeago(final TimeagoList value) async {
+    final current = selectedForumState?.settings;
+    if (current == null) return;
+    final newData = current.copyWith(timeago: value);
+    selectedForumState?.setSettings(newData);
+    if (currentContentState != null) {
+      currentContentState!.setTimeago(value);
+    }
   }
 
   Future<void> setRetantionPeriod(final RetentionPeriodList value) async {

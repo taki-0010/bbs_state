@@ -62,12 +62,12 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     await userLocal.init();
     await threadLocal.loadCache();
     await forumLocal.load();
-    final accountExist = await server.init();
-    if (!accountExist) {
-      connection = ConnectTo.local;
-    } else {
-      connection = ConnectTo.server;
-    }
+    // final accountExist = await server.init();
+    // if (!accountExist) {
+    //   connection = ConnectTo.local;
+    // } else {
+    //   connection = ConnectTo.server;
+    // }
     logger.d(
         'repository: init: connection: $connection, user: ${user?.toJson()}');
   }
