@@ -734,8 +734,13 @@ abstract class ForumStateBase with Store, WithDateTime {
         final boardId = FutabaData.getBoardIdFromUrl(url);
         final directory = FutabaData.getDirectory(Uri.parse(url));
         if (id != null && boardId != null && directory != null) {
+          final urlData = url.startsWith('https://')
+              ? url.replaceAll('https://', '')
+              : url.startsWith('http://')
+                  ? url.replaceAll('http://', '')
+                  : url;
           return await _getContentForFutabaCh(
-              url: url.replaceAll('https://', ''), directory: directory);
+              url: url.replaceAll(urlData, ''), directory: directory);
           // threadLength = result?.lastOrNull?.index;
         }
         break;

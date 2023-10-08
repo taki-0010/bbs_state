@@ -739,10 +739,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<FetchResult> getDataByUrl(final String? value,
       {final bool setContent = true}) async {
     if (value == null) return FetchResult.error;
-    toggleContentLoading();
+    // toggleContentLoading();
+    // toggleEntireLoading();
     final result =
         await selectedForumState?.getDataByUrl(value, setContent: setContent);
-    toggleContentLoading();
+    // toggleEntireLoading();
+    // toggleContentLoading();
     return result ?? FetchResult.error;
   }
 
