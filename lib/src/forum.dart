@@ -1172,6 +1172,22 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
+  Future<List<BoardData?>?> searchBoards(final String keyword,
+      {final String? category}) async {
+    late FetchBoardsResultData result;
+    switch (type) {
+      case Communities.shitaraba:
+        if (category == null) return null;
+        result = await ShitarabaHandler.searchBoards(category, keyword);
+        break;
+      default:
+    }
+    if (result.result == FetchResult.success) {
+      return result.boards;
+    }
+    return null;
+  }
+
   @action
   void disposeNonLargeContent() {
     // switch (_primaryViewState) {
