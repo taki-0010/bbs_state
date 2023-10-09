@@ -9,6 +9,13 @@ part of 'content.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ContentState on ContentStateBase, Store {
+  Computed<int>? _$minIndexForSeekBarComputed;
+
+  @override
+  int get minIndexForSeekBar => (_$minIndexForSeekBarComputed ??= Computed<int>(
+          () => super.minIndexForSeekBar,
+          name: 'ContentStateBase.minIndexForSeekBar'))
+      .value;
   Computed<double>? _$initialSeekableIndexComputed;
 
   @override
@@ -36,6 +43,21 @@ mixin _$ContentState on ContentStateBase, Store {
   List<GroupData?> get groupList =>
       (_$groupListComputed ??= Computed<List<GroupData?>>(() => super.groupList,
               name: 'ContentStateBase.groupList'))
+          .value;
+  Computed<bool>? _$showBottomChipComputed;
+
+  @override
+  bool get showBottomChip =>
+      (_$showBottomChipComputed ??= Computed<bool>(() => super.showBottomChip,
+              name: 'ContentStateBase.showBottomChip'))
+          .value;
+  Computed<List<RangeList?>?>? _$rangeListBy1000StepsComputed;
+
+  @override
+  List<RangeList?>? get rangeListBy1000Steps =>
+      (_$rangeListBy1000StepsComputed ??= Computed<List<RangeList?>?>(
+              () => super.rangeListBy1000Steps,
+              name: 'ContentStateBase.rangeListBy1000Steps'))
           .value;
 
   late final _$contentAtom =
@@ -197,6 +219,38 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$selectedRangeAtom =
+      Atom(name: 'ContentStateBase.selectedRange', context: context);
+
+  @override
+  RangeList? get selectedRange {
+    _$selectedRangeAtom.reportRead();
+    return super.selectedRange;
+  }
+
+  @override
+  set selectedRange(RangeList? value) {
+    _$selectedRangeAtom.reportWrite(value, super.selectedRange, () {
+      super.selectedRange = value;
+    });
+  }
+
+  late final _$selectedPageAtom =
+      Atom(name: 'ContentStateBase.selectedPage', context: context);
+
+  @override
+  int? get selectedPage {
+    _$selectedPageAtom.reportRead();
+    return super.selectedPage;
+  }
+
+  @override
+  set selectedPage(int? value) {
+    _$selectedPageAtom.reportWrite(value, super.selectedPage, () {
+      super.selectedPage = value;
+    });
+  }
+
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
 
@@ -206,6 +260,28 @@ mixin _$ContentState on ContentStateBase, Store {
         name: 'ContentStateBase.setSelectedText');
     try {
       return super.setSelectedText(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setSelectedRangeList(RangeList? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setSelectedRangeList');
+    try {
+      return super.setSelectedRangeList(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setSelectedPage(int? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setSelectedPage');
+    try {
+      return super.setSelectedPage(value);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -334,10 +410,15 @@ currentContentItemIndex: ${currentContentItemIndex},
 selectedText: ${selectedText},
 timeago: ${timeago},
 hot: ${hot},
+selectedRange: ${selectedRange},
+selectedPage: ${selectedPage},
+minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},
-groupList: ${groupList}
+groupList: ${groupList},
+showBottomChip: ${showBottomChip},
+rangeListBy1000Steps: ${rangeListBy1000Steps}
     ''';
   }
 }

@@ -169,13 +169,6 @@ mixin _$MainStore on MainStoreBase, Store {
               () => super.currentMovedToLastThread,
               name: 'MainStoreBase.currentMovedToLastThread'))
           .value;
-  Computed<PositionToGet>? _$currentPositionToGetComputed;
-
-  @override
-  PositionToGet get currentPositionToGet => (_$currentPositionToGetComputed ??=
-          Computed<PositionToGet>(() => super.currentPositionToGet,
-              name: 'MainStoreBase.currentPositionToGet'))
-      .value;
   Computed<bool>? _$blurThumbnailComputed;
 
   @override
@@ -958,7 +951,6 @@ currentTimeago: ${currentTimeago},
 currentViewStyle: ${currentViewStyle},
 currentAutoDLSizeLimit: ${currentAutoDLSizeLimit},
 currentMovedToLastThread: ${currentMovedToLastThread},
-currentPositionToGet: ${currentPositionToGet},
 blurThumbnail: ${blurThumbnail},
 currentContent: ${currentContent},
 currentMainThreadsLoading: ${currentMainThreadsLoading},

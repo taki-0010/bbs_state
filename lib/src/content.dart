@@ -50,9 +50,29 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   double? hot;
 
+  @observable
+  RangeList? selectedRange;
+
+  @observable
+  int? selectedPage;
+
   @action
   void setSelectedText(final String? value) {
     selectedText = value;
+  }
+
+  @action
+  void setSelectedRangeList(final RangeList? value) {
+    selectedRange = value;
+    currentContentIndex = 0;
+    currentContentItemIndex = 1;
+  }
+
+  @action
+  void setSelectedPage(final int? value) {
+    selectedPage = value;
+    currentContentIndex = 0;
+    currentContentItemIndex = 1;
   }
 
   // @observable
@@ -66,6 +86,12 @@ abstract class ContentStateBase with Store, WithDateTime {
 
   @action
   void setSeekHandleValue(final int value) => seekBarHandleValue = value;
+
+  @computed
+  int get minIndexForSeekBar {
+    final first = (content.content.length) >= 2 ? content.content[1]?.index : 1;
+    return first ?? 1;
+  }
 
   @computed
   double get initialSeekableIndex {
@@ -175,13 +201,12 @@ abstract class ContentStateBase with Store, WithDateTime {
       content = value;
       setHot(value.hot);
     }
-   
   }
 
   @action
-  void setHot(final double value){
+  void setHot(final double value) {
     hot = value;
-     logger.d('updateContent: hot: $hot');
+    logger.d('updateContent: hot: $hot');
   }
 
   // @action
@@ -219,6 +244,8 @@ abstract class ContentStateBase with Store, WithDateTime {
             currentContentItemIndex = itemIndex;
           }
         }
+        // logger.i(
+        //     'setCurrentContentIndex: value: $value, itemIndex:$itemIndex, currentContentItemIndex: $currentContentItemIndex');
       } catch (e) {
         logger.e('setCurrentContentIndex: $e');
       }
@@ -376,5 +403,20 @@ abstract class ContentStateBase with Store, WithDateTime {
     });
     final result = '${beforeList.length} / $total';
     return result;
+  }
+
+  @computed
+  bool get showBottomChip {
+    return (rangeListBy1000Steps != null && rangeListBy1000Steps!.isNotEmpty) ||
+        futabaLimit != null ||
+        content.girlsPages != null;
+  }
+
+  @computed
+  List<RangeList?>? get rangeListBy1000Steps {
+    if (content.type != Communities.shitaraba) {
+      return null;
+    }
+    return ShitarabaData.getRangeList(content.threadLength);
   }
 }

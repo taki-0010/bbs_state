@@ -244,9 +244,9 @@ abstract class MainStoreBase with Store, WithDateTime {
       selectedForumState?.settings?.movedToLastThreads ??
       MovedToLastThreads.none;
 
-  @computed
-  PositionToGet get currentPositionToGet =>
-      selectedForumState?.settings?.positionToGet ?? PositionToGet.first;
+  // @computed
+  // PositionToGet get currentPositionToGet =>
+  //     selectedForumState?.settings?.positionToGet ?? PositionToGet.first;
 
   @computed
   bool get blurThumbnail =>
@@ -730,11 +730,11 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleContentLoading();
   }
 
-  Future<void> updatePositionToGet(final PositionToGet value) async {
-    toggleEntireLoading();
-    await selectedForumState?.updatePositionToGet(value);
-    toggleEntireLoading();
-  }
+  // Future<void> updatePositionToGet(final PositionToGet value) async {
+  //   toggleEntireLoading();
+  //   await selectedForumState?.updatePositionToGet(value);
+  //   toggleEntireLoading();
+  // }
 
   Future<FetchResult> getDataByUrl(final String? value,
       {final bool setContent = true}) async {
@@ -1146,16 +1146,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     selectedForumState?.setSettings(newData);
   }
 
-  void setPositionToGet(final PositionToGet value) {
-    final settnigs = selectedForumState?.settings;
-    if (settnigs == null) return;
-    if (settnigs.positionToGet == value) return;
-    final newData = settnigs.copyWith(positionToGet: value);
-    selectedForumState?.setSettings(newData);
-    // await repository.server.forumState.setPositionToGet(value);
+  // void setPositionToGet(final PositionToGet value) {
+  //   final settnigs = selectedForumState?.settings;
+  //   if (settnigs == null) return;
+  //   if (settnigs.positionToGet == value) return;
+  //   final newData = settnigs.copyWith(positionToGet: value);
+  //   selectedForumState?.setSettings(newData);
+  //   // await repository.server.forumState.setPositionToGet(value);
 
-    // await userStorage.setPositionToGet(selected, value);
-  }
+  //   // await userStorage.setPositionToGet(selected, value);
+  // }
 
   void setListViewStyle(final ListViewStyle value) {
     final settnigs = selectedForumState?.settings;

@@ -330,9 +330,10 @@ mixin _$ForumState on ForumStateBase, Store {
   Future<FetchContentResultData?> _fetchData<T extends ThreadBase>(
       String dataId,
       {required T thread,
-      PositionToGet? positionToGet}) {
-    return _$_fetchDataAsyncAction.run(() => super
-        ._fetchData<T>(dataId, thread: thread, positionToGet: positionToGet));
+      int? lastPageForGirlsCh,
+      RangeList? range}) {
+    return _$_fetchDataAsyncAction.run(() => super._fetchData<T>(dataId,
+        thread: thread, lastPageForGirlsCh: lastPageForGirlsCh, range: range));
   }
 
   late final _$_getContentForFiveChAsyncAction =
@@ -351,9 +352,9 @@ mixin _$ForumState on ForumStateBase, Store {
 
   @override
   Future<FetchContentResultData> _getContentForGirlsCh(String id,
-      {required PositionToGet positionToGet}) {
-    return _$_getContentForGirlsChAsyncAction.run(
-        () => super._getContentForGirlsCh(id, positionToGet: positionToGet));
+      {required int page}) {
+    return _$_getContentForGirlsChAsyncAction
+        .run(() => super._getContentForGirlsCh(id, page: page));
   }
 
   late final _$_getContentForFutabaChAsyncAction =

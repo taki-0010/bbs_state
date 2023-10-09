@@ -326,6 +326,17 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   }
 
   @override
+  void setThreadScrollOffset(double? value) {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase.setThreadScrollOffset');
+    try {
+      return super.setThreadScrollOffset(value);
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setBoard(BoardData value) {
     final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
         name: 'ForumMainStateBase.setBoard');

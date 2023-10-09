@@ -302,6 +302,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @action
+  void setThreadScrollOffset(final double? value) =>
+      lastThreadsScrollIndex = value;
+
+  @action
   void setBoard(final BoardData value) => board = value;
 
   @action
@@ -464,6 +468,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   Future<void> setThreads(final BoardData value) async {
     setBoard(value);
+    setThreadScrollOffset(null);
     toggleBoardLoading();
     final result = await getThreads();
     toggleBoardLoading();
