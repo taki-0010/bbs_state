@@ -429,7 +429,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
                 // final data =
                 //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
                 final data =
-                    await FutabaChHandler.getContent(i.url, b.futabaDirectory);
+                    await FutabaChHandler.getContent(b.boardId, b.futabaDirectory, b.id);
                 if (data.result == FetchResult.error ||
                     data.statusCode == 404) {
                   await parent.parent.deleteThreadMarkData(i);

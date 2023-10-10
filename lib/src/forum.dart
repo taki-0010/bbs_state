@@ -585,6 +585,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.fiveCh ||
             Communities.pinkCh ||
             Communities.machi ||
+            Communities.open2Ch ||
             Communities.shitaraba:
         return int.tryParse(value.id);
       case Communities.girlsCh:
@@ -773,17 +774,15 @@ abstract class ForumStateBase with Store, WithDateTime {
         final boardId = FutabaData.getBoardIdFromUrl(url);
         final directory = FutabaData.getDirectory(Uri.parse(url));
         if (id != null && boardId != null && directory != null) {
-          final urlData = url.startsWith('https://')
-              ? url.replaceAll('https://', '')
-              : url.startsWith('http://')
-                  ? url.replaceAll('http://', '')
-                  : url;
+          // final path = FutabaData.getUrlByPath(directory, boardId, id);
+
+          // logger.i('get by url futaba: $path, ');
           return await _getContentForFutabaCh(
-              url: url.replaceAll(urlData, ''), directory: directory);
+              boardId: boardId, directory: directory, threadId: id);
           // threadLength = result?.lastOrNull?.index;
         }
         break;
-      case Communities.pinkCh:
+      case Communities.pinkCh || Communities.open2Ch:
         final id = FiveChData.getId(url);
         final host = Uri.parse(url).host;
         final boardId = FiveChData.getBoardIdFromDat(url);
@@ -833,6 +832,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.fiveCh ||
             Communities.pinkCh ||
             Communities.machi ||
+            Communities.open2Ch ||
             Communities.shitaraba:
         return FiveChData.getId(url);
       case Communities.girlsCh:
@@ -846,7 +846,7 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   String? _getBoardIdFromUrl(final String url, final ContentData? item) {
     switch (type) {
-      case Communities.fiveCh || Communities.pinkCh:
+      case Communities.fiveCh || Communities.pinkCh || Communities.open2Ch:
         return FiveChData.getBoardIdFromDat(url);
       case Communities.girlsCh:
         if (item is GirlsChContent) {
@@ -934,12 +934,14 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.futabaCh:
         // if (thread is! FutabaChThread) return null;
         return await _getContentForFutabaCh(
-            url: thread.url, directory: thread.futabaDirectory
+            boardId: thread.boardId,
+            directory: thread.futabaDirectory,
+            threadId: dataId
             // title: thread.title,
             // boardId: thread.boardId,
             // thumbnail: thread.thumbnailUrl
             );
-      case Communities.pinkCh:
+      case Communities.pinkCh || Communities.open2Ch:
         // if (thread is! FiveChThreadTitleData) return null;
         return await _getContentForFiveCh(
           dataId,
@@ -1030,24 +1032,24 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
   }
 
-  Future<FetchResult> updateContent({
-    final ThreadMarkData? changedPositiontoGet,
-    // final RangeList range = RangeList.last1000
-  }) async {
-    final thread = changedPositiontoGet ?? currentContentThreadData;
+  Future<FetchResult> updateContent(
+      {final RangeList? changedRange, final int? changedPage
+      // final RangeList range = RangeList.last1000
+      }) async {
+    final thread = currentContentThreadData;
     if (thread == null) return FetchResult.error;
     // logger.d('position: 2: ${thread.positionToGet}');
-    final currentRange = currentContentState?.selectedRange;
-    final selectedPage = currentContentState?.selectedPage;
+    // final currentRange = currentContentState?.selectedRange;
+    // final selectedPage = currentContentState?.selectedPage;
     final result = await _fetchData<ThreadMarkData>(thread.id,
-        thread: thread, lastPageForGirlsCh: selectedPage, range: currentRange);
+        thread: thread, lastPageForGirlsCh: changedPage, range: changedRange);
     if (result == null) return FetchResult.error;
-    final content = _getData(result, thread.id, thread.boardId, currentRange);
+    final content = _getData(result, thread.id, thread.boardId, changedRange);
     if (content == null) return FetchResult.error;
-    final lastReadIndex = selectedPage != null || currentRange != null
+    final lastReadIndex = changedPage != null || changedRange != null
         ? null
         : currentContentState?.content.content.lastOrNull?.index;
-    final lastIndex = selectedPage != null || currentRange != null
+    final lastIndex = changedPage != null || changedRange != null
         ? null
         : currentContentState?.currentContentIndex;
     currentContentState?.setLastResIndex(lastReadIndex);
@@ -1190,15 +1192,15 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   @action
-  Future<FetchContentResultData> _getContentForFutabaCh({
-    required final String url,
-    required final String directory,
-  }) async {
+  Future<FetchContentResultData> _getContentForFutabaCh(
+      {
+      // required final String url,
+      required final String boardId,
+      required final String directory,
+      required final String threadId}) async {
     // if (thread is! FutabaChThread) return;
-    final result = await FutabaChHandler.getContent(
-      url,
-      directory,
-    );
+    final result =
+        await FutabaChHandler.getContent(boardId, directory, threadId);
     return result;
   }
 
@@ -1364,6 +1366,19 @@ abstract class ForumStateBase with Store, WithDateTime {
             boardId: thread.boardId,
             threadId: thread.id);
         break;
+      case Communities.open2Ch:
+       final domain = thread.uri.host;
+        final bbs = thread.boardId;
+        final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
+        if (threadId != null) {
+          final result = await Open2ChHandler.post(value, domain, bbs, threadId);
+          if (result != null) {
+            final resMark = ResMarkData(index: result, icon: MarkIcon.edit);
+            await updateMark(resMark);
+            return true;
+          }
+        }
+        return false;
 
       default:
     }

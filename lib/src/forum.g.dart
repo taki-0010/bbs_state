@@ -362,9 +362,12 @@ mixin _$ForumState on ForumStateBase, Store {
 
   @override
   Future<FetchContentResultData> _getContentForFutabaCh(
-      {required String url, required String directory}) {
-    return _$_getContentForFutabaChAsyncAction.run(
-        () => super._getContentForFutabaCh(url: url, directory: directory));
+      {required String boardId,
+      required String directory,
+      required String threadId}) {
+    return _$_getContentForFutabaChAsyncAction.run(() => super
+        ._getContentForFutabaCh(
+            boardId: boardId, directory: directory, threadId: threadId));
   }
 
   late final _$ForumStateBaseActionController =

@@ -149,7 +149,7 @@ abstract class SearchStateBase with Store {
       case Communities.futabaCh:
         final board = await parent.parent.boardForSearch;
         if (board?.futabaCh == null) return;
-       result = await FutabaChHandler.searchThreadsByJson(
+        result = await FutabaChHandler.searchThreadsByJson(
             keyword, board!.futabaCh!.directory, board.id);
         // final result = await FutabaChHandler.searchThreads(
         //   keyword: keyword,
@@ -172,12 +172,14 @@ abstract class SearchStateBase with Store {
         break;
       case Communities.pinkCh:
         result = await PinkChHandler.searchTheads<T>(keyword);
-        
+
         break;
       case Communities.machi:
         final boardId = parent.parent.boardIdForSearch;
         if (boardId == null) return;
         result = await MachiHandler.searchThreads(keyword, boardId);
+      case Communities.open2Ch:
+        result = await Open2ChHandler.getSearchThreads(keyword);
       default:
     }
     _setSearchThreads(result);

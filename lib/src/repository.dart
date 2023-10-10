@@ -161,6 +161,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       case Communities.shitaraba:
         parent.shitaraba.clear();
         break;
+      case Communities.open2Ch:
+        parent.open2ch.clear();
+        break;
       default:
     }
   }
@@ -284,6 +287,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       case Communities.shitaraba:
         parent.shitaraba.setSettings(value);
         break;
+      case Communities.open2Ch:
+        parent.open2ch.setSettings(value);
+        break;
       default:
     }
   }
@@ -308,6 +314,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
           break;
         case Communities.shitaraba:
           parent.shitaraba.history.setLog(value);
+          break;
+        case Communities.open2Ch:
+          parent.open2ch.history.setLog(value);
           break;
         default:
       }
@@ -337,6 +346,9 @@ abstract class RepositoryStateBase with Store, WithDateTime {
           break;
         case Communities.shitaraba:
           parent.shitaraba.deleteContent(value);
+          break;
+        case Communities.open2Ch:
+          parent.open2ch.deleteContent(value);
           break;
         default:
       }

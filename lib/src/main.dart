@@ -22,6 +22,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final pinkCh = ForumState(parent: this, type: Communities.pinkCh);
   late final machi = ForumState(parent: this, type: Communities.machi);
   late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
+  late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
 
   // late final SembastCacheStore store;
 
@@ -149,6 +150,7 @@ abstract class MainStoreBase with Store, WithDateTime {
       selectedForum == Communities.fiveCh ||
       selectedForum == Communities.machi ||
       selectedForum == Communities.shitaraba ||
+      selectedForum == Communities.open2Ch ||
       selectedForum == Communities.pinkCh;
 
   @computed
@@ -212,6 +214,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return machi;
       case Communities.shitaraba:
         return shitaraba;
+      case Communities.open2Ch:
+        return open2ch;
       default:
         return null;
     }
@@ -356,6 +360,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Uri.https('${ShitarabaData.sub}.${ShitarabaData.host}',
                 '${board?.shitarabaBoard?.category}/${board?.id}')
             .toString();
+      case Communities.open2Ch:
+        return board?.fiveCh?.url;
       default:
     }
     return null;
@@ -634,6 +640,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
+        Communities.open2Ch => FiveChBoardNames.getById(id),
         Communities.shitaraba => selectedForumState?.history.markList
             .firstWhere(
               (element) => element?.boardId == id,
@@ -723,10 +730,12 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
-  Future<void> updateContent() async {
+  Future<void> updateContent(
+      {final RangeList? changedRange, final int? changedPage}) async {
     if (currentContent == null) return;
     toggleContentLoading();
-    await selectedForumState?.updateContent();
+    await selectedForumState?.updateContent(
+        changedPage: changedPage, changedRange: changedRange);
     toggleContentLoading();
   }
 
@@ -1233,6 +1242,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
     if (currentAutoDLSizeLimit == AutoDownloadableSizeLimit.noLimit) {
       final data = await _getMedia(url);
+      logger.i('not get media from network: no limit, $url');
       return (data, null);
     }
     final bytes = await FetchData.getMediaSize(url);
@@ -1241,7 +1251,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         final data = await _getMedia(url);
         // final data = await FetchData.getMediaData(url);
         // if (data == null) return null;
-        // logger.i('get media from network: $bytes, $url');
+        logger.i('get media from network: under size $bytes, $url');
         // final currentThread = currentContentThreadData;
         // await repository.mediaLocal.putMediaData(currentThread?.documentId,
         //     url: url, forum: selectedForum, data: data);
@@ -1259,7 +1269,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<Uint8List?> _getMedia(final String url) async {
     final data = await FetchData.getMediaData(url);
     if (data == null) return null;
-    // logger.i('get media from network: $bytes, $url');
+    logger.i('get media $url');
     final currentThread = currentContentThreadData;
     await repository.mediaLocal.putMediaData(currentThread?.documentId,
         url: url, forum: selectedForum, data: data);
@@ -1471,9 +1481,9 @@ abstract class MainStoreBase with Store, WithDateTime {
     await repository.removeForum(value);
   }
 
-  Future<void> getThreadsByJson() async {
-    // FutabaChHandler.getThreadsByJson();
-  }
+  // Future<void> getThreadsByJson() async {
+  //   // FutabaChHandler.getThreadsByJson();
+  // }
 
   String? parsedUrl(final String url) {
     switch (selectedForum) {
@@ -1543,8 +1553,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     return await ShitarabaHandler.getBoards(category);
   }
 
-  // Future<void> shitarabaRes() async {
-  // await ShitarabaHandler.getRes(
-  //     'bbs/read.cgi/netgame/16797/1694834704', 4940);
+  // Future<void> openget() async {
+  //   logger.i('open2ch');
+  //   await Open2ChHandler.getSearchThreads('雑談');
   // }
 }

@@ -86,6 +86,21 @@ abstract class ForumMainStateBase with Store, WithDateTime {
                   (final element) => element?.id == e,
                   orElse: () => null))
               .toList();
+        case Communities.open2Ch:
+          List<BoardData?> boardList = [];
+          for (final element in boards) {
+            if (element?.open2chBoards != null) {
+              final i = element!.open2chBoards;
+              for (final t in i) {
+                boardList.add(t);
+              }
+            }
+          }
+          return favoritesBoards
+              .map((e) => boardList.firstWhere(
+                  (final element) => element?.id == e,
+                  orElse: () => null))
+              .toList();
         case Communities.shitaraba:
           return favoriteBoardsData;
 
@@ -335,6 +350,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         await getFavBoards();
 
         break;
+      case Communities.open2Ch:
+        result = await _getBoardsForOpen2ch();
+        break;
       default:
     }
     toggleBoardLoading();
@@ -362,6 +380,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       favoriteBoardsData.addAll([...?fav]);
       toggleBoardLoading();
     }
+  }
+
+  Future<FetchBoardsResultData?> _getBoardsForOpen2ch() async {
+    if (boards.isEmpty) {
+      return await Open2ChHandler.getBoards();
+    }
+    return null;
   }
 
   // @action
@@ -524,6 +549,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.shitaraba:
         result = await _getThreadsForShitaraba();
         break;
+      case Communities.open2Ch:
+        result = await _getThreadsForOpen2Ch();
+        break;
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -681,6 +709,27 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           domain: domain,
           directoryName: b.fiveCh!.directoryName,
           boardName: b.name);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
+    }
+    return null;
+  }
+
+  Future<FetchThreadsResultData?> _getThreadsForOpen2Ch() async {
+    if (board?.forum == Communities.open2Ch) {
+      // b as FiveChBoardData;
+      // final domain = '${board?.fiveCh?.directoryName}.${Open2ChData.host}';
+      if (board?.fiveCh?.directoryName == null) return null;
+
+      // if (board == null) return;
+      // logger.d('_getThreadsForFiveCh: name: ${b.name}');
+
+      return await Open2ChHandler.getThreads(
+          board!.fiveCh!.directoryName,
+          board!.id,
+          board!.name);
       // if (result == null) {
       //   return;
       // }

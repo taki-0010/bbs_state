@@ -32,8 +32,13 @@ abstract class MediaCacheStateBase with Store {
 
   String _getPath(final String url) {
     final parsed = Uri.parse(url);
-    final path = '${parsed.host}${parsed.path}';
+    final file = parsed.pathSegments.last;
+    final extIndex = file.lastIndexOf('.');
+    final ext = file.substring(extIndex);
+    final hashed = md5.string(file);
+    final path = '${parsed.host}_$hashed$ext';
     final replaced = path.replaceAll('/', '_');
+    logger.i('file path: $replaced');
     // if (replaced.length > 40) {
     //   return replaced.substring(0, 40);
     // }
@@ -75,7 +80,7 @@ abstract class MediaCacheStateBase with Store {
         _forum: forum?.name,
         _retentionPeriod: retentionPeriod,
         _size: length,
-        _url: path
+        _url: url
       });
       logger.i('putMediaData: size: ${filesize(length)}  path: ${file.path}');
     }
