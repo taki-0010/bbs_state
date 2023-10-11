@@ -1035,18 +1035,20 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<FetchResult> updateContent(
-      {final RangeList? changedRange, final int? changedPage
+      {
+        final RangeList? changedRange, final int? changedPage
       // final RangeList range = RangeList.last1000
-      }) async {
+      }
+      ) async {
     final thread = currentContentThreadData;
     if (thread == null) return FetchResult.error;
     // logger.d('position: 2: ${thread.positionToGet}');
-    // final currentRange = currentContentState?.selectedRange;
-    // final selectedPage = currentContentState?.selectedPage;
+    final currentRange = changedRange ?? currentContentState?.selectedRange;
+    final selectedPage = changedPage ?? currentContentState?.selectedPage;
     final result = await _fetchData<ThreadMarkData>(thread.id,
-        thread: thread, lastPageForGirlsCh: changedPage, range: changedRange);
+        thread: thread, lastPageForGirlsCh: selectedPage, range: currentRange);
     if (result == null) return FetchResult.error;
-    final content = _getData(result, thread.id, thread.boardId, changedRange);
+    final content = _getData(result, thread.id, thread.boardId, currentRange);
     if (content == null) return FetchResult.error;
     final lastReadIndex = changedPage != null || changedRange != null
         ? null

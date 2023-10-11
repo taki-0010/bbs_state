@@ -1253,7 +1253,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
     if (currentAutoDLSizeLimit == AutoDownloadableSizeLimit.noLimit) {
       final data = await _getMedia(url);
-      logger.i('not get media from network: no limit, $url');
+      logger.i('get media from network: no limit, $url');
       return (data, null);
     }
     final bytes = await FetchData.getMediaSize(url);
