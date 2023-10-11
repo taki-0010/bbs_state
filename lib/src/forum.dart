@@ -741,11 +741,11 @@ abstract class ForumStateBase with Store, WithDateTime {
 
   Future<FetchContentResultData> _fetchDataByUrl(final String url) async {
     switch (type) {
-      case Communities.fiveCh:
+      case Communities.fiveCh || Communities.pinkCh || Communities.open2Ch:
         final id = FiveChData.getId(url);
         final host = Uri.parse(url).host;
-        final boardId = FiveChData.getBoardIdFromDat(url);
-        logger.i('getDataByUrl: $url, id:$id, $boardId, host:$host');
+        final boardId = FiveChData.getBoardIdFromHtmlUrl(url);
+          logger.i('byUrl: $id, host:$host, boardId: $boardId');
         if (id != null && boardId != null) {
           return await _getContentForFiveCh(
             id,
@@ -753,6 +753,7 @@ abstract class ForumStateBase with Store, WithDateTime {
             directoryName: boardId,
             // title: thread.title
           );
+
         }
       // threadLength = result?.lastOrNull?.index;
       // break;
@@ -782,18 +783,19 @@ abstract class ForumStateBase with Store, WithDateTime {
           // threadLength = result?.lastOrNull?.index;
         }
         break;
-      case Communities.pinkCh || Communities.open2Ch:
-        final id = FiveChData.getId(url);
-        final host = Uri.parse(url).host;
-        final boardId = FiveChData.getBoardIdFromDat(url);
-        if (id != null && boardId != null) {
-          return await _getContentForFiveCh(
-            id,
-            domain: host,
-            directoryName: boardId,
-            // title: thread.title
-          );
-        }
+      // case Communities.pinkCh || Communities.open2Ch:
+      //   final id = FiveChData.getId(url);
+      //   final host = Uri.parse(url).host;
+      //   final boardId = FiveChData.getBoardIdFromHtmlUrl(url);
+      //   logger.i('byUrl: $id, host:$host, boardId: $boardId');
+      //   if (id != null && boardId != null) {
+      //     return await _getContentForFiveCh(
+      //       id,
+      //       domain: host,
+      //       directoryName: boardId,
+      //       // title: thread.title
+      //     );
+      //   }
       case Communities.machi:
         final id = FiveChData.getId(url);
         // final host = MachiData.host;
@@ -935,7 +937,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         // if (thread is! FutabaChThread) return null;
         return await _getContentForFutabaCh(
             boardId: thread.boardId,
-            directory: thread.futabaDirectory,
+            directory: thread.getSubdomain,
             threadId: dataId
             // title: thread.title,
             // boardId: thread.boardId,
@@ -1169,7 +1171,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     // required final String title
   }) async {
     final result = await FiveChHandler.getDat(id,
-        domain: domain, directoryName: directoryName);
+        forum: type, domain: domain, directoryName: directoryName);
     return result;
   }
 
@@ -1367,12 +1369,14 @@ abstract class ForumStateBase with Store, WithDateTime {
             threadId: thread.id);
         break;
       case Communities.open2Ch:
-       final domain = thread.uri.host;
+        final domain = thread.uri.host;
         final bbs = thread.boardId;
         final threadId = FiveChData.getId(currentContentThreadData?.url ?? '');
         if (threadId != null) {
-          final result = await Open2ChHandler.post(value, domain, bbs, threadId);
+          final result =
+              await Open2ChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
+            await Future.delayed(const Duration(milliseconds: 500));
             final resMark = ResMarkData(index: result, icon: MarkIcon.edit);
             await updateMark(resMark);
             return true;

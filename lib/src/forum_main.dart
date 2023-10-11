@@ -727,9 +727,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       // logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
       return await Open2ChHandler.getThreads(
-          board!.fiveCh!.directoryName,
-          board!.id,
-          board!.name);
+          board!.fiveCh!.directoryName, board!.id, board!.name);
       // if (result == null) {
       //   return;
       // }
@@ -875,10 +873,20 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         if (postResult) {
           result = true;
         }
+      case Communities.open2Ch:
+        final domain = board?.fiveCh?.domain;
+        final bbs = board?.id;
+        if (domain == null ||
+            bbs == null ||
+            data.body.isEmpty ||
+            data.name.isEmpty) {
+          return result;
+        }
+        result = await Open2ChHandler.postThread(data, domain, bbs);
       default:
     }
     if (result) {
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 800));
       await getThreads();
     }
     toggleThreadsLoading();

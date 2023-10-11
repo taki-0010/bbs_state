@@ -361,7 +361,10 @@ abstract class MainStoreBase with Store, WithDateTime {
                 '${board?.shitarabaBoard?.category}/${board?.id}')
             .toString();
       case Communities.open2Ch:
-        return board?.fiveCh?.url;
+        return Uri.https(
+                '${board?.fiveCh?.directoryName}.${Communities.open2Ch.host}',
+                '${board?.id}')
+            .toString();
       default:
     }
     return null;
@@ -1101,6 +1104,11 @@ abstract class MainStoreBase with Store, WithDateTime {
             (element) => element?.id == threadId && element?.boardId == boardId,
             orElse: () => null);
         break;
+      case Communities.open2Ch:
+        mark = open2ch.history.markList.firstWhere(
+            (element) => element?.id == threadId && element?.boardId == boardId,
+            orElse: () => null);
+        break;
       default:
     }
     if (mark == null) return;
@@ -1235,6 +1243,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<(Uint8List?, String?)?> getMediaData(final String url) async {
+    if (url.isEmpty) {
+      return null;
+    }
     final cache = await _getMediaFromCache(url);
     if (cache != null) {
       logger.i('get media from cache: $url');

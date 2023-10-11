@@ -32,10 +32,12 @@ abstract class MediaCacheStateBase with Store {
 
   String _getPath(final String url) {
     final parsed = Uri.parse(url);
+    logger.d('persed: $parsed');
     final file = parsed.pathSegments.last;
+
     final extIndex = file.lastIndexOf('.');
     final ext = file.substring(extIndex);
-    final hashed = md5.string(file);
+    final hashed = md5.string(parsed.toString());
     final path = '${parsed.host}_$hashed$ext';
     final replaced = path.replaceAll('/', '_');
     logger.i('file path: $replaced');

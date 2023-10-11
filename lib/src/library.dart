@@ -428,8 +428,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
               if (i != null) {
                 // final data =
                 //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
-                final data =
-                    await FutabaChHandler.getContent(b.boardId, b.futabaDirectory, b.id);
+                final data = await FutabaChHandler.getContent(
+                    b.boardId, b.getSubdomain, b.id);
                 if (data.result == FetchResult.error ||
                     data.statusCode == 404) {
                   await parent.parent.deleteThreadMarkData(i);
@@ -462,9 +462,16 @@ abstract class LibraryStateBase with Store, WithDateTime {
           case Communities.shitaraba:
             final boardId = b.boardId;
             final category = b.shitarabaCategory;
-            final boardName = b.boardName ?? parent.parent.boardNameById(boardId);
-            result =
-                await ShitarabaHandler.getThreads(category, boardId, boardName ?? '');
+            final boardName =
+                b.boardName ?? parent.parent.boardNameById(boardId);
+            result = await ShitarabaHandler.getThreads(
+                category, boardId, boardName ?? '');
+          case Communities.open2Ch:
+            result = await Open2ChHandler.getThreads(
+                b.getSubdomain, b.boardId, b.boardName ?? '');
+            if (result.result == FetchResult.success) {
+              await setArchived<ThreadData>(result.threads!, b.boardId);
+            }
           default:
         }
         List<ThreadData?> threads = [];
