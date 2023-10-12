@@ -181,6 +181,36 @@ abstract class LibraryStateBase with Store, WithDateTime {
         orElse: () => null);
   }
 
+  ThreadMarkData? getSelectedMarkDataById(
+      final String id, final String boardId) {
+    return markList.firstWhere(
+        (element) => element?.id == id && element?.boardId == boardId,
+        orElse: () => null);
+  }
+
+  ThreadMarkData? getSelectedMarkDataByUri(final Uri uri) {
+    final threadOrBoard = parent.parent.uriIsThreadOrBoard(uri, parent.type);
+    if (threadOrBoard == null || !threadOrBoard) {
+      return null;
+    }
+    final threadId = parent.parent.getThreadIdFromUri(uri, parent.type);
+    final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
+    // switch (parent.type) {
+    //   case Communities.shitaraba:
+    //     threadId = ShitarabaData.getThreadIdFromUri(uri);
+    //     boardId = ShitarabaData.getBoardIdFromUri(uri);
+    //     break;
+    //   case Communities.fiveCh:
+    //     threadId = FiveChData.getThreadIdFromUri(uri);
+    //     boardId = FiveChData.getBoardIdFromUri(uri);
+    //   default:
+    // }
+    if (threadId != null && boardId != null) {
+      return getSelectedMarkDataById(threadId, boardId);
+    }
+    return null;
+  }
+
   @action
   void replaceContent(ContentState value) {
     content = value;

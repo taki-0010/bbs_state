@@ -893,22 +893,37 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return result;
   }
 
+  bool isFavBoardByUri(final Uri uri) {
+    if (settings == null) {
+      return false;
+    }
+    final favs = settings!.favoritesBoardList;
+    String? id;
+    switch (parent.type) {
+      case Communities.shitaraba:
+        final isThread = ShitarabaData.uriIsThreadOrBoard(uri);
+        if (isThread != null && !isThread) {
+          final category = ShitarabaData.getCategoryFromUrl(uri.toString());
+          final boardId = ShitarabaData.getBoardIdFromUrl(uri.toString());
+          if (category != null && boardId != null) {
+            id = ShitarabaData.favoriteBoardStr(
+                boardId: boardId, category: category);
+          }
+        }
+
+        break;
+      default:
+    }
+    return favs.contains(id);
+  }
+
   @action
   void setContent(final ContentState? value) {
     content = value;
   }
 
-  // void updateMarkData(final ThreadMarkData value) =>
-  //     content?.updateMarkData(value);
-
-  // @action
   void updateContent(final ThreadContentData value) =>
       content?.updateContent(value);
-
-  // @action
-  // void setContent(final ThreadContentData? value) {
-  //   mainContent = value;
-  // }
 
   @action
   void setSearchWord(final String value) {

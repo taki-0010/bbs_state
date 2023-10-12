@@ -742,12 +742,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleContentLoading();
   }
 
-  // Future<void> updatePositionToGet(final PositionToGet value) async {
-  //   toggleEntireLoading();
-  //   await selectedForumState?.updatePositionToGet(value);
-  //   toggleEntireLoading();
-  // }
-
   Future<FetchResult> getDataByUrl(final String? value,
       {final bool setContent = true}) async {
     if (value == null) return FetchResult.error;
@@ -1506,6 +1500,125 @@ abstract class MainStoreBase with Store, WithDateTime {
         return url;
     }
   }
+
+  Communities? forumLink(final Uri uri) {
+    if (selectedForumList == null) return null;
+    final host = uri.host;
+    for (final i in selectedForumList!) {
+      if (host.contains(i.host)) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  // String linkButtonLabel(final Uri uri, final Communities forum) {
+  //   final tob = uriIsThreadOrBoard(uri, forum);
+  //   if (tob == null) {
+  //     return uri.host;
+  //   }
+  //   final boardId = getBoardIdFromUri(uri, forum);
+  //   if (tob) {
+  //     final markData = getThreadMarkByUri(uri, forum);
+  //     if (markData != null) {
+  //       return markData.title;
+  //     }
+  //     if (boardId != null) {
+  //       return '$boardId Board Thread';
+  //     }
+  //   }
+  //   if (boardId != null) {
+  //     return '$boardId Board';
+  //   }
+  //   return uri.host;
+  // }
+
+  String? getBoardIdFromUri(final Uri uri, final Communities forum) {
+    switch (forum) {
+      case Communities.fiveCh || Communities.pinkCh:
+        return FiveChData.getBoardIdFromUri(uri, forum);
+      case Communities.shitaraba:
+        return ShitarabaData.getBoardIdFromUri(uri);
+      case Communities.machi:
+        return MachiData.getBoardIdFromUri(uri);
+      case Communities.girlsCh:
+        return GirlsChData.getBoardIdFromUri(uri);
+      case Communities.open2Ch:
+        return Open2ChData.getBoardIdFromUri(uri);
+      case Communities.futabaCh:
+        return FutabaData.getBoardIdFromUri(uri);
+      default:
+    }
+    return null;
+  }
+
+  String? getThreadIdFromUri(final Uri uri, final Communities forum) {
+    switch (forum) {
+      case Communities.fiveCh || Communities.pinkCh:
+        return FiveChData.getThreadIdFromUri(uri, forum);
+      case Communities.shitaraba:
+        return ShitarabaData.getThreadIdFromUri(uri);
+      case Communities.machi:
+        return MachiData.getThreadIdFromUri(uri);
+      case Communities.girlsCh:
+        return GirlsChData.getThreadIdFromUri(uri);
+      case Communities.open2Ch:
+        return Open2ChData.getThreadIdFromUri(uri);
+      case Communities.futabaCh:
+        return FutabaData.getThreadIdFromUri(uri);
+      default:
+    }
+    return null;
+  }
+
+  bool? uriIsThreadOrBoard(final Uri uri, final Communities forum) {
+    switch (forum) {
+      case Communities.shitaraba:
+        return ShitarabaData.uriIsThreadOrBoard(uri);
+      case Communities.fiveCh || Communities.pinkCh:
+        return FiveChData.uriIsThreadOrBoard(uri, forum);
+      case Communities.girlsCh:
+        return GirlsChData.uriIsThreadOrBoard(uri);
+      case Communities.machi:
+        return MachiData.uriIsThreadOrBoard(uri);
+      case Communities.open2Ch:
+        return Open2ChData.uriIsThreadOrBoard(uri);
+      case Communities.futabaCh:
+        return FutabaData.uriIsThreadOrBoard(uri);
+      default:
+    }
+    return null;
+  }
+
+  ThreadMarkData? getThreadMarkByUri(final Uri uri, final Communities forum) {
+    switch (forum) {
+      case Communities.fiveCh:
+        return fiveCh.history.getSelectedMarkDataByUri(uri);
+      case Communities.pinkCh:
+        return pinkCh.history.getSelectedMarkDataByUri(uri);
+      default:
+    }
+    return null;
+  }
+
+  bool uriIsFavBoard(final Uri uri, final Communities forum) => switch (forum) {
+        Communities.shitaraba => shitaraba.forumMain.isFavBoardByUri(uri),
+        Communities.fiveCh => false,
+        Communities.machi => false,
+        Communities.futabaCh => false,
+        Communities.pinkCh => false,
+        Communities.girlsCh => false,
+        Communities.open2Ch => false,
+      };
+
+  // String? forumLinkText(final Uri uri, final Communities forum) {
+  //   final threadOrBoard = isThreadOrBoard(uri);
+  //   if (threadOrBoard == null) return null;
+  //   if (threadOrBoard) {
+  //   } else {
+
+  //   }
+  // }
 
   Future<bool> postThread({
     required final PostData data,
