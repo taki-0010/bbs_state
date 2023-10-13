@@ -435,7 +435,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
             result = await FiveChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
-                boardName: b.boardName ?? '');
+                boardName: b.boardName ?? '', forum: Communities.fiveCh);
             if (result.result == FetchResult.success) {
               await setArchived<ThreadData>(result.threads!, b.boardId);
             }

@@ -53,6 +53,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     for (final i in threadList) {
       if (i != null) {
         final markData = parent.history.getSelectedMarkData(i);
+        // logger.i('threadsLastReadAt: ${parent.history.markList.map((element) => (element?.id, element?.boardId, element?.type)).toList()}, i:${i.boardId}, i: ${i.id}, ${markData?.type}, ${markData?.lastReadAt}');
         if (markData != null) {
           result[markData.id] = markData.lastReadAt;
         }
@@ -373,12 +374,17 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<void> getFavBoards() async {
     final favorites = settings?.favoritesBoardList;
 
-    if (favorites != null || favorites!.isNotEmpty) {
-      toggleBoardLoading();
-      final fav = await ShitarabaHandler.getBoardInfoList(favorites);
-      favoriteBoardsData.clear();
-      favoriteBoardsData.addAll([...?fav]);
-      toggleBoardLoading();
+    if (favorites != null && favorites.isNotEmpty) {
+      switch (parent.type) {
+        case Communities.shitaraba:
+          toggleBoardLoading();
+          final fav = await ShitarabaHandler.getBoardInfoList(favorites);
+          favoriteBoardsData.clear();
+          favoriteBoardsData.addAll([...?fav]);
+          toggleBoardLoading();
+          break;
+        default:
+      }
     }
   }
 
@@ -683,7 +689,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       return await FiveChHandler.getThreads(
           domain: domain,
           directoryName: b.fiveCh!.directoryName,
-          boardName: b.name);
+          boardName: b.name, forum: Communities.fiveCh);
       // if (result == null) {
       //   return;
       // }
@@ -816,14 +822,23 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return current;
   }
 
+  List<String?>? setFavoriteBoardByUri(final Uri uri) {
+    final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
+    if (boardId != null) {
+      return _setFavorite(boardId);
+    }
+    return null;
+  }
+
   List<String?>? addBoard(final String url) {
     if (parent.type != Communities.shitaraba) {
       return null;
     }
-    final result = ShitarabaData.validateUrl(url);
-    if (result) {
-      final favoriteStr = ShitarabaData.getFavoriteStr(url);
-      if (favoriteStr != null && !favoritesBoards.contains(favoriteStr)) {
+    final uri = Uri.parse(url);
+    final result = ShitarabaData.uriIsThreadOrBoard(uri);
+    if (result != null && !result) {
+      final favoriteStr = ShitarabaData.getFavoriteStr(uri);
+      if (favoriteStr != null) {
         return _setFavorite(favoriteStr);
       }
     }
@@ -893,29 +908,29 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return result;
   }
 
-  bool isFavBoardByUri(final Uri uri) {
-    if (settings == null) {
-      return false;
-    }
-    final favs = settings!.favoritesBoardList;
-    String? id;
-    switch (parent.type) {
-      case Communities.shitaraba:
-        final isThread = ShitarabaData.uriIsThreadOrBoard(uri);
-        if (isThread != null && !isThread) {
-          final category = ShitarabaData.getCategoryFromUrl(uri.toString());
-          final boardId = ShitarabaData.getBoardIdFromUrl(uri.toString());
-          if (category != null && boardId != null) {
-            id = ShitarabaData.favoriteBoardStr(
-                boardId: boardId, category: category);
-          }
-        }
+  // bool isFavBoardByUri(final Uri uri) {
+  //   if (settings == null) {
+  //     return false;
+  //   }
+  //   final favs = settings!.favoritesBoardList;
+  //   String? id;
+  //   switch (parent.type) {
+  //     case Communities.shitaraba:
+  //       final isThread = ShitarabaData.uriIsThreadOrBoard(uri);
+  //       if (isThread != null && !isThread) {
+  //         final category = ShitarabaData.getCategoryFromUrl(uri.toString());
+  //         final boardId = ShitarabaData.getBoardIdFromUrl(uri.toString());
+  //         if (category != null && boardId != null) {
+  //           id = ShitarabaData.favoriteBoardStr(
+  //               boardId: boardId, category: category);
+  //         }
+  //       }
 
-        break;
-      default:
-    }
-    return favs.contains(id);
-  }
+  //       break;
+  //     default:
+  //   }
+  //   return favs.contains(id);
+  // }
 
   @action
   void setContent(final ContentState? value) {

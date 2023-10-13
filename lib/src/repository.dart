@@ -223,13 +223,13 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     }
   }
 
-  Future<void> updateForumSettings() async {
+  Future<void> updateForumSettings({final ForumSettingsData? settings}) async {
     switch (connection) {
       case ConnectTo.server:
         await server.forumState.update();
         break;
       case ConnectTo.local:
-        await forumLocal.updateData();
+        await forumLocal.updateData(settings: settings);
       default:
     }
   }

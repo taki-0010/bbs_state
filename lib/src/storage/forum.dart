@@ -65,11 +65,12 @@ abstract class ForumStateForLocalBase with Store {
         .put(parent.db, value.toJson());
   }
 
-  Future<void> updateData() async {
-    if (currentData == null) return;
+  Future<void> updateData({final ForumSettingsData? settings}) async {
+    final data = settings ?? currentData;
+    if (data == null) return;
     await store
-        .record('${currentData!.forum.name}_${parent.user!.id}')
-        .update(parent.db, currentData!.toJson());
+        .record('${data.forum.name}_${parent.user!.id}')
+        .update(parent.db, data.toJson());
   }
 
   Future<void> deleteData(final Communities value, final String userId) async {

@@ -90,6 +90,14 @@ mixin _$MainStore on MainStoreBase, Store {
               () => super.lastOpenedIndexForVisibleContent,
               name: 'MainStoreBase.lastOpenedIndexForVisibleContent'))
           .value;
+  Computed<Map<String, List<String?>>>? _$favoritesBoardsComputed;
+
+  @override
+  Map<String, List<String?>> get favoritesBoards =>
+      (_$favoritesBoardsComputed ??= Computed<Map<String, List<String?>>>(
+              () => super.favoritesBoards,
+              name: 'MainStoreBase.favoritesBoards'))
+          .value;
   Computed<UserData?>? _$userDataComputed;
 
   @override
@@ -940,6 +948,7 @@ currentContentState: ${currentContentState},
 searchServerThreads: ${searchServerThreads},
 showHot: ${showHot},
 lastOpenedIndexForVisibleContent: ${lastOpenedIndexForVisibleContent},
+favoritesBoards: ${favoritesBoards},
 userData: ${userData},
 selectedForumList: ${selectedForumList},
 getLocale: ${getLocale},

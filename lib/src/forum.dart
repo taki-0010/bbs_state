@@ -745,7 +745,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         final id = FiveChData.getId(url);
         final host = Uri.parse(url).host;
         final boardId = FiveChData.getBoardIdFromHtmlUrl(url);
-          logger.i('byUrl: $id, host:$host, boardId: $boardId');
+        logger.i('byUrl: $id, host:$host, boardId: $boardId');
         if (id != null && boardId != null) {
           return await _getContentForFiveCh(
             id,
@@ -753,7 +753,6 @@ abstract class ForumStateBase with Store, WithDateTime {
             directoryName: boardId,
             // title: thread.title
           );
-
         }
       // threadLength = result?.lastOrNull?.index;
       // break;
@@ -829,56 +828,58 @@ abstract class ForumStateBase with Store, WithDateTime {
     return FetchContentResultData();
   }
 
-  String? _getThreadIdFromUrl(final String url) {
-    switch (type) {
-      case Communities.fiveCh ||
-            Communities.pinkCh ||
-            Communities.machi ||
-            Communities.open2Ch ||
-            Communities.shitaraba:
-        return FiveChData.getId(url);
-      case Communities.girlsCh:
-        return GirlsChParser.getIdFromUrl(url);
-      case Communities.futabaCh:
-        return FutabaData.getIdFromUrl(url);
-      default:
-    }
-    return null;
-  }
+  // String? _getThreadIdFromUrl(final String url) {
+  //   switch (type) {
+  //     case Communities.fiveCh ||
+  //           Communities.pinkCh ||
+  //           Communities.machi ||
+  //           Communities.open2Ch ||
+  //           Communities.shitaraba:
+  //       return FiveChData.getId(url);
+  //     case Communities.girlsCh:
+  //       return GirlsChParser.getIdFromUrl(url);
+  //     case Communities.futabaCh:
+  //       return FutabaData.getIdFromUrl(url);
+  //     default:
+  //   }
+  //   return null;
+  // }
 
-  String? _getBoardIdFromUrl(final String url, final ContentData? item) {
-    switch (type) {
-      case Communities.fiveCh || Communities.pinkCh || Communities.open2Ch:
-        return FiveChData.getBoardIdFromDat(url);
-      case Communities.girlsCh:
-        if (item is GirlsChContent) {
-          return item.categoryId;
-        }
-      case Communities.futabaCh:
-        return FutabaData.getBoardIdFromUrl(url);
-      case Communities.machi:
-        return MachiData.getBoardIdFromUrl(url);
-      case Communities.shitaraba:
-        return ShitarabaData.getBoardIdFromUrl(url);
-      default:
-    }
-    return null;
-  }
+  // String? _getBoardIdFromUrl(final String url, final ContentData? item) {
+  //   switch (type) {
+  //     case Communities.fiveCh || Communities.pinkCh || Communities.open2Ch:
+  //       return FiveChData.getBoardIdFromDat(url);
+  //     case Communities.girlsCh:
+  //       if (item is GirlsChContent) {
+  //         return item.categoryId;
+  //       }
+  //     case Communities.futabaCh:
+  //       return FutabaData.getBoardIdFromUrl(url);
+  //     case Communities.machi:
+  //       return MachiData.getBoardIdFromUrl(url);
+  //     case Communities.shitaraba:
+  //       return ShitarabaData.getBoardIdFromUrl(url);
+  //     default:
+  //   }
+  //   return null;
+  // }
 
-  Future<FetchResult> getDataByUrl(final String url,
+  Future<FetchResult> getDataByUrl(final Uri uri,
       {final bool setContent = true}) async {
     // List<ContentData?>? result;
     // bool archived = false;
     // String? id;
     // String? boardId;
     // int? threadLength;
-    final result = await _fetchDataByUrl(url);
+    final result = await _fetchDataByUrl(uri.toString());
     if (result.result != FetchResult.success) {
       return result.result;
     }
 
-    final threadId = _getThreadIdFromUrl(url);
-    final boardId = _getBoardIdFromUrl(url, result.contentList?.firstOrNull);
+    final threadId = parent.getThreadIdFromUri(uri, type);
+    final boardId = parent.getBoardIdFromUri(uri, type);
+    // final threadId = _getThreadIdFromUrl(url);
+    // final boardId = _getBoardIdFromUrl(url, result.contentList?.firstOrNull);
     if (threadId == null || boardId == null) {
       return FetchResult.error;
     }
@@ -891,7 +892,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       _setContent(content);
     }
     final markResult = await _setInitialThreadMarkData(
-        content, url.replaceAll('https://', ''), null, null);
+        content, '${uri.host}/${uri.path}', null, null);
     if (markResult != FetchResult.success) {
       return result.result;
     }
@@ -1035,11 +1036,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<FetchResult> updateContent(
-      {
-        final RangeList? changedRange, final int? changedPage
+      {final RangeList? changedRange, final int? changedPage
       // final RangeList range = RangeList.last1000
-      }
-      ) async {
+      }) async {
     final thread = currentContentThreadData;
     if (thread == null) return FetchResult.error;
     // logger.d('position: 2: ${thread.positionToGet}');

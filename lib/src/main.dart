@@ -163,6 +163,17 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   @computed
+  Map<String, List<String?>> get favoritesBoards {
+    Map<String, List<String?>> result = {};
+    if (selectedForumList == null) return result;
+    for (final i in selectedForumList!) {
+      final favBoards = _selectedForum(i)?.settings?.favoritesBoardList;
+      result[i.name] = favBoards ?? [];
+    }
+    return result;
+  }
+
+  @computed
   UserData? get userData => repository.user;
 
   @computed
@@ -183,42 +194,27 @@ abstract class MainStoreBase with Store, WithDateTime {
     return [...?selectedForumState?.settings?.addedFonts, ...list];
   }
 
-  // @computed
-  // ContentMetaData? get visibleContent => selectedForumState?.visibleContent;
-
-  // @computed
-  // Communities? get selectedForum {
-  //   if (selectedForumIndex == null) {
-  //     return null;
-  //   }
-  //   final current = selectedForumList?.elementAtOrNull(selectedForumIndex!);
-  //   if (current != null) {
-  //     return current;
-  //   } else {
-  //     return selectedForumList?.firstOrNull;
-  //   }
-  // }
-
   @computed
   ForumState? get selectedForumState {
-    switch (selectedForum) {
-      case Communities.fiveCh:
-        return fiveCh;
-      case Communities.girlsCh:
-        return girlsCh;
-      case Communities.futabaCh:
-        return futabaCh;
-      case Communities.pinkCh:
-        return pinkCh;
-      case Communities.machi:
-        return machi;
-      case Communities.shitaraba:
-        return shitaraba;
-      case Communities.open2Ch:
-        return open2ch;
-      default:
-        return null;
-    }
+    return _selectedForum(selectedForum);
+    // switch (selectedForum) {
+    //   case Communities.fiveCh:
+    //     return fiveCh;
+    //   case Communities.girlsCh:
+    //     return girlsCh;
+    //   case Communities.futabaCh:
+    //     return futabaCh;
+    //   case Communities.pinkCh:
+    //     return pinkCh;
+    //   case Communities.machi:
+    //     return machi;
+    //   case Communities.shitaraba:
+    //     return shitaraba;
+    //   case Communities.open2Ch:
+    //     return open2ch;
+    //   default:
+    //     return null;
+    // }
   }
 
   @computed
@@ -742,13 +738,15 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleContentLoading();
   }
 
-  Future<FetchResult> getDataByUrl(final String? value,
-      {final bool setContent = true}) async {
-    if (value == null) return FetchResult.error;
+  Future<FetchResult> getDataByUrl(final Uri? uri,
+      {final Communities? selectedForum, final bool setContent = true}) async {
+    if (uri == null) return FetchResult.error;
     // toggleContentLoading();
     // toggleEntireLoading();
-    final result =
-        await selectedForumState?.getDataByUrl(value, setContent: setContent);
+    final forum = selectedForum != null
+        ? _selectedForum(selectedForum)
+        : selectedForumState;
+    final result = await forum?.getDataByUrl(uri, setContent: setContent);
     // toggleEntireLoading();
     // toggleContentLoading();
     return result ?? FetchResult.error;
@@ -890,8 +888,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
-  Future<void> updateForumSettings() async =>
-      await repository.updateForumSettings();
+  Future<void> updateForumSettings({final ForumSettingsData? newData}) async =>
+      await repository.updateForumSettings(settings: newData);
 
   @action
   void setSelectedForum(final int value) {
@@ -965,6 +963,10 @@ abstract class MainStoreBase with Store, WithDateTime {
         setBottomIndex(1);
       }
     }
+  }
+
+  Future<void> deleteSelectedForumThread(final ThreadMarkData value) async {
+    await repository.deleteThread(value);
   }
 
   Future<void> deleteThreadMarkData(final ThreadMarkData value) async {
@@ -1065,46 +1067,48 @@ abstract class MainStoreBase with Store, WithDateTime {
       required final String threadId,
       required final String boardId}) async {
     if (index == null) return;
-    ThreadMarkData? mark;
-    switch (type) {
-      case Communities.fiveCh:
-        mark = fiveCh.history.markList.firstWhere(
-          (element) => element?.id == threadId && element?.boardId == boardId,
-          orElse: () => null,
-        );
-        break;
-      case Communities.girlsCh:
-        mark = girlsCh.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      case Communities.futabaCh:
-        mark = futabaCh.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      case Communities.pinkCh:
-        mark = pinkCh.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      case Communities.machi:
-        mark = machi.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      case Communities.shitaraba:
-        mark = shitaraba.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      case Communities.open2Ch:
-        mark = open2ch.history.markList.firstWhere(
-            (element) => element?.id == threadId && element?.boardId == boardId,
-            orElse: () => null);
-        break;
-      default:
-    }
+    final mark = _selectedForum(type)
+        ?.history
+        .getSelectedMarkDataById(threadId, boardId);
+    // switch (type) {
+    //   case Communities.fiveCh:
+    //     mark = fiveCh.history.markList.firstWhere(
+    //       (element) => element?.id == threadId && element?.boardId == boardId,
+    //       orElse: () => null,
+    //     );
+    //     break;
+    //   case Communities.girlsCh:
+    //     mark = girlsCh.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   case Communities.futabaCh:
+    //     mark = futabaCh.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   case Communities.pinkCh:
+    //     mark = pinkCh.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   case Communities.machi:
+    //     mark = machi.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   case Communities.shitaraba:
+    //     mark = shitaraba.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   case Communities.open2Ch:
+    //     mark = open2ch.history.markList.firstWhere(
+    //         (element) => element?.id == threadId && element?.boardId == boardId,
+    //         orElse: () => null);
+    //     break;
+    //   default:
+    // }
     if (mark == null) return;
     if (mark.lastOpendIndex == index) return;
     final newData = mark.copyWith(
@@ -1316,24 +1320,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
-  // await userStorage.setSortHistoryByExpire(value);
-  // Future<void> setViewByBoardInHistory(final bool value) async {
-  //   final settnigs = selectedForumState?.settings;
-  //   if (settnigs == null) return;
-  //   if (settnigs.viewByBoardInHistory == value) return;
-  //   final newData = settnigs.copyWith(viewByBoardInHistory: value);
-  //   selectedForumState?.setSettings(newData);
-  //   await repository.server.forumState.update();
-  // }
-
-  // Future<void> setViewByBoardInSearch(final bool value) async {
-  //   final settnigs = selectedForumState?.settings;
-  //   if (settnigs == null) return;
-  //   if (settnigs.viewByBoardInSearch == value) return;
-  //   final newData = settnigs.copyWith(viewByBoardInSearch: value);
-  //   selectedForumState?.setSettings(newData);
-  //   await repository.server.forumState.update();
-  // }
+  ForumState? _selectedForum(final Communities? forum) => switch (forum) {
+        Communities.fiveCh => fiveCh,
+        Communities.pinkCh => pinkCh,
+        Communities.shitaraba => shitaraba,
+        Communities.futabaCh => futabaCh,
+        Communities.girlsCh => girlsCh,
+        Communities.open2Ch => open2ch,
+        Communities.machi => machi,
+        null => null
+      };
 
   // await userStorage.setViewByBoardInHistory(value);
   Future<void> setOpenLink(final bool value) async {
@@ -1378,6 +1374,31 @@ abstract class MainStoreBase with Store, WithDateTime {
       return true;
     }
     return false;
+  }
+
+  Future<bool> addFavBoardBySelectedForum(
+      final Communities forum, final Uri uri) async {
+    List<String?>? favs;
+    final selected = _selectedForum(forum);
+    if (selected == null) {
+      return false;
+    }
+    switch (forum) {
+      case Communities.shitaraba:
+        favs = shitaraba.forumMain.addBoard(uri.toString());
+        logger.d('favs: $favs');
+        break;
+      default:
+        favs = selected.forumMain.setFavoriteBoardByUri(uri);
+    }
+    if (favs == null) return false;
+    final settnigs = selected.settings;
+    if (settnigs == null) return false;
+    final newData = settnigs.copyWith(favoritesBoardList: favs);
+    selected.setSettings(newData);
+    await updateForumSettings(newData: newData);
+    await selected.forumMain.getFavBoards();
+    return true;
   }
 
   Future<void> removeSearchWord(final String value) async {
@@ -1591,25 +1612,26 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   ThreadMarkData? getThreadMarkByUri(final Uri uri, final Communities forum) {
-    switch (forum) {
-      case Communities.fiveCh:
-        return fiveCh.history.getSelectedMarkDataByUri(uri);
-      case Communities.pinkCh:
-        return pinkCh.history.getSelectedMarkDataByUri(uri);
-      default:
-    }
-    return null;
+    return _selectedForum(forum)?.history.getSelectedMarkDataByUri(uri);
+    // switch (forum) {
+    //   case Communities.fiveCh:
+    //     return fiveCh.history.getSelectedMarkDataByUri(uri);
+    //   case Communities.pinkCh:
+    //     return pinkCh.history.getSelectedMarkDataByUri(uri);
+    //   default:
+    // }
+    // return null;
   }
 
-  bool uriIsFavBoard(final Uri uri, final Communities forum) => switch (forum) {
-        Communities.shitaraba => shitaraba.forumMain.isFavBoardByUri(uri),
-        Communities.fiveCh => false,
-        Communities.machi => false,
-        Communities.futabaCh => false,
-        Communities.pinkCh => false,
-        Communities.girlsCh => false,
-        Communities.open2Ch => false,
-      };
+  // bool uriIsFavBoard(final Uri uri, final Communities forum) => switch (forum) {
+  //       Communities.shitaraba => shitaraba.forumMain.isFavBoardByUri(uri),
+  //       Communities.fiveCh => false,
+  //       Communities.machi => false,
+  //       Communities.futabaCh => false,
+  //       Communities.pinkCh => false,
+  //       Communities.girlsCh => false,
+  //       Communities.open2Ch => false,
+  //     };
 
   // String? forumLinkText(final Uri uri, final Communities forum) {
   //   final threadOrBoard = isThreadOrBoard(uri);
