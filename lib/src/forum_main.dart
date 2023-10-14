@@ -302,6 +302,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   @action
   Future<void> setPrimaryView(final PrimaryViewState value) async {
+    if (value == selectedPrimaryView) {
+      return;
+    }
     final beforIsConent = selectedPrimaryView == PrimaryViewState.content;
     selectedPrimaryView = value;
     if (value == PrimaryViewState.threads && beforIsConent) {
@@ -315,6 +318,44 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
       deleteContentState();
     }
+  }
+
+  BoardData? getSelectedBoardDataById(final String id) {
+    BoardData? boardData;
+    switch (parent.type) {
+      case Communities.fiveCh:
+        for (final c in boards) {
+          if (c?.fiveChCategory != null) {
+            for (final b in c!.fiveChCategory!.categoryContent) {
+              if (b.id == id) {
+                boardData = b;
+              }
+            }
+          }
+        }
+        break;
+      default:
+        boardData = boards.firstWhere(
+          (element) => element?.id == id,
+          orElse: () => null,
+        );
+    }
+    return boardData;
+  }
+
+  Future<void> openBoardByUri(final Uri uri) async {
+    final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
+    if (boardId == null ) {
+      return;
+    }
+    if (boards.isEmpty) {
+      await getBoards();
+    }
+    final boardData = getSelectedBoardDataById(boardId);
+    if (boardData == null) {
+      return;
+    }
+    await setThreads(boardData);
   }
 
   @action
@@ -689,7 +730,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       return await FiveChHandler.getThreads(
           domain: domain,
           directoryName: b.fiveCh!.directoryName,
-          boardName: b.name, forum: Communities.fiveCh);
+          boardName: b.name,
+          forum: Communities.fiveCh);
       // if (result == null) {
       //   return;
       // }

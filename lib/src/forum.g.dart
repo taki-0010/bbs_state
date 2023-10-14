@@ -329,11 +329,11 @@ mixin _$ForumState on ForumStateBase, Store {
   @override
   Future<FetchContentResultData?> _fetchData<T extends ThreadBase>(
       String dataId,
-      {required T thread,
+      {required Uri uri,
       int? lastPageForGirlsCh,
       RangeList? range}) {
     return _$_fetchDataAsyncAction.run(() => super._fetchData<T>(dataId,
-        thread: thread, lastPageForGirlsCh: lastPageForGirlsCh, range: range));
+        uri: uri, lastPageForGirlsCh: lastPageForGirlsCh, range: range));
   }
 
   late final _$_getContentForFiveChAsyncAction =

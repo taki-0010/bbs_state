@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: bf84efecd662198d8cfb04a3c3e4a5e777993c18
+      resolved-ref: "9638e5446009035fd1152b540e5f7809de88eb90"
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -513,7 +513,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "3a316f43bc4ea35cbe8ce31cbec04c34ce3a0f61"
+      resolved-ref: "2cef65cbb384be14f9f8194aaafac84dc28fe952"
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"
@@ -798,10 +798,10 @@ packages:
     dependency: "direct dev"
     description:
       name: test
-      sha256: a20ddc0723556dc6dd56094e58ec1529196d5d7774156604cb14e8445a5a82ff
+      sha256: d983a57c33dde6d44b1fb8635f67c91f4b41d26cf227c147963affa97d63563d
       url: "https://pub.dev"
     source: hosted
-    version: "1.24.7"
+    version: "1.24.8"
   test_api:
     dependency: transitive
     description:
@@ -814,10 +814,10 @@ packages:
     dependency: transitive
     description:
       name: test_core
-      sha256: "96382d0bc826e260b077bb496259e58bc82e90b603ab16cd5ae95dfe1dfcba8b"
+      sha256: "2f866bf4b20c11327ac166ee6036bddafb7fe9e35505ff8324f788e66913f967"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.7"
+    version: "0.5.8"
   timeago:
     dependency: transitive
     description:

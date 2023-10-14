@@ -639,13 +639,15 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
-        Communities.open2Ch => FiveChBoardNames.getById(id),
+        Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
         Communities.shitaraba => selectedForumState?.history.markList
-            .firstWhere(
-              (element) => element?.boardId == id,
-              orElse: () => null,
-            )
-            ?.boardName,
+                .firstWhere(
+                  (element) =>
+                      element?.boardId == id && element?.boardName != null,
+                  orElse: () => null,
+                )
+                ?.boardName ??
+            id,
         null => null
       };
 
@@ -1511,16 +1513,16 @@ abstract class MainStoreBase with Store, WithDateTime {
   //   // FutabaChHandler.getThreadsByJson();
   // }
 
-  String? parsedUrl(final String url) {
-    switch (selectedForum) {
-      case Communities.fiveCh:
-        return FiveChData.toDatUrl(url);
-      case Communities.pinkCh:
-        return FiveChData.toDatUrl(url);
-      default:
-        return url;
-    }
-  }
+  // String? parsedUrl(final String url) {
+  //   switch (selectedForum) {
+  //     case Communities.fiveCh:
+  //       return FiveChData.toDatUrl(url);
+  //     case Communities.pinkCh:
+  //       return FiveChData.toDatUrl(url);
+  //     default:
+  //       return url;
+  //   }
+  // }
 
   Communities? forumLink(final Uri uri) {
     if (selectedForumList == null) return null;
@@ -1531,6 +1533,11 @@ abstract class MainStoreBase with Store, WithDateTime {
       }
     }
     return null;
+  }
+
+  Future<void> openBoardByUri(final Uri uri) async {
+    if (!largeScreen) return;
+    await selectedForumState?.forumMain.openBoardByUri(uri);
   }
 
   // String linkButtonLabel(final Uri uri, final Communities forum) {
@@ -1563,7 +1570,10 @@ abstract class MainStoreBase with Store, WithDateTime {
       case Communities.machi:
         return MachiData.getBoardIdFromUri(uri);
       case Communities.girlsCh:
-        return GirlsChData.getBoardIdFromUri(uri);
+        final fromUri = GirlsChData.getBoardIdFromUri(uri);
+        final content = currentContent?.content.lastOrNull;
+        final id = content is GirlsChContent? ? content?.categoryId : null;
+        return id ?? fromUri;
       case Communities.open2Ch:
         return Open2ChData.getBoardIdFromUri(uri);
       case Communities.futabaCh:

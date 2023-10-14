@@ -182,6 +182,7 @@ abstract class SearchStateBase with Store {
         result = await Open2ChHandler.getSearchThreads(keyword);
       default:
     }
+    logger.i('search result: ${result?.length}');
     _setSearchThreads(result);
     await setSearchWords(keyword);
     // await parent.parent.userStorage.setSearchWords(keyword);
@@ -205,6 +206,7 @@ abstract class SearchStateBase with Store {
   void _setSearchThreads(final List<ThreadData?>? value) {
     searchThreadList.clear();
     if (value != null) {
+      // value.sort((a, b) => a.c);
       searchThreadList.addAll([...value]);
     }
   }
