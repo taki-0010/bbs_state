@@ -314,11 +314,14 @@ abstract class ContentStateBase with Store, WithDateTime {
     final count = content.content
         .where((element) => element?.getPostId == selfId)
         .toList();
+    if (count.isEmpty || count.length == 1) {
+      return null;
+    }
     final before = count
         .where((element) => element != null && element.index <= currentIndex)
         .toList();
     final result = '${before.length} / ${count.length}';
-    return count.length == 1 ? null : result;
+    return result;
   }
 
   List<int?> getResCount(

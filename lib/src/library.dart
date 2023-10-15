@@ -182,9 +182,10 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   ThreadMarkData? getSelectedMarkDataById(
-      final String id, final String boardId) {
+      final String id, final String? boardId) {
+
     return markList.firstWhere(
-        (element) => element?.id == id && element?.boardId == boardId,
+        (element) => element?.id == id && (parent.type == Communities.girlsCh ? true : element?.boardId == boardId),
         orElse: () => null);
   }
 
@@ -195,17 +196,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
     }
     final threadId = parent.parent.getThreadIdFromUri(uri, parent.type);
     final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
-    // switch (parent.type) {
-    //   case Communities.shitaraba:
-    //     threadId = ShitarabaData.getThreadIdFromUri(uri);
-    //     boardId = ShitarabaData.getBoardIdFromUri(uri);
-    //     break;
-    //   case Communities.fiveCh:
-    //     threadId = FiveChData.getThreadIdFromUri(uri);
-    //     boardId = FiveChData.getBoardIdFromUri(uri);
-    //   default:
-    // }
-    if (threadId != null && boardId != null) {
+    
+    if (threadId != null ) {
       return getSelectedMarkDataById(threadId, boardId);
     }
     return null;

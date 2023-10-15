@@ -880,30 +880,110 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
   }
 
-  Future<FetchResult> getDataByUrl(final Uri uriData,
-      {final bool setContent = true}) async {
+  Future<ContentData?> getSelectedRes(final Uri uri, final int resNum) async {
+    List<ContentData?>? contentList;
+    switch (type) {
+      case Communities.girlsCh:
+        final threadId = GirlsChData.getThreadIdFromUri(uri);
+        if (threadId != null) {
+          final result = await GirlsChHandler.getRes(threadId, resNum);
+          contentList = result.contentList;
+        }
+        break;
+      case Communities.shitaraba:
+        final category = ShitarabaData.getCategoryFromUri(uri);
+        final boardId = ShitarabaData.getBoardIdFromUri(uri);
+        final threadId = ShitarabaData.getThreadIdFromUri(uri);
+        if (category != null && boardId != null && threadId != null) {
+          final result = await ShitarabaHandler.getRes(
+              ShitarabaData.getThreadUrlPath(
+                  category: category, boardId: boardId, threadId: threadId),
+              resNum);
+          contentList = result.contentList;
+        }
+
+        break;
+      default:
+        final (
+          FetchContentResultData? contentResult,
+          String? threadId,
+          Uri uri
+        )? result = await _getDataByUri(uri);
+        final contentData = result?.$1;
+        logger.i('getSelectedRes: ${contentData?.contentList?.length}');
+        if (result == null ||
+            contentData == null ||
+            contentData.result != FetchResult.success) {
+          return null;
+        }
+        contentList = contentData.contentList;
+    }
+    
+    if (contentList == null) {
+      return null;
+    }
+
+    ContentData? data;
+    for (final i in contentList) {
+      if (i?.index == resNum) {
+        data = i;
+      }
+    }
+    // final data = contentData.contentList!.firstWhere(
+    //   (element) => element?.index == resNum,
+    //   orElse: () => null,
+    // );
+    return data;
+  }
+
+  Future<(FetchContentResultData? contentResult, String? threadId, Uri uri)?>
+      _getDataByUri(final Uri uriData) async {
     final uri = htmlToDatUri(uriData);
     logger.i('getDataByUri: $uri');
     if (uri == null) {
-      return FetchResult.error;
+      return null;
     }
     final threadId = parent.getThreadIdFromUri(uri, type);
     if (threadId == null) {
-      return FetchResult.error;
+      return null;
     }
     logger.i('getDataByUrl: uri: $uri, threadId: $threadId');
-    final result = await _fetchData(threadId, uri: uri);
-    if (result == null || result.result != FetchResult.success) {
-      return result?.result ?? FetchResult.error;
+    return (await _fetchData(threadId, uri: uri), threadId, uri);
+  }
+
+  Future<FetchResult> getDataByUrl(final Uri uriData,
+      {final bool setContent = true}) async {
+    // final uri = htmlToDatUri(uriData);
+    // logger.i('getDataByUri: $uri');
+    // if (uri == null) {
+    //   return FetchResult.error;
+    // }
+    // final threadId = parent.getThreadIdFromUri(uri, type);
+    // if (threadId == null) {
+    //   return FetchResult.error;
+    // }
+    // logger.i('getDataByUrl: uri: $uri, threadId: $threadId');
+    final (
+      FetchContentResultData? contentResult,
+      String? threadId,
+      Uri uri
+    )? result = await _getDataByUri(uriData);
+    final contentData = result?.$1;
+    if (result == null ||
+        contentData == null ||
+        contentData.result != FetchResult.success) {
+      return contentData?.result ?? FetchResult.error;
     }
+    final uri = result.$3;
+    final threadId = result.$2!;
 
     // final threadId = parent.getThreadIdFromUri(uri, type);
-    final boardId = _getBoardId(uri, result);
+    final boardId = _getBoardId(uri, contentData);
     if (boardId == null) {
       return FetchResult.error;
     }
 
-    final content = _getData(result, threadId, boardId, null);
+    final content = _getData(contentData, threadId, boardId, null);
     if (content == null) {
       return FetchResult.error;
     }
@@ -914,7 +994,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     final markResult = await _setInitialThreadMarkData(
         content, '${uri.host}${uri.path}', null, null);
     if (markResult != FetchResult.success) {
-      return result.result;
+      return contentData.result;
     }
     if (setContent) {
       search.setPrimaryView(PrimaryViewState.content);
@@ -987,7 +1067,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         final host = uri.host;
         final boardId = Open2ChData.getBoardIdFromUri(uri);
         if (boardId != null) {
-          logger.i('_fetchData: host: $host,$dataId, $boardId');
+          logger.i('_fetchData: open: host: $host, $dataId, $boardId');
 
           return await _getContentForFiveCh(
             dataId,

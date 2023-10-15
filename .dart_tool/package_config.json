@@ -171,13 +171,13 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-9638e5446009035fd1152b540e5f7809de88eb90/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-27455d32553027a0351e73800eec7b1a13cd8800/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "device_info_plus",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/device_info_plus-9.0.3",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/device_info_plus-9.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
@@ -387,7 +387,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-2cef65cbb384be14f9f8194aaafac84dc28fe952/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-caa978e6028a2cf09a60392e148d70fcde78015e/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -411,7 +411,7 @@
     },
     {
       "name": "package_info_plus",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/package_info_plus-4.1.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/package_info_plus-4.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
@@ -776,7 +776,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-10-14T10:18:33.217248Z",
+  "generated": "2023-10-15T05:25:45.315942Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

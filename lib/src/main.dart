@@ -1540,6 +1540,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     await selectedForumState?.forumMain.openBoardByUri(uri);
   }
 
+  Future<ContentData?> getSelectedRes(
+      final Uri uri, final Communities forum, final int resNum) async {
+    return _selectedForum(forum)?.getSelectedRes(uri, resNum);
+  }
+
+  ThemeList getForumTheme(final Communities forum) {
+    final currentTheme = selectedTheme;
+    return _selectedForum(forum)?.selectedTheme ?? currentTheme;
+  }
+
   // String linkButtonLabel(final Uri uri, final Communities forum) {
   //   final tob = uriIsThreadOrBoard(uri, forum);
   //   if (tob == null) {
@@ -1619,6 +1629,23 @@ abstract class MainStoreBase with Store, WithDateTime {
       default:
     }
     return null;
+  }
+
+  int? getResNumFromUri(final Uri uri, final Communities forum) {
+    switch (forum) {
+      case Communities.fiveCh || Communities.pinkCh:
+        return FiveChData.getResNumFromUri(uri, forum);
+      case Communities.girlsCh:
+        return GirlsChData.getResNumFromUri(uri);
+      case Communities.shitaraba:
+        return ShitarabaData.getResNumFromUri(uri);
+      case Communities.machi:
+        return MachiData.getResNumFromUri(uri);
+      case Communities.open2Ch:
+        return Open2ChData.getResNumFromUri(uri);
+      default:
+        return null;
+    }
   }
 
   ThreadMarkData? getThreadMarkByUri(final Uri uri, final Communities forum) {
