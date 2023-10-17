@@ -142,6 +142,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   @computed
   TimeagoList get selectedTimeagoList =>
       settings?.timeago ?? TimeagoList.enable;
+      
+  @computed
+  bool get selectedNsfw =>
+      settings?.nsfw ?? false;
 
   // @computed
   // bool get userFavoritesBoards => settings?.useFavoritesBoards ?? false;
@@ -918,7 +922,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
         contentList = contentData.contentList;
     }
-    
+
     if (contentList == null) {
       return null;
     }
@@ -1096,22 +1100,18 @@ abstract class ForumStateBase with Store, WithDateTime {
               threadId: dataId,
               range: range ?? RangeList.last1000);
         }
+      case Communities.chan4:
+        final boardId = Chan4Data.getBoardIdFromUri(uri);
+        final threadId = Chan4Data.getThreadIdFromUri(uri);
+        logger.i('chan4: $uri, threadId: $threadId, $boardId');
+        if (boardId != null && threadId != null) {
+          return await _getContentForChan4(
+              boardId: boardId, threadId: threadId);
+        }
 
       default:
       // _toggleLoading();
     }
-    // if (result != null && threadLength != null) {
-    //   final content = ThreadContentData(
-    //       id: thread.id,
-    //       boardId: thread.boardId,
-    //       type: type,
-    //       content: result,
-    //       threadLength: threadLength,
-    //       archived: archived);
-    //   return content;
-
-    //   // await _setContent(content);
-    // }
     return null;
   }
 
@@ -1358,6 +1358,18 @@ abstract class ForumStateBase with Store, WithDateTime {
   }) async {
     // if (thread is! FutabaChThread) return;
     final result = await MachiHandler.getContent(
+      boardId,
+      threadId,
+    );
+    return result;
+  }
+
+  Future<FetchContentResultData> _getContentForChan4({
+    required final String boardId,
+    required final String threadId,
+  }) async {
+    // if (thread is! FutabaChThread) return;
+    final result = await Chan4Handler.getContent(
       boardId,
       threadId,
     );

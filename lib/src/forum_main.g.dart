@@ -272,6 +272,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
     return _$setPrimaryViewAsyncAction.run(() => super.setPrimaryView(value));
   }
 
+  late final _$reloadBoardsAsyncAction =
+      AsyncAction('ForumMainStateBase.reloadBoards', context: context);
+
+  @override
+  Future<void> reloadBoards() {
+    return _$reloadBoardsAsyncAction.run(() => super.reloadBoards());
+  }
+
   late final _$getBoardsAsyncAction =
       AsyncAction('ForumMainStateBase.getBoards', context: context);
 

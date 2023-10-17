@@ -338,6 +338,20 @@ abstract class ContentStateBase with Store, WithDateTime {
     return result;
   }
 
+  List<int?> getNoCount(
+    final int no,
+  ) {
+    final list = content.content;
+    List<int?> result = [];
+    final target = '>>$no';
+    for (final i in list) {
+      if (i is Chan4Content && i.anchorList.contains(target)) {
+        result.add(i.no);
+      }
+    }
+    return result;
+  }
+
   List<int?> getResCountForFutaba(
       final FutabaChContent self, final List<String> targetBody) {
     final list = content.content;

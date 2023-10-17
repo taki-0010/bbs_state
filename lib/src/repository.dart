@@ -142,30 +142,31 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   }
 
   void _clearForumThreads(final Communities value) {
-    switch (value) {
-      case Communities.fiveCh:
-        parent.fiveCh.clear();
-        break;
-      case Communities.girlsCh:
-        parent.girlsCh.clear();
-        break;
-      case Communities.futabaCh:
-        parent.futabaCh.clear();
-        break;
-      case Communities.pinkCh:
-        parent.pinkCh.clear();
-        break;
-      case Communities.machi:
-        parent.machi.clear();
-        break;
-      case Communities.shitaraba:
-        parent.shitaraba.clear();
-        break;
-      case Communities.open2Ch:
-        parent.open2ch.clear();
-        break;
-      default:
-    }
+    parent.clearForumThreads(value);
+    // switch (value) {
+    //   case Communities.fiveCh:
+    //     parent.fiveCh.clear();
+    //     break;
+    //   case Communities.girlsCh:
+    //     parent.girlsCh.clear();
+    //     break;
+    //   case Communities.futabaCh:
+    //     parent.futabaCh.clear();
+    //     break;
+    //   case Communities.pinkCh:
+    //     parent.pinkCh.clear();
+    //     break;
+    //   case Communities.machi:
+    //     parent.machi.clear();
+    //     break;
+    //   case Communities.shitaraba:
+    //     parent.shitaraba.clear();
+    //     break;
+    //   case Communities.open2Ch:
+    //     parent.open2ch.clear();
+    //     break;
+    //   default:
+    // }
   }
 
   Future<void> saveThreadMark(final ThreadMarkData value) async {
@@ -268,58 +269,60 @@ abstract class RepositoryStateBase with Store, WithDateTime {
 
   void setForumSettings(final ForumSettingsData value) {
     logger.d('repository: setForumSettings: ${value.forum}');
-    switch (value.forum) {
-      case Communities.fiveCh:
-        parent.fiveCh.setSettings(value);
-        break;
-      case Communities.girlsCh:
-        parent.girlsCh.setSettings(value);
-        break;
-      case Communities.futabaCh:
-        parent.futabaCh.setSettings(value);
-        break;
-      case Communities.pinkCh:
-        parent.pinkCh.setSettings(value);
-        break;
-      case Communities.machi:
-        parent.machi.setSettings(value);
-        break;
-      case Communities.shitaraba:
-        parent.shitaraba.setSettings(value);
-        break;
-      case Communities.open2Ch:
-        parent.open2ch.setSettings(value);
-        break;
-      default:
-    }
+    parent.setForumSettings(value);
+    // switch (value.forum) {
+    //   case Communities.fiveCh:
+    //     parent.fiveCh.setSettings(value);
+    //     break;
+    //   case Communities.girlsCh:
+    //     parent.girlsCh.setSettings(value);
+    //     break;
+    //   case Communities.futabaCh:
+    //     parent.futabaCh.setSettings(value);
+    //     break;
+    //   case Communities.pinkCh:
+    //     parent.pinkCh.setSettings(value);
+    //     break;
+    //   case Communities.machi:
+    //     parent.machi.setSettings(value);
+    //     break;
+    //   case Communities.shitaraba:
+    //     parent.shitaraba.setSettings(value);
+    //     break;
+    //   case Communities.open2Ch:
+    //     parent.open2ch.setSettings(value);
+    //     break;
+    //   default:
+    // }
   }
 
   void setThreadData(final ThreadMarkData? value) {
     if (value != null) {
-      switch (value.type) {
-        case Communities.fiveCh:
-          parent.fiveCh.history.setLog(value);
-          break;
-        case Communities.girlsCh:
-          parent.girlsCh.history.setLog(value);
-          break;
-        case Communities.futabaCh:
-          parent.futabaCh.history.setLog(value);
-          break;
-        case Communities.pinkCh:
-          parent.pinkCh.history.setLog(value);
-          break;
-        case Communities.machi:
-          parent.machi.history.setLog(value);
-          break;
-        case Communities.shitaraba:
-          parent.shitaraba.history.setLog(value);
-          break;
-        case Communities.open2Ch:
-          parent.open2ch.history.setLog(value);
-          break;
-        default:
-      }
+      parent.setThreadData(value);
+      // switch (value.type) {
+      //   case Communities.fiveCh:
+      //     parent.fiveCh.history.setLog(value);
+      //     break;
+      //   case Communities.girlsCh:
+      //     parent.girlsCh.history.setLog(value);
+      //     break;
+      //   case Communities.futabaCh:
+      //     parent.futabaCh.history.setLog(value);
+      //     break;
+      //   case Communities.pinkCh:
+      //     parent.pinkCh.history.setLog(value);
+      //     break;
+      //   case Communities.machi:
+      //     parent.machi.history.setLog(value);
+      //     break;
+      //   case Communities.shitaraba:
+      //     parent.shitaraba.history.setLog(value);
+      //     break;
+      //   case Communities.open2Ch:
+      //     parent.open2ch.history.setLog(value);
+      //     break;
+      //   default:
+      // }
     }
   }
 
@@ -328,30 +331,31 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   void deleteThreadData(final ThreadMarkData? value,
       {final bool showSnack = true}) {
     if (value != null) {
-      switch (value.type) {
-        case Communities.fiveCh:
-          parent.fiveCh.deleteContent(value);
-          break;
-        case Communities.girlsCh:
-          parent.girlsCh.deleteContent(value);
-          break;
-        case Communities.futabaCh:
-          parent.futabaCh.deleteContent(value);
-          break;
-        case Communities.pinkCh:
-          parent.pinkCh.deleteContent(value);
-          break;
-        case Communities.machi:
-          parent.machi.deleteContent(value);
-          break;
-        case Communities.shitaraba:
-          parent.shitaraba.deleteContent(value);
-          break;
-        case Communities.open2Ch:
-          parent.open2ch.deleteContent(value);
-          break;
-        default:
-      }
+      parent.deleteThreadData(value);
+      // switch (value.type) {
+        // case Communities.fiveCh:
+        //   parent.fiveCh.deleteContent(value);
+        //   break;
+        // case Communities.girlsCh:
+        //   parent.girlsCh.deleteContent(value);
+        //   break;
+        // case Communities.futabaCh:
+        //   parent.futabaCh.deleteContent(value);
+        //   break;
+        // case Communities.pinkCh:
+        //   parent.pinkCh.deleteContent(value);
+        //   break;
+        // case Communities.machi:
+        //   parent.machi.deleteContent(value);
+        //   break;
+        // case Communities.shitaraba:
+        //   parent.shitaraba.deleteContent(value);
+        //   break;
+        // case Communities.open2Ch:
+        //   parent.open2ch.deleteContent(value);
+        //   break;
+        // default:
+      // }
       if (showSnack) {
         parent.setDeletedThreadTitle(value.title);
       }

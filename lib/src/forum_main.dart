@@ -72,11 +72,11 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   List<BoardData?> get boardsData {
     if (userFavoritesBoards) {
       switch (parent.type) {
-        case Communities.fiveCh:
+        case Communities.fiveCh || Communities.open2Ch:
           List<BoardData?> boardList = [];
           for (final element in boards) {
-            if (element?.fiveChCategory != null) {
-              final i = element!.fiveChCategory!.categoryContent;
+            if (element is FiveChCategoryData) {
+              final i = element.categoryContent;
               for (final t in i) {
                 boardList.add(t);
               }
@@ -87,21 +87,21 @@ abstract class ForumMainStateBase with Store, WithDateTime {
                   (final element) => element?.id == e,
                   orElse: () => null))
               .toList();
-        case Communities.open2Ch:
-          List<BoardData?> boardList = [];
-          for (final element in boards) {
-            if (element?.open2chBoards != null) {
-              final i = element!.open2chBoards;
-              for (final t in i) {
-                boardList.add(t);
-              }
-            }
-          }
-          return favoritesBoards
-              .map((e) => boardList.firstWhere(
-                  (final element) => element?.id == e,
-                  orElse: () => null))
-              .toList();
+        // case Communities.open2Ch:
+        //   List<BoardData?> boardList = [];
+        //   for (final element in boards) {
+        //     if (element is FiveChCategoryData) {
+        //       final i = element.categoryContent;
+        //       for (final t in i) {
+        //         boardList.add(t);
+        //       }
+        //     }
+        //   }
+        //   return favoritesBoards
+        //       .map((e) => boardList.firstWhere(
+        //           (final element) => element?.id == e,
+        //           orElse: () => null))
+        //       .toList();
         case Communities.shitaraba:
           return favoriteBoardsData;
 
@@ -237,6 +237,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         }
       }
       over1000.sort((a, b) => (a?.resCount ?? 1).compareTo((b?.resCount ?? 1)));
+      // logger.i('sortedThreads: ${notOver1000.length}, ${over1000.length}');
       return [...notOver1000, ...over1000];
     } else {
       return removeSameId;
@@ -250,12 +251,16 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     if (board == null) return false;
     switch (parent.type) {
       case Communities.shitaraba:
-        final str = ShitarabaData.favoriteBoardStr(
-            category: board!.shitarabaBoard!.category, boardId: board!.id);
-        return favoritesBoards.contains(str);
+        if (board is ShitarabaBoardData) {
+          final category = (board as ShitarabaBoardData).category;
+          final str = ShitarabaData.favoriteBoardStr(
+              category: category, boardId: board!.id);
+          return favoritesBoards.contains(str);
+        }
       default:
         return favoritesBoards.contains(board!.id);
     }
+    return false;
   }
 
   @computed
@@ -323,10 +328,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   BoardData? getSelectedBoardDataById(final String id) {
     BoardData? boardData;
     switch (parent.type) {
-      case Communities.fiveCh:
+      case Communities.fiveCh || Communities.open2Ch:
         for (final c in boards) {
-          if (c?.fiveChCategory != null) {
-            for (final b in c!.fiveChCategory!.categoryContent) {
+          if (c is FiveChCategoryData) {
+            for (final b in c.categoryContent) {
               if (b.id == id) {
                 boardData = b;
               }
@@ -345,7 +350,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   Future<void> openBoardByUri(final Uri uri) async {
     final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
-    if (boardId == null ) {
+    if (boardId == null) {
       return;
     }
     if (boards.isEmpty) {
@@ -364,6 +369,12 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   @action
   void setBoard(final BoardData value) => board = value;
+
+  @action
+  Future<void> reloadBoards() async {
+    boards.clear();
+    await getBoards();
+  }
 
   @action
   Future<void> getBoards() async {
@@ -395,6 +406,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.open2Ch:
         result = await _getBoardsForOpen2ch();
         break;
+      case Communities.chan4:
+        result = await _getBoardsForChan4();
+        break;
       default:
     }
     toggleBoardLoading();
@@ -406,6 +420,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case FetchResult.networkError:
         parent.setErrorMessage('Status Code: ${result!.statusCode}');
       case FetchResult.success:
+        // boards.clear();
         boards.addAll([...?result?.boards]);
       default:
         parent.setErrorMessage('Error!');
@@ -428,6 +443,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
     }
   }
+  // Future<void>
+
+  Future<FetchBoardsResultData?> _getBoardsForChan4() async =>
+      await Chan4Handler.getBoards(parent.selectedNsfw);
 
   Future<FetchBoardsResultData?> _getBoardsForOpen2ch() async {
     if (boards.isEmpty) {
@@ -599,6 +618,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.open2Ch:
         result = await _getThreadsForOpen2Ch();
         break;
+      case Communities.chan4:
+        result = await _getThreadsForChan4();
+        break;
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -614,11 +636,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           result!.threads!,
         );
         if (parent.type == Communities.futabaCh) {
-          final jsonData = await FutabaChHandler.fetchThreadsByJson(
-              board!.futabaCh!.directory, board!.id);
-          if (jsonData != null) {
-            await parent.history.deleteMarkDataWhenNotFound<FutabaChThread>(
-                jsonData, board!.id);
+          if (board is FutabaChBoard) {
+            final jsonData = await FutabaChHandler.fetchThreadsByJson(
+                (board as FutabaChBoard).directory, board!.id);
+            if (jsonData != null) {
+              await parent.history.deleteMarkDataWhenNotFound<FutabaChThread>(
+                  jsonData, board!.id);
+            }
           }
         }
       default:
@@ -704,6 +728,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
     _setThreadsDiff<T>(newList: result, boardData: board!);
     _clearThreads();
+    // logger.i('_setThreadsMetadat: length: ${result.length}');
     threadList.addAll(result);
     await parent.history.setArchived<T>(result, board!.id);
     await parent.history.updateResCountWhenUpdateBoard(result);
@@ -719,9 +744,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
-    if (b?.forum == Communities.fiveCh) {
+    if (b?.forum == Communities.fiveCh && b is FiveChBoardData) {
       // b as FiveChBoardData;
-      final domain = b!.fiveCh!.domain;
+      final domain = b.domain;
       if (domain == null) return null;
 
       // if (board == null) return;
@@ -729,7 +754,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
       return await FiveChHandler.getThreads(
           domain: domain,
-          directoryName: b.fiveCh!.directoryName,
+          directoryName: b.directoryName,
           boardName: b.name,
           forum: Communities.fiveCh);
       // if (result == null) {
@@ -745,18 +770,16 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     // logger.d(
     //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
-    if (b?.forum == Communities.pinkCh) {
+    if (b?.forum == Communities.pinkCh && b is FiveChBoardData) {
       // b as FiveChBoardData;
-      final domain = b!.fiveCh!.domain;
+      final domain = b.domain;
       if (domain == null) return null;
 
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
       return await PinkChHandler.getThreads(
-          domain: domain,
-          directoryName: b.fiveCh!.directoryName,
-          boardName: b.name);
+          domain: domain, directoryName: b.directoryName, boardName: b.name);
       // if (result == null) {
       //   return;
       // }
@@ -766,16 +789,10 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   Future<FetchThreadsResultData?> _getThreadsForOpen2Ch() async {
-    if (board?.forum == Communities.open2Ch) {
-      // b as FiveChBoardData;
-      // final domain = '${board?.fiveCh?.directoryName}.${Open2ChData.host}';
-      if (board?.fiveCh?.directoryName == null) return null;
-
-      // if (board == null) return;
-      // logger.d('_getThreadsForFiveCh: name: ${b.name}');
-
+    final b = board;
+    if (b?.forum == Communities.open2Ch && b is FiveChBoardData) {
       return await Open2ChHandler.getThreads(
-          board!.fiveCh!.directoryName, board!.id, board!.name);
+          b.directoryName, board!.id, board!.name);
       // if (result == null) {
       //   return;
       // }
@@ -786,9 +803,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   // @action
   Future<FetchThreadsResultData?> _getThreadsForGirlsCh() async {
-    if (board?.girlsCh != null) {
-      return await GirlsChHandler.getTitleList(board!.girlsCh!.url,
-          categoryId: board!.id);
+    final b = board;
+    if (b is GirlsChCategory) {
+      return await GirlsChHandler.getTitleList(b.url, categoryId: b.id);
       // if (result == null) {
       //   return;
       // }
@@ -798,17 +815,27 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   Future<FetchThreadsResultData?> _getThreadsForMachi() async {
-    if (board?.machi != null) {
-      return await MachiHandler.getThreads(board!.id);
+    final b = board;
+    if (b is MachiBoardData) {
+      return await MachiHandler.getThreads(b.id);
+      // return setMachiThreads(result);
+    }
+    return null;
+  }
+
+  Future<FetchThreadsResultData?> _getThreadsForChan4() async {
+    final b = board;
+    if (b is Chan4BoardData) {
+      return await Chan4Handler.getThreads(b.id);
       // return setMachiThreads(result);
     }
     return null;
   }
 
   Future<FetchThreadsResultData?> _getThreadsForShitaraba() async {
-    if (board?.shitarabaBoard != null) {
-      return await ShitarabaHandler.getThreads(
-          board!.shitarabaBoard!.category, board!.id, board!.name);
+    final b = board;
+    if (b is ShitarabaBoardData) {
+      return await ShitarabaHandler.getThreads(b.category, b.id, b.name);
       // return setMachiThreads(result);
     }
     return null;
@@ -816,39 +843,32 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   // @action
   Future<FetchThreadsResultData?> _getThreadsForFutabaCh() async {
-    if (board?.futabaCh != null) {
+    final b = board;
+    if (b is FutabaChBoard) {
       // final futabaBoard = board as FutabaChBoard;
       return await FutabaChHandler.getAllThreads(
-          catalog: board!.futabaCh!.catalogUrl,
-          newer: board!.futabaCh!.newListUrl,
-          hug: board!.futabaCh!.hugListUrl,
+          catalog: b.catalogUrl,
+          newer: b.newListUrl,
+          hug: b.hugListUrl,
           boardId: board!.id,
-          directory: board!.futabaCh!.directory);
-      // final result =
-      //     await FutabaChHandler.getThreads(board!.futabaCh!.catalogUrl, board!);
-      // if (result == null) {
-      //   return null;
-      // }
-      // await _setThreadsMetadata<FutabaChThread>(result, board!);
-      // final jsonData = await FutabaChHandler.fetchThreadsByJson(
-      //     board!.futabaCh!.directory, board!.id);
-      // if (jsonData != null) {
-      //   await parent.history
-      //       .deleteMarkDataWhenNotFound<FutabaChThread>(jsonData, board!.id);
-      // }
+          directory: b.directory);
     }
     return null;
   }
 
   List<String?>? toggleFavoriteBoard() {
-    if (board == null) return null;
+    final b = board;
+    if (b == null) return null;
     String? boardId;
     switch (parent.type) {
       case Communities.shitaraba:
-        boardId = ShitarabaData.favoriteBoardStr(
-            category: board!.shitarabaBoard!.category, boardId: board!.id);
+        if (b is ShitarabaBoardData) {
+          boardId = ShitarabaData.favoriteBoardStr(
+              category: b.category, boardId: b.id);
+        }
+
       default:
-        boardId = board?.id;
+        boardId = b.id;
     }
     if (boardId == null) return null;
     return _setFavorite(boardId);
@@ -888,58 +908,68 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   Future<bool> postThread({required final PostData data}) async {
+    final b = board;
     bool result = false;
     toggleThreadsLoading();
     switch (parent.type) {
       case Communities.fiveCh || Communities.pinkCh:
-        final domain = board?.fiveCh?.domain;
-        final bbs = board?.fiveCh?.directoryName;
-        if (domain == null ||
-            bbs == null ||
-            data.body.isEmpty ||
-            data.name.isEmpty) {
-          return result;
+        if (b is FiveChBoardData) {
+          final domain = b.domain;
+          final bbs = b.directoryName;
+          if (domain == null ||
+              // bbs == null ||
+              data.body.isEmpty ||
+              data.name.isEmpty) {
+            return result;
+          }
+          logger.i('postThread: $domain, $bbs');
+          result = await FiveChHandler.postThread(
+              forum: parent.type,
+              body: data.body,
+              title: data.name,
+              origin: domain,
+              boardId: bbs);
         }
-        logger.i('postThread: $domain, $bbs');
-        result = await FiveChHandler.postThread(
-            forum: parent.type,
-            body: data.body,
-            title: data.name,
-            origin: domain,
-            boardId: bbs);
+
       case Communities.futabaCh:
-        final directory = board?.futabaCh?.directory;
-        final boardId = board?.id;
-        final deleteKey = parent.settings?.deleteKeyForFutaba;
-        if (directory == null || boardId == null || deleteKey == null) {
-          return false;
+        if (b is FutabaChBoard) {
+          final directory = b.directory;
+          final boardId = b.id;
+          final deleteKey = parent.settings?.deleteKeyForFutaba;
+          if (deleteKey == null) {
+            return false;
+          }
+          result = await FutabaChHandler.postThread(directory, boardId,
+              comment: data, deleteKey: deleteKey);
         }
-        result = await FutabaChHandler.postThread(directory, boardId,
-            comment: data, deleteKey: deleteKey);
+
       case Communities.girlsCh:
         final postResult = await GirlsChHandler.postThread(data);
         if (postResult != null && postResult) {
           result = true;
         }
       case Communities.shitaraba:
-        if (board?.shitarabaBoard == null) {
+        if (b is! ShitarabaBoardData) {
           return false;
         }
         final postResult = await ShitarabaHandler.postThread(data,
-            boardId: board!.id, category: board!.shitarabaBoard!.category);
+            boardId: b.id, category: b.category);
         if (postResult) {
           result = true;
         }
       case Communities.open2Ch:
-        final domain = board?.fiveCh?.domain;
-        final bbs = board?.id;
-        if (domain == null ||
-            bbs == null ||
-            data.body.isEmpty ||
-            data.name.isEmpty) {
-          return result;
+        if (b is FiveChBoardData) {
+          final domain = b.domain;
+          final bbs = b.id;
+          if (domain == null ||
+              // bbs == null ||
+              data.body.isEmpty ||
+              data.name.isEmpty) {
+            return result;
+          }
+          result = await Open2ChHandler.postThread(data, domain, bbs);
         }
-        result = await Open2ChHandler.postThread(data, domain, bbs);
+
       default:
     }
     if (result) {

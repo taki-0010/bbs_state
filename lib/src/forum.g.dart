@@ -81,6 +81,13 @@ mixin _$ForumState on ForumStateBase, Store {
           Computed<TimeagoList>(() => super.selectedTimeagoList,
               name: 'ForumStateBase.selectedTimeagoList'))
       .value;
+  Computed<bool>? _$selectedNsfwComputed;
+
+  @override
+  bool get selectedNsfw =>
+      (_$selectedNsfwComputed ??= Computed<bool>(() => super.selectedNsfw,
+              name: 'ForumStateBase.selectedNsfw'))
+          .value;
   Computed<RetentionPeriodList>? _$retentionPeriodComputed;
 
   @override
@@ -483,6 +490,7 @@ selectedFonts: ${selectedFonts},
 selectedTheme: ${selectedTheme},
 selectedListViewStyle: ${selectedListViewStyle},
 selectedTimeagoList: ${selectedTimeagoList},
+selectedNsfw: ${selectedNsfw},
 retentionPeriod: ${retentionPeriod},
 getBoardsScrollTotal: ${getBoardsScrollTotal},
 currentContentState: ${currentContentState},

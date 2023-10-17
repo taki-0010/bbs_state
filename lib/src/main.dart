@@ -23,6 +23,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final machi = ForumState(parent: this, type: Communities.machi);
   late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
   late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
+  late final chan4 = ForumState(parent: this, type: Communities.chan4);
 
   // late final SembastCacheStore store;
 
@@ -251,6 +252,8 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get blurThumbnail =>
       selectedForumState?.settings?.blurThumbnail ?? false;
+  @computed
+  bool get enableNsfw => selectedForumState?.settings?.nsfw ?? false;
 
   @computed
   ThreadContentData? get currentContent {
@@ -340,27 +343,44 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get currentBoardUrl {
     final board = selectedForumState?.forumMain.board;
     switch (selectedForum) {
-      case Communities.fiveCh:
-        return board?.fiveCh?.url;
+      case Communities.chan4:
+        if (board is Chan4BoardData) {
+          return board.currentBoardUri.toString();
+        }
+      case Communities.fiveCh || Communities.pinkCh:
+        return board is FiveChBoardData ? board.url : null;
       case Communities.girlsCh:
-        final data = board?.girlsCh?.url;
-        return Uri.https(GirlsChData.host, data ?? '').toString();
+        final data = board is GirlsChCategory ? board.url : null;
+        if (data != null) {
+          return Uri.https(GirlsChData.host, data).toString();
+        }
       case Communities.futabaCh:
-        final data = board?.futabaCh?.path;
-        return 'https://$data/';
-      case Communities.pinkCh:
-        return board?.fiveCh?.url;
+        final data = board is FutabaChBoard ? board.path : null;
+        if (data != null) {
+          return 'https://$data/';
+        }
+
+      // case Communities.pinkCh:
+      //   return board?.fiveCh?.url;
       case Communities.machi:
         return Uri.https('${selectedForum?.host}', '${board?.id}').toString();
       case Communities.shitaraba:
-        return Uri.https('${ShitarabaData.sub}.${ShitarabaData.host}',
-                '${board?.shitarabaBoard?.category}/${board?.id}')
-            .toString();
+        final category = board is ShitarabaBoardData ? board.category : null;
+        if (category != null) {
+          return Uri.https('${ShitarabaData.sub}.${ShitarabaData.host}',
+                  '$category/${board?.id}')
+              .toString();
+        }
+
       case Communities.open2Ch:
-        return Uri.https(
-                '${board?.fiveCh?.directoryName}.${Communities.open2Ch.host}',
-                '${board?.id}')
-            .toString();
+        final directoryName =
+            board is FiveChBoardData ? board.directoryName : null;
+        if (directoryName != null) {
+          return Uri.https(
+                  '$directoryName.${Communities.open2Ch.host}', '${board?.id}')
+              .toString();
+        }
+
       default:
     }
     return null;
@@ -476,12 +496,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   List<RetentionPeriodList> get selectableRetentionPeriod {
     switch (selectedForum) {
-      case Communities.fiveCh:
+      case Communities.fiveCh || Communities.pinkCh || Communities.shitaraba:
         return RetentionPeriodList.values;
-      case Communities.pinkCh:
-        return RetentionPeriodList.values;
-      case Communities.shitaraba:
-        return RetentionPeriodList.values;
+      // case Communities.pinkCh:
+      //   return RetentionPeriodList.values;
+      // case Communities.shitaraba:
+      //   return RetentionPeriodList.values;
       default:
         return RetentionPeriodList.values
             .where((element) => element != RetentionPeriodList.byPostPace)
@@ -491,14 +511,18 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   String? get boardIdForSearch {
-    switch (selectedForum) {
-      case Communities.futabaCh:
-        return futabaCh.settings?.searchBoardIdForFutaba;
-      case Communities.machi:
-        return machi.settings?.searchBoardIdForMachi;
-      default:
-    }
-    return null;
+    return _selectedForum(selectedForum)?.settings?.searchBoardId;
+
+    // switch (selectedForum) {
+    //   case Communities.futabaCh:
+    //     return futabaCh.settings?.searchBoardId;
+    //   case Communities.machi:
+    //     return machi.settings?.searchBoardId;
+    //   case Communities.machi:
+    //     return machi.settings?.searchBoardId;
+    //   default:
+    // }
+    // return null;
   }
 
   @computed
@@ -518,6 +542,14 @@ abstract class MainStoreBase with Store, WithDateTime {
           return boards;
         } else {
           final boards = await MachiHandler.getBoards();
+          return boards.boards;
+        }
+      case Communities.chan4:
+        final boards = chan4.forumMain.boards;
+        if (boards.isNotEmpty) {
+          return boards;
+        } else {
+          final boards = await Chan4Handler.getBoards(chan4.selectedNsfw);
           return boards.boards;
         }
       default:
@@ -647,6 +679,13 @@ abstract class MainStoreBase with Store, WithDateTime {
                   orElse: () => null,
                 )
                 ?.boardName ??
+            id,
+        Communities.chan4 => selectedForumState?.forumMain.boards
+                .firstWhere(
+                  (element) => element?.id == id,
+                  orElse: () => null,
+                )
+                ?.name ??
             id,
         null => null
       };
@@ -1209,6 +1248,24 @@ abstract class MainStoreBase with Store, WithDateTime {
     // await userStorage.setPositionToGet(selected, value);
   }
 
+  void setNsfw(final bool value) {
+    final settnigs = selectedForumState?.settings;
+    if (settnigs == null) return;
+    if (settnigs.nsfw == value) return;
+    final newData = settnigs.copyWith(nsfw: value);
+    selectedForumState?.setSettings(newData);
+    selectedForumState?.forumMain.reloadBoards().then((final v) {
+      if (!value) {
+        switch (selectedForum) {
+          case Communities.chan4:
+            setSearchBoardId('a');
+            break;
+          default:
+        }
+      }
+    });
+  }
+
   Future<void> setThreadsOrder(final ThreadsOrderType value) async {
     final current = selectedForumState?.settings;
     if (current == null) return;
@@ -1330,6 +1387,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.girlsCh => girlsCh,
         Communities.open2Ch => open2ch,
         Communities.machi => machi,
+        Communities.chan4 => chan4,
         null => null
       };
 
@@ -1442,14 +1500,18 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<void> setSearchBoardId(final String id) async {
     final current = selectedForumState?.settings;
     if (current == null) return;
+    final newData = current.copyWith(searchBoardId: id);
     switch (selectedForumState?.type) {
       case Communities.futabaCh:
-        final newData = current.copyWith(searchBoardIdForFutaba: id);
+        // final newData = current.copyWith(searchBoardIdForFutaba: id);
         futabaCh.setSettings(newData);
         break;
       case Communities.machi:
-        final newData = current.copyWith(searchBoardIdForMachi: id);
+        // final newData = current.copyWith(searchBoardIdForMachi: id);
         machi.setSettings(newData);
+        break;
+      case Communities.chan4:
+        chan4.setSettings(newData);
         break;
       default:
     }
@@ -1588,6 +1650,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Open2ChData.getBoardIdFromUri(uri);
       case Communities.futabaCh:
         return FutabaData.getBoardIdFromUri(uri);
+      case Communities.chan4:
+        return Chan4Data.getBoardIdFromUri(uri);
       default:
     }
     return null;
@@ -1607,6 +1671,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Open2ChData.getThreadIdFromUri(uri);
       case Communities.futabaCh:
         return FutabaData.getThreadIdFromUri(uri);
+      case Communities.chan4:
+        return Chan4Data.getThreadIdFromUri(uri);
       default:
     }
     return null;
@@ -1626,6 +1692,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Open2ChData.uriIsThreadOrBoard(uri);
       case Communities.futabaCh:
         return FutabaData.uriIsThreadOrBoard(uri);
+      case Communities.chan4:
+        return Chan4Data.uriIsThreadOrBoard(uri);
       default:
     }
     return null;
@@ -1736,8 +1804,23 @@ abstract class MainStoreBase with Store, WithDateTime {
     return await ShitarabaHandler.getBoards(category);
   }
 
-  // Future<void> openget() async {
-  //   logger.i('open2ch');
-  //   await Open2ChHandler.getSearchThreads('雑談');
-  // }
+  void clearForumThreads(final Communities forum) {
+    _selectedForum(forum)?.clear();
+  }
+
+  void setForumSettings(final ForumSettingsData value) {
+    _selectedForum(value.forum)?.setSettings(value);
+  }
+
+  void setThreadData(final ThreadMarkData value) {
+    _selectedForum(value.type)?.history.setLog(value);
+  }
+
+  void deleteThreadData(final ThreadMarkData value) =>
+      _selectedForum(value.type)?.deleteContent(value);
+
+  Future<void> openget() async {
+    logger.i('open2ch');
+    // await Chan4Handler.searchThreads('waifu draw', 'a');
+  }
 }

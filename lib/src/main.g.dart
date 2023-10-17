@@ -184,6 +184,13 @@ mixin _$MainStore on MainStoreBase, Store {
       (_$blurThumbnailComputed ??= Computed<bool>(() => super.blurThumbnail,
               name: 'MainStoreBase.blurThumbnail'))
           .value;
+  Computed<bool>? _$enableNsfwComputed;
+
+  @override
+  bool get enableNsfw =>
+      (_$enableNsfwComputed ??= Computed<bool>(() => super.enableNsfw,
+              name: 'MainStoreBase.enableNsfw'))
+          .value;
   Computed<ThreadContentData?>? _$currentContentComputed;
 
   @override
@@ -961,6 +968,7 @@ currentViewStyle: ${currentViewStyle},
 currentAutoDLSizeLimit: ${currentAutoDLSizeLimit},
 currentMovedToLastThread: ${currentMovedToLastThread},
 blurThumbnail: ${blurThumbnail},
+enableNsfw: ${enableNsfw},
 currentContent: ${currentContent},
 currentMainThreadsLoading: ${currentMainThreadsLoading},
 currentHistoryThreadsLoading: ${currentHistoryThreadsLoading},
