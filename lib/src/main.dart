@@ -469,6 +469,15 @@ abstract class MainStoreBase with Store, WithDateTime {
                 element == ThreadsOrderType.importance ||
                 element == ThreadsOrderType.resCountDesc)
             .toList();
+      case Communities.chan4:
+        return ThreadsOrderType.values
+            .where((element) =>
+                element == ThreadsOrderType.hot ||
+                element == ThreadsOrderType.newerResponce ||
+                element == ThreadsOrderType.importance ||
+                element == ThreadsOrderType.newerThread ||
+                element == ThreadsOrderType.resCountDesc)
+            .toList();
       default:
         return ThreadsOrderType.values
             .where((element) =>
@@ -912,6 +921,13 @@ abstract class MainStoreBase with Store, WithDateTime {
     _setInitialForum();
     // initWhenLargeScreen();
   }
+
+  // Future<void> agreeTerms() async {
+  //   final current = userData;
+  //   if (current == null) return;
+  //   final newData = current.copyWith(agreedTerms: true);
+  //   await repository.updateUserAgreedTerms(newData);
+  // }
 
   Future<void> sendAgree(final ContentData value,
       {final bool good = true}) async {
@@ -1770,6 +1786,18 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   String getMediaFilePath(final String url) {
     return repository.mediaLocal.getFullPath(url).path;
+  }
+
+  Future<bool> report(final ContentData content) async {
+    switch (content.forum) {
+      case Communities.girlsCh:
+        if (content is GirlsChContent) {
+          return await GirlsChHandler.report(content.reportHash ?? '');
+        }
+
+      default:
+    }
+    return false;
   }
 
   Future<List<ContentData?>?> getRes(

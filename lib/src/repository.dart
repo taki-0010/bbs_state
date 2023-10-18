@@ -96,6 +96,11 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   @action
   void setUser(final UserData? value) => user = value;
 
+  // Future<void> updateUserAgreedTerms(final UserData value) async {
+  //   await userLocal.update(value);
+  //   setUser(value);
+  // }
+
   Future<void> addForum(final Communities value) async {
     if (user == null) return;
     final copied = [...forums!];
@@ -333,28 +338,28 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     if (value != null) {
       parent.deleteThreadData(value);
       // switch (value.type) {
-        // case Communities.fiveCh:
-        //   parent.fiveCh.deleteContent(value);
-        //   break;
-        // case Communities.girlsCh:
-        //   parent.girlsCh.deleteContent(value);
-        //   break;
-        // case Communities.futabaCh:
-        //   parent.futabaCh.deleteContent(value);
-        //   break;
-        // case Communities.pinkCh:
-        //   parent.pinkCh.deleteContent(value);
-        //   break;
-        // case Communities.machi:
-        //   parent.machi.deleteContent(value);
-        //   break;
-        // case Communities.shitaraba:
-        //   parent.shitaraba.deleteContent(value);
-        //   break;
-        // case Communities.open2Ch:
-        //   parent.open2ch.deleteContent(value);
-        //   break;
-        // default:
+      // case Communities.fiveCh:
+      //   parent.fiveCh.deleteContent(value);
+      //   break;
+      // case Communities.girlsCh:
+      //   parent.girlsCh.deleteContent(value);
+      //   break;
+      // case Communities.futabaCh:
+      //   parent.futabaCh.deleteContent(value);
+      //   break;
+      // case Communities.pinkCh:
+      //   parent.pinkCh.deleteContent(value);
+      //   break;
+      // case Communities.machi:
+      //   parent.machi.deleteContent(value);
+      //   break;
+      // case Communities.shitaraba:
+      //   parent.shitaraba.deleteContent(value);
+      //   break;
+      // case Communities.open2Ch:
+      //   parent.open2ch.deleteContent(value);
+      //   break;
+      // default:
       // }
       if (showSnack) {
         parent.setDeletedThreadTitle(value.title);

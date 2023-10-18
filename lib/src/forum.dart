@@ -142,10 +142,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   @computed
   TimeagoList get selectedTimeagoList =>
       settings?.timeago ?? TimeagoList.enable;
-      
+
   @computed
-  bool get selectedNsfw =>
-      settings?.nsfw ?? false;
+  bool get selectedNsfw => settings?.nsfw ?? false;
 
   // @computed
   // bool get userFavoritesBoards => settings?.useFavoritesBoards ?? false;
@@ -616,9 +615,15 @@ abstract class ForumStateBase with Store, WithDateTime {
         return (datetime.millisecondsSinceEpoch * 0.001).toInt();
       // case Communities.pinkCh:
       //   return int.tryParse(value.id);
+      case Communities.chan4:
+        final first = value.content.firstOrNull;
+        if (first is Chan4Content) {
+          return first.time;
+        }
       default:
         return null;
     }
+    return null;
   }
 
   // Future<void> setThreadMarkDataToHistoryList(final String url) async {}

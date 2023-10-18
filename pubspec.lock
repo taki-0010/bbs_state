@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: efdbdf284250adaf66d71fb8c9863fdce81a605b
+      resolved-ref: c8baaf9c86cadf0bf373f10fd8b38398a64ef891
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -496,10 +496,10 @@ packages:
     dependency: "direct main"
     description:
       name: mobx
-      sha256: "0afcf88b3ee9d6819890bf16c11a727fc8c62cf736fda8e5d3b9b4eace4e62ea"
+      sha256: "42ae7277ec5c36fa5ce02aa14551065babce3c38a35947330144ff47bc775c75"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   mobx_codegen:
     dependency: "direct dev"
     description:
@@ -513,7 +513,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "327a92ad12df2a063bbd72320aceb0c42471789a"
+      resolved-ref: "0ad1960494ed8798da257f695d024d330eaeae72"
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"

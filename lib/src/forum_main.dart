@@ -151,8 +151,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         //     .i('shitarabaThreads: 1: ${list[0]?.title}, 2: ${list[1]?.title}');
         break;
       case ThreadsOrderType.newerResponce:
-        list.sort(
-            (a, b) => (b?.updateAtStr ?? '').compareTo(a?.updateAtStr ?? ''));
+        list.sort((a, b) => (b?.updateAt ?? 0).compareTo(a?.updateAt ?? 0));
         break;
       case ThreadsOrderType.newerThread:
         list.sort((a, b) => (b?.createdAt ?? 0).compareTo(a?.createdAt ?? 0));

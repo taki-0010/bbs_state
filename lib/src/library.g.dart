@@ -31,14 +31,6 @@ mixin _$LibraryState on LibraryStateBase, Store {
           Computed<SortHistoryList>(() => super.sortHistory,
               name: 'LibraryStateBase.sortHistory'))
       .value;
-  Computed<Map<String, List<ThreadMarkData?>?>>? _$displayListComputed;
-
-  @override
-  Map<String, List<ThreadMarkData?>?> get displayList =>
-      (_$displayListComputed ??= Computed<Map<String, List<ThreadMarkData?>?>>(
-              () => super.displayList,
-              name: 'LibraryStateBase.displayList'))
-          .value;
   Computed<Set<String?>>? _$boardIdSetOfContentListComputed;
 
   @override
@@ -311,7 +303,6 @@ markListDiff: ${markListDiff},
 settings: ${settings},
 currentMarksResCount: ${currentMarksResCount},
 sortHistory: ${sortHistory},
-displayList: ${displayList},
 boardIdSetOfContentList: ${boardIdSetOfContentList},
 markListByBoardId: ${markListByBoardId},
 markListByLastReadAt: ${markListByLastReadAt},

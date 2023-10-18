@@ -64,13 +64,13 @@ abstract class LibraryStateBase with Store, WithDateTime {
   // @computed
   // bool get viewByBoard => settings?.viewByBoardInHistory ?? false;
 
-  @computed
-  Map<String, List<ThreadMarkData?>?> get displayList => switch (sortHistory) {
-        SortHistoryList.boards => markListByBoardId,
-        // SortHistoryList.deletionDate => markListByBoardId,
-        // SortHistoryList.hot => markListByBoardId,
-        SortHistoryList.history => markListByLastReadAt
-      };
+  // @computed
+  // Map<String, List<ThreadMarkData?>?> get displayList => switch (sortHistory) {
+  //       SortHistoryList.boards => markListByBoardId,
+  //       // SortHistoryList.deletionDate => markListByBoardId,
+  //       // SortHistoryList.hot => markListByBoardId,
+  //       SortHistoryList.history => markListByLastReadAt
+  //     };
 
   @computed
   Set<String?> get boardIdSetOfContentList {
@@ -560,6 +560,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
   Future<void> setArchived<T extends ThreadData>(
       final List<T?> newList, final String boardId) async {
     if (parent.type == Communities.futabaCh ||
+        parent.type == Communities.open2Ch ||
         parent.type == Communities.girlsCh) {
       return;
     }
