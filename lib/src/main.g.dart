@@ -287,6 +287,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<SortHistoryList>(() => super.sortHistory,
               name: 'MainStoreBase.sortHistory'))
       .value;
+  Computed<TemplateData?>? _$templateDataComputed;
+
+  @override
+  TemplateData? get templateData => (_$templateDataComputed ??=
+          Computed<TemplateData?>(() => super.templateData,
+              name: 'MainStoreBase.templateData'))
+      .value;
   Computed<bool>? _$openLinkByWebViewComputed;
 
   @override
@@ -982,6 +989,7 @@ currentFavoritesBoards: ${currentFavoritesBoards},
 retentionPeriod: ${retentionPeriod},
 userFavoritesBoards: ${userFavoritesBoards},
 sortHistory: ${sortHistory},
+templateData: ${templateData},
 openLinkByWebView: ${openLinkByWebView},
 historyDiff: ${historyDiff},
 currentBoardUrl: ${currentBoardUrl},

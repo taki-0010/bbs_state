@@ -183,9 +183,12 @@ abstract class LibraryStateBase with Store, WithDateTime {
 
   ThreadMarkData? getSelectedMarkDataById(
       final String id, final String? boardId) {
-
     return markList.firstWhere(
-        (element) => element?.id == id && (parent.type == Communities.girlsCh ? true : element?.boardId == boardId),
+        (element) =>
+            element?.id == id &&
+            (parent.type == Communities.girlsCh
+                ? true
+                : element?.boardId == boardId),
         orElse: () => null);
   }
 
@@ -196,8 +199,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
     }
     final threadId = parent.parent.getThreadIdFromUri(uri, parent.type);
     final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
-    
-    if (threadId != null ) {
+
+    if (threadId != null) {
       return getSelectedMarkDataById(threadId, boardId);
     }
     return null;
@@ -427,7 +430,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
             result = await FiveChHandler.getThreads(
                 domain: b.uri.host,
                 directoryName: b.boardId,
-                boardName: b.boardName ?? '', forum: Communities.fiveCh);
+                boardName: b.boardName ?? '',
+                forum: Communities.fiveCh);
             if (result.result == FetchResult.success) {
               await setArchived<ThreadData>(result.threads!, b.boardId);
             }
@@ -491,6 +495,11 @@ abstract class LibraryStateBase with Store, WithDateTime {
           case Communities.open2Ch:
             result = await Open2ChHandler.getThreads(
                 b.getSubdomain, b.boardId, b.boardName ?? '');
+            if (result.result == FetchResult.success) {
+              await setArchived<ThreadData>(result.threads!, b.boardId);
+            }
+          case Communities.chan4:
+            result = await Chan4Handler.getThreads(b.boardId);
             if (result.result == FetchResult.success) {
               await setArchived<ThreadData>(result.threads!, b.boardId);
             }

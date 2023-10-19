@@ -315,6 +315,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   SortHistoryList get sortHistory =>
       selectedForumState?.history.sortHistory ?? SortHistoryList.boards;
+
+  @computed
+  TemplateData? get templateData => selectedForumState?.template;
   // @computed
   // bool get viewByBoard => switch (currentScreen) {
   //       BottomMenu.history => selectedForumState?.history.viewByBoard ?? false,
@@ -1744,24 +1747,17 @@ abstract class MainStoreBase with Store, WithDateTime {
     // return null;
   }
 
-  // bool uriIsFavBoard(final Uri uri, final Communities forum) => switch (forum) {
-  //       Communities.shitaraba => shitaraba.forumMain.isFavBoardByUri(uri),
-  //       Communities.fiveCh => false,
-  //       Communities.machi => false,
-  //       Communities.futabaCh => false,
-  //       Communities.pinkCh => false,
-  //       Communities.girlsCh => false,
-  //       Communities.open2Ch => false,
-  //     };
+  Future<void> updateTemplate(final TemplateData value) async {
+    await repository.updateTemplateData(value);
+  }
 
-  // String? forumLinkText(final Uri uri, final Communities forum) {
-  //   final threadOrBoard = isThreadOrBoard(uri);
-  //   if (threadOrBoard == null) return null;
-  //   if (threadOrBoard) {
-  //   } else {
-
-  //   }
-  // }
+  TemplateData? getInitialTemplate() {
+    final current = selectedForumState?.settings;
+    if (current == null) {
+      return null;
+    }
+    return repository.postDraftLocal.initialTemplate(current);
+  }
 
   Future<bool> postThread({
     required final PostData data,
@@ -1842,6 +1838,10 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   void setThreadData(final ThreadMarkData value) {
     _selectedForum(value.type)?.history.setLog(value);
+  }
+
+  void setTemplateData(final TemplateData? value) {
+    _selectedForum(value?.forum)?.setTemplateData(value);
   }
 
   void deleteThreadData(final ThreadMarkData value) =>

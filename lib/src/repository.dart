@@ -21,7 +21,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   late final userLocal = UserStateForLocal(parent: this);
   late final forumLocal = ForumStateForLocal(parent: this);
   late final mediaLocal = MediaCacheState(parent: this);
-  late final postDraftLocal = PostDraftStateForLocal(parent: this);
+  late final postDraftLocal = TemplateStateForLocal(parent: this);
 
   @observable
   ConnectTo connection = ConnectTo.local;
@@ -62,6 +62,8 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     await userLocal.init();
     await threadLocal.loadCache();
     await forumLocal.load();
+    await postDraftLocal.load();
+
     // final accountExist = await server.init();
     // if (!accountExist) {
     //   connection = ConnectTo.local;
@@ -117,6 +119,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       case ConnectTo.local:
         await forumLocal.addForum(forum);
         await userLocal.update(newUserData);
+        await postDraftLocal.saveTemplate(forum);
       default:
     }
     setUser(newUserData);
@@ -137,6 +140,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
         await forumLocal.deleteData(value, user!.id);
         await userLocal.update(newUserData);
         await threadLocal.clearForumThreads(value);
+        await postDraftLocal.deleteTemplate(value);
         break;
       default:
     }
@@ -261,6 +265,19 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     }
   }
 
+  Future<void> updateTemplateData(final TemplateData value) async {
+    switch (connection) {
+      case ConnectTo.server:
+        break;
+      case ConnectTo.local:
+        await postDraftLocal.updateTemplate(value);
+        break;
+      default:
+    }
+
+    parent.setTemplateData(value);
+  }
+
   void setSettingsData(final List<ForumSettingsData?> list) {
     // if (doc.documents.isNotEmpty) {
     //   final docList =
@@ -299,6 +316,10 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     //     break;
     //   default:
     // }
+  }
+
+  void setTemplateData(final TemplateData? value) {
+    parent.setTemplateData(value);
   }
 
   void setThreadData(final ThreadMarkData? value) {
@@ -366,7 +387,7 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       }
 
       mediaLocal.deleteCacheWhenThreadDeleted(value);
-      postDraftLocal.deleteCacheWhenThreadDeleted(value);
+      // postDraftLocal.deleteCacheWhenThreadDeleted(value);
     }
   }
 }

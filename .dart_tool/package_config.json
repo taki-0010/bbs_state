@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-c8baaf9c86cadf0bf373f10fd8b38398a64ef891/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-047e93e333d6ec349e145de096a9f26392efd918/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -333,7 +333,7 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/lints-2.1.1",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/lints-3.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -387,7 +387,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-0ad1960494ed8798da257f695d024d330eaeae72/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-c6a6ea780eeb5edfef10dc6a48b5a762b4a015c8/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -776,7 +776,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-10-18T12:36:39.198903Z",
+  "generated": "2023-10-19T13:20:43.568163Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

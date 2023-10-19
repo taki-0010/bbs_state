@@ -49,6 +49,7 @@ abstract class ForumStateForLocalBase with Store {
         throw 'forumLocal: value == null';
       }
       await _putData(value);
+      await parent.postDraftLocal.saveTemplate(value);
       parent.setForumSettings(value);
       logger.d('forumLocal:  _setInitialData: ${value.forum}');
     }

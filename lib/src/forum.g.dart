@@ -176,6 +176,22 @@ mixin _$ForumState on ForumStateBase, Store {
     });
   }
 
+  late final _$templateAtom =
+      Atom(name: 'ForumStateBase.template', context: context);
+
+  @override
+  TemplateData? get template {
+    _$templateAtom.reportRead();
+    return super.template;
+  }
+
+  @override
+  set template(TemplateData? value) {
+    _$templateAtom.reportWrite(value, super.template, () {
+      super.template = value;
+    });
+  }
+
   late final _$loadingAtom =
       Atom(name: 'ForumStateBase.loading', context: context);
 
@@ -425,6 +441,17 @@ mixin _$ForumState on ForumStateBase, Store {
   }
 
   @override
+  void setTemplateData(TemplateData? value) {
+    final _$actionInfo = _$ForumStateBaseActionController.startAction(
+        name: 'ForumStateBase.setTemplateData');
+    try {
+      return super.setTemplateData(value);
+    } finally {
+      _$ForumStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setSettings(ForumSettingsData value) {
     final _$actionInfo = _$ForumStateBaseActionController.startAction(
         name: 'ForumStateBase.setSettings');
@@ -472,6 +499,7 @@ mixin _$ForumState on ForumStateBase, Store {
   String toString() {
     return '''
 settings: ${settings},
+template: ${template},
 loading: ${loading},
 hoverdItem: ${hoverdItem},
 hoverdItemX: ${hoverdItemX},

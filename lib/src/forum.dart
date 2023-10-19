@@ -47,6 +47,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   ForumSettingsData? settings;
 
   @observable
+  TemplateData? template;
+
+  @observable
   bool loading = false;
 
   @observable
@@ -173,6 +176,9 @@ abstract class ForumStateBase with Store, WithDateTime {
       boardsScroll += value;
     }
   }
+
+  @action
+  void setTemplateData(final TemplateData? value) => template = value;
 
   // @observable
   // ObservableList<ThreadData?> logList = ObservableList<ThreadData?>();
