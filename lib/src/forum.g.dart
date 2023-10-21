@@ -102,6 +102,75 @@ mixin _$ForumState on ForumStateBase, Store {
           Computed<double>(() => super.getBoardsScrollTotal,
               name: 'ForumStateBase.getBoardsScrollTotal'))
       .value;
+  Computed<List<ImportanceData?>>? _$forumVeryImListComputed;
+
+  @override
+  List<ImportanceData?> get forumVeryImList => (_$forumVeryImListComputed ??=
+          Computed<List<ImportanceData?>>(() => super.forumVeryImList,
+              name: 'ForumStateBase.forumVeryImList'))
+      .value;
+  Computed<List<ImportanceData?>>? _$forumImListComputed;
+
+  @override
+  List<ImportanceData?> get forumImList => (_$forumImListComputed ??=
+          Computed<List<ImportanceData?>>(() => super.forumImList,
+              name: 'ForumStateBase.forumImList'))
+      .value;
+  Computed<List<ImportanceData?>>? _$forumUnimListComputed;
+
+  @override
+  List<ImportanceData?> get forumUnimList => (_$forumUnimListComputed ??=
+          Computed<List<ImportanceData?>>(() => super.forumUnimList,
+              name: 'ForumStateBase.forumUnimList'))
+      .value;
+  Computed<List<ImportanceData?>>? _$forumVeryUnimListComputed;
+
+  @override
+  List<ImportanceData?> get forumVeryUnimList =>
+      (_$forumVeryUnimListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.forumVeryUnimList,
+              name: 'ForumStateBase.forumVeryUnimList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$titleImportanceListComputed;
+
+  @override
+  List<ImportanceData?> get titleImportanceList =>
+      (_$titleImportanceListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.titleImportanceList,
+              name: 'ForumStateBase.titleImportanceList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$nameImportanceListComputed;
+
+  @override
+  List<ImportanceData?> get nameImportanceList =>
+      (_$nameImportanceListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.nameImportanceList,
+              name: 'ForumStateBase.nameImportanceList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$postIdImportanceListComputed;
+
+  @override
+  List<ImportanceData?> get postIdImportanceList =>
+      (_$postIdImportanceListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.postIdImportanceList,
+              name: 'ForumStateBase.postIdImportanceList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$userIdImportanceListComputed;
+
+  @override
+  List<ImportanceData?> get userIdImportanceList =>
+      (_$userIdImportanceListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.userIdImportanceList,
+              name: 'ForumStateBase.userIdImportanceList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$bodyImportanceListComputed;
+
+  @override
+  List<ImportanceData?> get bodyImportanceList =>
+      (_$bodyImportanceListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.bodyImportanceList,
+              name: 'ForumStateBase.bodyImportanceList'))
+          .value;
   Computed<ContentState?>? _$currentContentStateComputed;
 
   @override
@@ -521,6 +590,15 @@ selectedTimeagoList: ${selectedTimeagoList},
 selectedNsfw: ${selectedNsfw},
 retentionPeriod: ${retentionPeriod},
 getBoardsScrollTotal: ${getBoardsScrollTotal},
+forumVeryImList: ${forumVeryImList},
+forumImList: ${forumImList},
+forumUnimList: ${forumUnimList},
+forumVeryUnimList: ${forumVeryUnimList},
+titleImportanceList: ${titleImportanceList},
+nameImportanceList: ${nameImportanceList},
+postIdImportanceList: ${postIdImportanceList},
+userIdImportanceList: ${userIdImportanceList},
+bodyImportanceList: ${bodyImportanceList},
 currentContentState: ${currentContentState},
 contentLoading: ${contentLoading},
 currentContent: ${currentContent},

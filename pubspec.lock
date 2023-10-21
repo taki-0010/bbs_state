@@ -230,7 +230,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "047e93e333d6ec349e145de096a9f26392efd918"
+      resolved-ref: "09fec9fefdad0e2f3fa331e3f0d039138407f0c6"
       url: "https://github.com/taki-0010/bbs_data.git"
     source: git
     version: "1.0.0"
@@ -513,7 +513,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: c6a6ea780eeb5edfef10dc6a48b5a762b4a015c8
+      resolved-ref: "74e0f5aad4f181233a26b2be7e0ecbb46fd97f16"
       url: "https://github.com/taki-0010/bbs_model.git"
     source: git
     version: "1.0.0"
@@ -613,6 +613,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      sha256: cb3798bef7fc021ac45b308f4b51208a152792445cce0448c9a4ba5879dd8750
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.4.0"
   platform:
     dependency: transitive
     description:
@@ -962,6 +970,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  webfeed_advanced:
+    dependency: transitive
+    description:
+      name: webfeed_advanced
+      sha256: "5e15891d46f61aa9142b0b23793f0ce922812a324c043ee2b40cf3299d6443b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   webkit_inspection_protocol:
     dependency: transitive
     description:
@@ -1002,6 +1018,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.3"
+  xml:
+    dependency: transitive
+    description:
+      name: xml
+      sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
   yaml:
     dependency: transitive
     description:

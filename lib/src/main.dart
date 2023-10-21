@@ -1,7 +1,7 @@
 // import 'dart:typed_data';
 
 // import 'dart:math';
-import 'dart:convert';
+// import 'dart:convert';
 // import 'dart:html';
 import 'dart:typed_data';
 
@@ -24,6 +24,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
   late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
   late final chan4 = ForumState(parent: this, type: Communities.chan4);
+  late final hatena = ForumState(parent: this, type: Communities.hatena);
 
   // late final SembastCacheStore store;
 
@@ -286,13 +287,26 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   String? get selectedFonts => selectedForumState?.selectedFonts;
-  @computed
-  List<ImportanceData?> get boardImportance =>
-      selectedForumState?.settings?.boardImportanceList ?? [];
+  // @computed
+  // List<ImportanceData?> get boardImportance =>
+  //     selectedForumState?.settings?.boardImportanceList ?? [];
+
+  // @computed
+  // List<ImportanceData?> get threadsImportance =>
+  //     selectedForumState?.settings?.threadsImportanceList ?? [];
 
   @computed
-  List<ImportanceData?> get threadsImportance =>
-      selectedForumState?.settings?.threadsImportanceList ?? [];
+  List<ImportanceData?> get currentForumVeryImpList =>
+      selectedForumState?.forumVeryImList ?? [];
+  @computed
+  List<ImportanceData?> get currentForumImpList =>
+      selectedForumState?.forumImList ?? [];
+  @computed
+  List<ImportanceData?> get currentForumUnimpList =>
+      selectedForumState?.forumUnimList ?? [];
+  @computed
+  List<ImportanceData?> get currentForumVeryUnimpList =>
+      selectedForumState?.forumVeryUnimList ?? [];
 
   @computed
   List<GroupData?> get currentGroupList =>
@@ -421,37 +435,37 @@ abstract class MainStoreBase with Store, WithDateTime {
     return mapData;
   }
 
-  @computed
-  Map<ImportanceList, List<ImportanceData?>>
-      get importanceMapDataForCurrentBoard {
-    Map<ImportanceList, List<ImportanceData?>> mapData = {};
-    final data = boardImportance;
-    // if (data == null) {
-    //   return mapData;
-    // }
-    for (final element in data) {
-      if (element != null) {
-        mapData[element.level] = [...?mapData[element.level], element];
-      }
-    }
-    return mapData;
-  }
+  // @computed
+  // Map<ImportanceList, List<ImportanceData?>>
+  //     get importanceMapDataForCurrentBoard {
+  //   Map<ImportanceList, List<ImportanceData?>> mapData = {};
 
-  @computed
-  Map<ImportanceList, List<ImportanceData?>>
-      get importanceMapDataForCurrentThreads {
-    Map<ImportanceList, List<ImportanceData?>> mapData = {};
-    final data = threadsImportance;
-    // if (data == null) {
-    //   return mapData;
-    // }
-    for (final element in data) {
-      if (element != null) {
-        mapData[element.level] = [...?mapData[element.level], element];
-      }
-    }
-    return mapData;
-  }
+  //   final data = selectedForumState?.titleImportanceList ?? [];
+  //   for (final element in data) {
+  //     if (element != null) {
+  //       mapData[element.level] = [...?mapData[element.level], element];
+  //     }
+  //   }
+  //   return mapData;
+  // }
+
+  // @computed
+  // Map<ImportanceList, List<ImportanceData?>>
+  //     get importanceMapDataForCurrentThreads {
+  //   Map<ImportanceList, List<ImportanceData?>> mapData = {};
+  //   final postId = selectedForumState?.postIdImportanceList;
+  //   final userId = selectedForumState?.userIdImportanceList;
+  //   final userName = selectedForumState?.nameImportanceList;
+  //   final body = selectedForumState?.bodyImportanceList;
+  //   final data = [...?postId, ...?userId, ...?userName, ...?body];
+
+  //   for (final element in data) {
+  //     if (element != null) {
+  //       mapData[element.level] = [...?mapData[element.level], element];
+  //     }
+  //   }
+  //   return mapData;
+  // }
 
   @computed
   List<ThreadsOrderType> get enabledOrder {
@@ -683,6 +697,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
+        Communities.hatena => HatenaData.boardNameById(id),
         Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
         Communities.shitaraba => selectedForumState?.history.markList
                 .firstWhere(
@@ -817,23 +832,26 @@ abstract class MainStoreBase with Store, WithDateTime {
     toggleEntireLoading();
   }
 
-  Future<void> updateImportance(final ImportanceData value) async {
-    toggleEntireLoading();
-    await selectedForumState?.updateImportance(value);
-    toggleEntireLoading();
-  }
+  // Future<void> updateImportance(final ImportanceData value) async {
+  //   toggleEntireLoading();
+  //   await selectedForumState?.updateImportance(value);
+  //   toggleEntireLoading();
+  // }
 
-  Future<void> deleteImportance(final ImportanceData value) async {
-    toggleEntireLoading();
-    await selectedForumState?.deleteImportance(value);
-    toggleEntireLoading();
-  }
+  // Future<void> deleteImportance(final ImportanceData value) async {
+  //   toggleEntireLoading();
+  //   await selectedForumState?.deleteImportance(value);
+  //   toggleEntireLoading();
+  // }
 
   ImportanceData? getImportanceByContent(final ContentData value) {
     final byPostId = _getImportanceByPostId(value.getPostId);
     final byUserId = _getImportanceByUserId(value.getUserId);
     final byUserName = _getImportanceByUserName(value.getUserName);
     final byBody = _getImportanceByBody(value.body);
+    // if (byBody != null) {
+    //   logger.d('importance body: ${byBody.strValue}');
+    // }
     return byPostId ?? byUserId ?? byUserName ?? byBody;
   }
 
@@ -863,7 +881,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   ImportanceData? getImportanceByTitle(final String? title) {
     if (title == null) return null;
-    final exist = boardImportance.firstWhere(
+    final exist = selectedForumState?.settings?.getImportanceList.firstWhere(
         (element) =>
             element != null &&
             element.target == ImportanceTarget.title &&
@@ -1087,39 +1105,79 @@ abstract class MainStoreBase with Store, WithDateTime {
     await removeAddedFont(value);
   }
 
-  Future<void> updateForumImportance(
-      final ImportanceData value, final bool isBoard) async {
-    final settings = selectedForumState?.settings;
-    if (settings == null) return;
-    final current = isBoard
-        ? [...settings.boardImportanceList]
-        : [...settings.threadsImportanceList];
-    current.removeWhere((element) => element?.id == value.id);
-    current.insert(0, value);
-    final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
-    final newData = isBoard
-        ? settings.copyWith(boardImportance: strList)
-        : settings.copyWith(threadsImportance: strList);
-    selectedForumState?.setSettings(newData);
-    await updateForumSettings();
+  Future<void> blockThreadPostUser(final ThreadData thread) async {
+    await selectedForumState?.blockThreadPostUser(thread);
   }
 
-  Future<void> deleteForumImportance(
-      final ImportanceData value, final bool isBoard) async {
-    final settings = selectedForumState?.settings;
-    if (settings == null) return;
-    final current = isBoard
-        ? [...settings.boardImportanceList]
-        : [...settings.threadsImportanceList];
-    current.removeWhere((element) => element?.id == value.id);
-    // current.insert(0, value);
-    final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
-    final newData = isBoard
-        ? settings.copyWith(boardImportance: strList)
-        : settings.copyWith(threadsImportance: strList);
-    selectedForumState?.setSettings(newData);
-    await updateForumSettings();
+  Future<void> blockThreadResponseUser(final ContentData value) async {
+    await selectedForumState?.blockThreadResponseUser(value);
   }
+
+  Future<void> hideResponse(final ContentData value) async {
+    await selectedForumState?.hideResponse(value);
+  }
+
+  Future<void> updateForumImportance(final List<ImportanceData?> value,
+      {final bool delete = false}) async {
+    await selectedForumState?.updateForumImportance(value, delete: delete);
+  }
+
+  Future<void> clearForumImportance(
+    final ImportanceList value,
+  ) async {
+    await selectedForumState?.clearForumImportance(value);
+  }
+
+  Future<void> updateThreadImportance(final ImportanceData value,
+      {final bool delete = false}) async {
+    await selectedForumState?.updateThreadImportance(value, delete: delete);
+  }
+
+  Future<void> clearThreadImportance(final ImportanceList value) async {
+    await selectedForumState?.clearThreadImportance(value);
+  }
+
+  Future<void> allClearThreadImportance() async {
+    await selectedForumState?.allClearThreadImportance();
+  }
+
+  // Future<void> updateForumImportance(
+  //     final List<ImportanceData?> value, final bool isBoard) async {
+  //   final settings = selectedForumState?.settings;
+  //   if (settings == null) return;
+  //   if (value.isEmpty) return;
+  //   final current = isBoard
+  //       ? [...settings.boardImportanceList]
+  //       : [...settings.threadsImportanceList];
+  //   for (final i in value) {
+  //     current.removeWhere((element) => element?.id == i?.id);
+  //     current.insert(0, i);
+  //   }
+
+  //   final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
+  //   final newData = isBoard
+  //       ? settings.copyWith(boardImportance: strList)
+  //       : settings.copyWith(threadsImportance: strList);
+  //   selectedForumState?.setSettings(newData);
+  //   await updateForumSettings();
+  // }
+
+  // Future<void> deleteForumImportance(
+  //     final ImportanceData value, final bool isBoard) async {
+  //   final settings = selectedForumState?.settings;
+  //   if (settings == null) return;
+  //   final current = isBoard
+  //       ? [...settings.boardImportanceList]
+  //       : [...settings.threadsImportanceList];
+  //   current.removeWhere((element) => element?.id == value.id);
+  //   // current.insert(0, value);
+  //   final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
+  //   final newData = isBoard
+  //       ? settings.copyWith(boardImportance: strList)
+  //       : settings.copyWith(threadsImportance: strList);
+  //   selectedForumState?.setSettings(newData);
+  //   await updateForumSettings();
+  // }
   // Future<void> deleteSelectedData()
 
   Future<void> setLastOpenedContentIndexById(final int? index,
@@ -1407,6 +1465,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.open2Ch => open2ch,
         Communities.machi => machi,
         Communities.chan4 => chan4,
+        Communities.hatena => hatena,
         null => null
       };
 
@@ -1849,6 +1908,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    // await Chan4Handler.searchThreads('waifu draw', 'a');
+    await HatenaHandler.getThreads(HatenaData.boardUri(HatenaCategory.game));
   }
 }

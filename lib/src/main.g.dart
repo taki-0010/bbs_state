@@ -236,20 +236,37 @@ mixin _$MainStore on MainStoreBase, Store {
       (_$selectedFontsComputed ??= Computed<String?>(() => super.selectedFonts,
               name: 'MainStoreBase.selectedFonts'))
           .value;
-  Computed<List<ImportanceData?>>? _$boardImportanceComputed;
+  Computed<List<ImportanceData?>>? _$currentForumVeryImpListComputed;
 
   @override
-  List<ImportanceData?> get boardImportance => (_$boardImportanceComputed ??=
-          Computed<List<ImportanceData?>>(() => super.boardImportance,
-              name: 'MainStoreBase.boardImportance'))
-      .value;
-  Computed<List<ImportanceData?>>? _$threadsImportanceComputed;
+  List<ImportanceData?> get currentForumVeryImpList =>
+      (_$currentForumVeryImpListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.currentForumVeryImpList,
+              name: 'MainStoreBase.currentForumVeryImpList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$currentForumImpListComputed;
 
   @override
-  List<ImportanceData?> get threadsImportance =>
-      (_$threadsImportanceComputed ??= Computed<List<ImportanceData?>>(
-              () => super.threadsImportance,
-              name: 'MainStoreBase.threadsImportance'))
+  List<ImportanceData?> get currentForumImpList =>
+      (_$currentForumImpListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.currentForumImpList,
+              name: 'MainStoreBase.currentForumImpList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$currentForumUnimpListComputed;
+
+  @override
+  List<ImportanceData?> get currentForumUnimpList =>
+      (_$currentForumUnimpListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.currentForumUnimpList,
+              name: 'MainStoreBase.currentForumUnimpList'))
+          .value;
+  Computed<List<ImportanceData?>>? _$currentForumVeryUnimpListComputed;
+
+  @override
+  List<ImportanceData?> get currentForumVeryUnimpList =>
+      (_$currentForumVeryUnimpListComputed ??= Computed<List<ImportanceData?>>(
+              () => super.currentForumVeryUnimpList,
+              name: 'MainStoreBase.currentForumVeryUnimpList'))
           .value;
   Computed<List<GroupData?>>? _$currentGroupListComputed;
 
@@ -340,28 +357,6 @@ mixin _$MainStore on MainStoreBase, Store {
                   Computed<Map<ImportanceList, List<ImportanceData?>>>(
                       () => super.importanceMapDataForCurrentContent,
                       name: 'MainStoreBase.importanceMapDataForCurrentContent'))
-              .value;
-  Computed<Map<ImportanceList, List<ImportanceData?>>>?
-      _$importanceMapDataForCurrentBoardComputed;
-
-  @override
-  Map<ImportanceList, List<ImportanceData?>>
-      get importanceMapDataForCurrentBoard =>
-          (_$importanceMapDataForCurrentBoardComputed ??=
-                  Computed<Map<ImportanceList, List<ImportanceData?>>>(
-                      () => super.importanceMapDataForCurrentBoard,
-                      name: 'MainStoreBase.importanceMapDataForCurrentBoard'))
-              .value;
-  Computed<Map<ImportanceList, List<ImportanceData?>>>?
-      _$importanceMapDataForCurrentThreadsComputed;
-
-  @override
-  Map<ImportanceList, List<ImportanceData?>>
-      get importanceMapDataForCurrentThreads =>
-          (_$importanceMapDataForCurrentThreadsComputed ??=
-                  Computed<Map<ImportanceList, List<ImportanceData?>>>(
-                      () => super.importanceMapDataForCurrentThreads,
-                      name: 'MainStoreBase.importanceMapDataForCurrentThreads'))
               .value;
   Computed<List<ThreadsOrderType>>? _$enabledOrderComputed;
 
@@ -982,8 +977,10 @@ currentHistoryThreadsLoading: ${currentHistoryThreadsLoading},
 currentSearchThreadsLoading: ${currentSearchThreadsLoading},
 currentSecondaryThreadsLoading: ${currentSecondaryThreadsLoading},
 selectedFonts: ${selectedFonts},
-boardImportance: ${boardImportance},
-threadsImportance: ${threadsImportance},
+currentForumVeryImpList: ${currentForumVeryImpList},
+currentForumImpList: ${currentForumImpList},
+currentForumUnimpList: ${currentForumUnimpList},
+currentForumVeryUnimpList: ${currentForumVeryUnimpList},
 currentGroupList: ${currentGroupList},
 currentFavoritesBoards: ${currentFavoritesBoards},
 retentionPeriod: ${retentionPeriod},
@@ -996,8 +993,6 @@ currentBoardUrl: ${currentBoardUrl},
 currentBoardId: ${currentBoardId},
 boardIdSetOfForLibrary: ${boardIdSetOfForLibrary},
 importanceMapDataForCurrentContent: ${importanceMapDataForCurrentContent},
-importanceMapDataForCurrentBoard: ${importanceMapDataForCurrentBoard},
-importanceMapDataForCurrentThreads: ${importanceMapDataForCurrentThreads},
 enabledOrder: ${enabledOrder},
 selectableTimeago: ${selectableTimeago},
 selectableRetentionPeriod: ${selectableRetentionPeriod},

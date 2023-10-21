@@ -100,6 +100,18 @@ abstract class ForumStateBase with Store, WithDateTime {
   @action
   void setErrorMessage(final String? value) => errorMessage = value;
 
+  void setResultMessage(final FetchResult? result, final int? statuscode) {
+    switch (result) {
+      case FetchResult.error:
+        setErrorMessage('Error!');
+        break;
+      case FetchResult.networkError:
+        setErrorMessage('Statuscode: $statuscode');
+      default:
+        setErrorMessage('Error!');
+    }
+  }
+
   // @computed
   // Future<String?> get currentSessionId async =>
   //     await parent.repository.server.userState.currentSessionId;
@@ -169,6 +181,64 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
     return 0.0;
   }
+
+  @computed
+  List<ImportanceData?> get forumVeryImList =>
+      getImpList(ImportanceList.veryImportant);
+
+  @computed
+  List<ImportanceData?> get forumImList => getImpList(ImportanceList.important);
+  @computed
+  List<ImportanceData?> get forumUnimList =>
+      getImpList(ImportanceList.unimportant);
+  @computed
+  List<ImportanceData?> get forumVeryUnimList =>
+      getImpList(ImportanceList.veryUnimportant);
+
+  @computed
+  List<ImportanceData?> get titleImportanceList =>
+      settings?.getImportanceList
+          .where((element) => element?.target == ImportanceTarget.title)
+          .toList() ??
+      [];
+
+  @computed
+  List<ImportanceData?> get nameImportanceList {
+    return settings?.getImportanceList
+            .where((element) => element?.target == ImportanceTarget.userName)
+            .toList() ??
+        [];
+  }
+
+  @computed
+  List<ImportanceData?> get postIdImportanceList {
+    return settings?.getImportanceList
+            .where((element) => element?.target == ImportanceTarget.postId)
+            .toList() ??
+        [];
+  }
+
+  @computed
+  List<ImportanceData?> get userIdImportanceList {
+    return settings?.getImportanceList
+            .where((element) => element?.target == ImportanceTarget.userId)
+            .toList() ??
+        [];
+  }
+
+  @computed
+  List<ImportanceData?> get bodyImportanceList {
+    return settings?.getImportanceList
+            .where((element) => element?.target == ImportanceTarget.body)
+            .toList() ??
+        [];
+  }
+
+  List<ImportanceData?> getImpList(final ImportanceList value) =>
+      settings?.getImportanceList
+          .where((element) => element?.level == value)
+          .toList() ??
+      [];
 
   @action
   void computeBoardScrol(final double? value) {
@@ -286,7 +356,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   List<ImportanceData?> get getCurrentImportanceList {
     final thread = currentContentThreadData;
     if (thread == null) return [];
-    final settingsData = settings?.threadsImportanceList;
+    final settingsData = settings?.getImportanceList;
     return [...thread.importanceList, ...?settingsData];
   }
 
@@ -487,11 +557,8 @@ abstract class ForumStateBase with Store, WithDateTime {
   //   return null;
   // }
 
-  @action
-  Future<FetchResult> setContent(final String id,
+  Future<ThreadContentData?> _getThreadContent(final String id,
       {required final ThreadBase thread}) async {
-    // _toggleLoading();
-    // final lastOpenedIndex = _getLastOpenedIndexFromThread(thread);
     final range = ShitarabaData.getRange(thread);
     final currentPageOfGirlsCh = _getcurrentPageForGirlsCh(thread);
     // final position = thread is ThreadMarkData ? thread.positionToGet : null;
@@ -502,22 +569,44 @@ abstract class ForumStateBase with Store, WithDateTime {
         range: range);
     if (result == null) {
       logger.e('setContent: null');
-      return FetchResult.error;
+      return null;
     }
     if (result.result != FetchResult.success) {
-      return result.result;
+      return null;
     }
-    final content = _getData(result, thread.id, thread.boardId, range);
+    return _getData(result, thread.id, thread.boardId, range);
+  }
+
+  @action
+  Future<FetchResult> setContent(final String id,
+      {required final ThreadBase thread}) async {
+    // final range = ShitarabaData.getRange(thread);
+    // final currentPageOfGirlsCh = _getcurrentPageForGirlsCh(thread);
+
+    // final result = await _fetchData(id,
+    //     uri: thread.uri,
+    //     lastPageForGirlsCh: currentPageOfGirlsCh,
+    //     range: range);
+    // if (result == null) {
+    //   logger.e('setContent: null');
+    //   return FetchResult.error;
+    // }
+    // if (result.result != FetchResult.success) {
+    //   return result.result;
+    // }
+    // final content = _getData(result, thread.id, thread.boardId, range);
+    final content = await _getThreadContent(id, thread: thread);
     if (content == null) {
       logger.e('setContent: null');
+      setResultMessage(FetchResult.error, null);
       return FetchResult.error;
     }
 
     _setContent(
       content,
     );
-    logger.i(
-        'setContent: range:$range, content.range: ${content.range}, page: ${result.girlsPages?.next}');
+    // logger.i(
+    //     'setContent: range:$range, content.range: ${content.range}, page: ${result.girlsPages?.next}');
     if (thread is ThreadMarkData && currentScreen == BottomMenu.history) {
       int lastResIndex = thread.resCount;
       final contains = history.markListDiff.keys.contains(thread.id);
@@ -1253,27 +1342,81 @@ abstract class ForumStateBase with Store, WithDateTime {
     await parent.repository.updateThreadMark(newData);
   }
 
-  Future<void> updateImportance(final ImportanceData value) async {
+  Future<void> updateForumImportance(final List<ImportanceData?> value,
+      {final bool delete = false}) async {
+    final current = settings?.getImportanceList;
+    if (current == null) {
+      return;
+    }
+    final copied = [...current];
+    for (final i in value) {
+      if (i != null) {
+        copied.removeWhere((element) => element?.id == i.id);
+        if (!delete) {
+          copied.insert(0, i);
+        }
+      }
+    }
+    final strList = copied.map((e) => jsonEncode(e?.toJson())).toList();
+    final newData = settings!.copyWith(importanceList: strList);
+    setSettings(newData);
+    await parent.updateForumSettings();
+  }
+
+  Future<void> clearForumImportance(final ImportanceList value) async {
+    final current = settings?.getImportanceList;
+    if (current == null) {
+      return;
+    }
+    final copied = [...current];
+    copied.removeWhere((element) => element?.level == value);
+    final strList = copied.map((e) => jsonEncode(e?.toJson())).toList();
+    final newData = settings!.copyWith(importanceList: strList);
+    setSettings(newData);
+    await parent.updateForumSettings();
+  }
+
+  Future<void> updateThreadImportance(final ImportanceData value,
+      {final bool delete = false}) async {
     final thread = currentContentThreadData;
     if (thread == null) return;
     final current = [...thread.importanceList];
     current.removeWhere((element) => element?.id == value.id);
-    current.add(value);
+    if (!delete) {
+      current.insert(0, value);
+    }
     logger.i('imp: ${value.level}, str: ${value.strValue}');
     final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
 
-  Future<void> deleteImportance(final ImportanceData value) async {
+  Future<void> clearThreadImportance(final ImportanceList value) async {
     final thread = currentContentThreadData;
     if (thread == null) return;
     final current = [...thread.importanceList];
-    current.removeWhere((element) => element?.id == value.id);
+    current.removeWhere((element) => element?.level == value);
     final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
+
+  Future<void> allClearThreadImportance() async {
+    final thread = currentContentThreadData;
+    if (thread == null) return;
+    final newData = thread.copyWith(importance: []);
+    await parent.repository.updateThreadMark(newData);
+  }
+
+  // Future<void> deleteImportance(final ImportanceData value) async {
+  //   final thread = currentContentThreadData;
+  //   if (thread == null) return;
+  //   final current = [...thread.importanceList];
+  //   current.removeWhere((element) => element?.id == value.id);
+  //   final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
+  //   final newData = thread.copyWith(importance: strList);
+  //   await parent.repository.updateThreadMark(newData);
+  // }
 
   Future<void> updateAgreeSet(final int index) async {
     final thread = currentContentThreadData;
@@ -1387,9 +1530,73 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
-  // String? getBoardNameFromUri(final Uri uri, final Communities forum){
+  Future<void> blockThreadPostUser(final ThreadData thread) async {
+    final content = await _getThreadContent(thread.id, thread: thread);
+    if (content != null) {
+      final first = content.content.first;
+      if (first != null) {
+        final data = first.getPostId != null
+            ? ImportanceData(
+                id: randomInt(),
+                target: ImportanceTarget.postId,
+                level: ImportanceList.veryUnimportant,
+                strValue: first.getPostId!)
+            : null;
+        final title = ImportanceData(
+            id: randomInt(),
+            target: ImportanceTarget.title,
+            level: ImportanceList.veryUnimportant,
+            strValue: thread.title);
+        await parent.updateForumImportance([data, title]);
+      }
+    }
+  }
 
-  // }
+  Future<void> blockThreadResponseUser(final ContentData value) async {
+    final postId = value.getPostId != null
+        ? ImportanceData(
+            id: randomInt(),
+            target: ImportanceTarget.postId,
+            level: ImportanceList.veryUnimportant,
+            strValue: value.getPostId!)
+        : null;
+    final userId = value.getUserId != null
+        ? ImportanceData(
+            id: randomInt(),
+            target: ImportanceTarget.userId,
+            level: ImportanceList.veryUnimportant,
+            strValue: value.getUserId!)
+        : null;
+    logger.d('userId: ${value.getUserId}');
+    await _updateImportantResponse([postId, userId]);
+  }
+
+  Future<void> hideResponse(final ContentData value) async {
+    String body = value.body;
+    if (body.length >= ConstantsDataBase.importanceMaxLength) {
+      body = body.substring(0, ConstantsDataBase.importanceMaxLength);
+    }
+    final data = ImportanceData(
+        id: randomInt(),
+        target: ImportanceTarget.body,
+        level: ImportanceList.veryUnimportant,
+        strValue: body);
+    await _updateImportantResponse([data]);
+  }
+
+  Future<void> _updateImportantResponse(
+      final List<ImportanceData?> value) async {
+    final thread = currentContentThreadData;
+    if (thread == null) return;
+    final current = [...thread.importanceList];
+    current.insertAll(0, value);
+    // logger.i('imp: ${value.level}, str: ${value.strValue}');
+    final strList =
+        current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
+    final newData = thread.copyWith(importance: strList);
+    await parent.repository.updateThreadMark(newData);
+    return;
+  }
 
   Future<List<BoardData?>?> searchBoards(final String keyword,
       {final String? category}) async {

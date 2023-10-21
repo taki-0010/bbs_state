@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-047e93e333d6ec349e145de096a9f26392efd918/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-09fec9fefdad0e2f3fa331e3f0d039138407f0c6/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -387,7 +387,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-c6a6ea780eeb5edfef10dc6a48b5a762b4a015c8/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-74e0f5aad4f181233a26b2be7e0ecbb46fd97f16/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -460,6 +460,12 @@
     {
       "name": "path_provider_windows",
       "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/path_provider_windows-2.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "petitparser",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/petitparser-5.4.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -728,6 +734,12 @@
       "languageVersion": "2.15"
     },
     {
+      "name": "webfeed_advanced",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/webfeed_advanced-0.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "webkit_inspection_protocol",
       "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/webkit_inspection_protocol-1.2.1",
       "packageUri": "lib/",
@@ -758,6 +770,12 @@
       "languageVersion": "2.19"
     },
     {
+      "name": "xml",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/xml-6.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "yaml",
       "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/yaml-3.1.2",
       "packageUri": "lib/",
@@ -776,7 +794,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-10-19T13:20:43.568163Z",
+  "generated": "2023-10-21T12:20:25.237073Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

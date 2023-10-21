@@ -308,9 +308,10 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   String? getIdCount(final int currentIndex, final String? selfId) {
-    if (selfId == null) {
+    if (selfId == null || selfId.isEmpty) {
       return null;
     }
+    // logger.d('getIdCount: $selfId');
     final count = content.content
         .where((element) => element?.getPostId == selfId)
         .toList();

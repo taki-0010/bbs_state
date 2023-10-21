@@ -412,18 +412,23 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     }
     toggleBoardLoading();
     // if (result == null)
-    switch (result?.result) {
-      case FetchResult.error:
-        parent.setErrorMessage('Error!');
-        break;
-      case FetchResult.networkError:
-        parent.setErrorMessage('Status Code: ${result!.statusCode}');
-      case FetchResult.success:
-        // boards.clear();
-        boards.addAll([...?result?.boards]);
-      default:
-        parent.setErrorMessage('Error!');
+    if (result?.result == FetchResult.success) {
+      boards.addAll([...?result?.boards]);
+    } else {
+      parent.setResultMessage(result?.result, result?.statusCode);
     }
+    // switch (result?.result) {
+    //   case FetchResult.error:
+    //     parent.setErrorMessage('Error!');
+    //     break;
+    //   case FetchResult.networkError:
+    //     parent.setErrorMessage('Status Code: ${result!.statusCode}');
+    //   case FetchResult.success:
+    //     // boards.clear();
+
+    //   default:
+    //     parent.setErrorMessage('Error!');
+    // }
   }
 
   Future<void> getFavBoards() async {
@@ -562,18 +567,23 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     toggleBoardLoading();
     final result = await getThreads();
     toggleBoardLoading();
-    switch (result?.result) {
-      case FetchResult.success:
-        setPrimaryView(PrimaryViewState.threads);
-        break;
-      case FetchResult.error:
-        parent.setErrorMessage('Error!');
-        break;
-      case FetchResult.networkError:
-        parent.setErrorMessage('Status Code: ${result!.statusCode}');
-      default:
-        parent.setErrorMessage('Error!');
+    if (result?.result == FetchResult.success) {
+      setPrimaryView(PrimaryViewState.threads);
+    } else {
+      parent.setResultMessage(result?.result, result?.statusCode);
     }
+    // switch (result?.result) {
+    //   case FetchResult.success:
+
+    //     break;
+    //   case FetchResult.error:
+    //     parent.setErrorMessage('Error!');
+    //     break;
+    //   case FetchResult.networkError:
+    //     parent.setErrorMessage('Status Code: ${result!.statusCode}');
+    //   default:
+    //     parent.setErrorMessage('Error!');
+    // }
   }
 
   // @action
@@ -623,30 +633,35 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
-
-    switch (result?.result) {
-      case FetchResult.error:
-        parent.setErrorMessage('Error!');
-        break;
-      case FetchResult.networkError:
-        parent.setErrorMessage('Status Code: ${result!.statusCode}');
-      case FetchResult.success:
-        await _setThreadsMetadata(
-          result!.threads!,
-        );
-        if (parent.type == Communities.futabaCh) {
-          if (board is FutabaChBoard) {
-            final jsonData = await FutabaChHandler.fetchThreadsByJson(
-                (board as FutabaChBoard).directory, board!.id);
-            if (jsonData != null) {
-              await parent.history.deleteMarkDataWhenNotFound<FutabaChThread>(
-                  jsonData, board!.id);
-            }
+    if (result?.result == FetchResult.success) {
+      await _setThreadsMetadata(
+        result!.threads!,
+      );
+      if (parent.type == Communities.futabaCh) {
+        if (board is FutabaChBoard) {
+          final jsonData = await FutabaChHandler.fetchThreadsByJson(
+              (board as FutabaChBoard).directory, board!.id);
+          if (jsonData != null) {
+            await parent.history.deleteMarkDataWhenNotFound<FutabaChThread>(
+                jsonData, board!.id);
           }
         }
-      default:
-        parent.setErrorMessage('Error!');
+      }
+    } else {
+      parent.setResultMessage(result?.result, result?.statusCode);
     }
+
+    // switch (result?.result) {
+    //   case FetchResult.error:
+    //     parent.setErrorMessage('Error!');
+    //     break;
+    //   case FetchResult.networkError:
+    //     parent.setErrorMessage('Status Code: ${result!.statusCode}');
+    //   case FetchResult.success:
+
+    //   default:
+    //     parent.setErrorMessage('Error!');
+    // }
     return result;
   }
 
@@ -921,11 +936,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
               data.name.isEmpty) {
             return result;
           }
+          // https: //b.hatena.ne.jp/entry/jsonlite/?url=http%3A%2F%2Fwww.itmedia.co.jp%2Fnews%2Farticles%2F2310%2F19%2Fnews138.html
+          // https: //www.itmedia.co.jp/news/articles/2310/19/news138.html
           logger.i('postThread: $domain, $bbs');
           result = await FiveChHandler.postThread(
               forum: parent.type,
-              body: data.body,
-              title: data.name,
+              postData: data,
+              // body: data.body,
+              // title: data.name,
               origin: domain,
               boardId: bbs);
         }
