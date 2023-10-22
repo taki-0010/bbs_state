@@ -524,7 +524,8 @@ abstract class ForumStateBase with Store, WithDateTime {
           threadLength: value.threadLength!,
           hot: hot,
           range: range,
-          girlsPages: value.girlsPages
+          girlsPages: value.girlsPages,
+          tags: value.tags
           // archived: value.archived ?? false
           );
       return content;
@@ -568,7 +569,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         lastPageForGirlsCh: currentPageOfGirlsCh,
         range: range);
     if (result == null) {
-      logger.e('setContent: null');
+      logger.e('_getThreadContent: null');
       return null;
     }
     if (result.result != FetchResult.success) {
@@ -1208,6 +1209,8 @@ abstract class ForumStateBase with Store, WithDateTime {
           return await _getContentForChan4(
               boardId: boardId, threadId: threadId);
         }
+      case Communities.hatena:
+        return await _getContentForHatena(dataId);
 
       default:
       // _toggleLoading();
@@ -1357,7 +1360,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       }
     }
-    final strList = copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
+    final strList =
+        copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
     setSettings(newData);
     await parent.updateForumSettings();
@@ -1370,7 +1374,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
     final copied = [...current];
     copied.removeWhere((element) => element?.level == value);
-    final strList = copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
+    final strList =
+        copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
     setSettings(newData);
     await parent.updateForumSettings();
@@ -1386,7 +1391,8 @@ abstract class ForumStateBase with Store, WithDateTime {
       current.insert(0, value);
     }
     logger.i('imp: ${value.level}, str: ${value.strValue}');
-    final strList = current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
+    final strList =
+        current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
@@ -1396,7 +1402,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (thread == null) return;
     final current = [...thread.importanceList];
     current.removeWhere((element) => element?.level == value);
-    final strList = current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
+    final strList =
+        current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
@@ -1452,6 +1459,14 @@ abstract class ForumStateBase with Store, WithDateTime {
         logger.d('agree:futaba: $result');
       default:
     }
+  }
+
+  // @action
+  Future<FetchContentResultData> _getContentForHatena(
+    final String url
+  ) async {
+    final result = await HatenaHandler.getContent(url );
+    return result;
   }
 
   @action

@@ -469,9 +469,17 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   List<ThreadsOrderType> get enabledOrder {
+    final list = ThreadsOrderType.values;
     switch (selectedForum) {
+      case Communities.hatena:
+        return list
+            .where((element) =>
+                element == ThreadsOrderType.hot ||
+                element == ThreadsOrderType.resCountDesc ||
+                element == ThreadsOrderType.importance)
+            .toList();
       case Communities.futabaCh:
-        return ThreadsOrderType.values
+        return list
             .where((element) =>
                 element == ThreadsOrderType.catalog ||
                 element == ThreadsOrderType.newerThread ||
@@ -479,7 +487,7 @@ abstract class MainStoreBase with Store, WithDateTime {
                 element == ThreadsOrderType.resCountDesc)
             .toList();
       case Communities.girlsCh:
-        return ThreadsOrderType.values
+        return list
             .where((element) =>
                 // element == ThreadsOrderType.hot ||
                 element == ThreadsOrderType.newerResponce ||
@@ -487,7 +495,7 @@ abstract class MainStoreBase with Store, WithDateTime {
                 element == ThreadsOrderType.resCountDesc)
             .toList();
       case Communities.chan4:
-        return ThreadsOrderType.values
+        return list
             .where((element) =>
                 element == ThreadsOrderType.hot ||
                 element == ThreadsOrderType.newerResponce ||
@@ -496,7 +504,7 @@ abstract class MainStoreBase with Store, WithDateTime {
                 element == ThreadsOrderType.resCountDesc)
             .toList();
       default:
-        return ThreadsOrderType.values
+        return list
             .where((element) =>
                 element == ThreadsOrderType.hot ||
                 element == ThreadsOrderType.newerThread ||
@@ -697,7 +705,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.futabaCh => FutabaChBoardNames.getById(id),
         Communities.pinkCh => FiveChBoardNames.getById(id),
         Communities.machi => MachiData.getBoardNameById(id),
-        Communities.hatena => HatenaData.boardNameById(id),
+        Communities.hatena => HatenaData.boardNameById(id) ?? id,
         Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
         Communities.shitaraba => selectedForumState?.history.markList
                 .firstWhere(
@@ -1037,6 +1045,11 @@ abstract class MainStoreBase with Store, WithDateTime {
       girlsCh.disposeNonLargeContent();
       futabaCh.disposeNonLargeContent();
       pinkCh.disposeNonLargeContent();
+      shitaraba.disposeNonLargeContent();
+      machi.disposeNonLargeContent();
+      chan4.disposeNonLargeContent();
+      open2ch.disposeNonLargeContent();
+      hatena.disposeNonLargeContent();
       if (bottomBarIndex == 0) {
         setBottomIndex(1);
       }
@@ -1049,8 +1062,8 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> deleteHistoryByThreadData(final ThreadData thread) async {
     final markData = getSelectedMarkByThreadData(thread, thread.type);
-    if(markData != null){
-       await repository.deleteThread(markData);
+    if (markData != null) {
+      await repository.deleteThread(markData);
     }
   }
 
@@ -1920,6 +1933,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    await HatenaHandler.getThreads(HatenaData.boardUri(HatenaCategory.game));
+    await HatenaHandler.getThreads('it');
   }
 }

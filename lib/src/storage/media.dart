@@ -37,7 +37,8 @@ abstract class MediaCacheStateBase with Store {
 
     final extIndex = file.lastIndexOf('.');
     final ext = extIndex == -1 ? '.jpg' : file.substring(extIndex);
-    final hashed = md5.string(parsed.toString());
+    final hashed = UrlParser.hashed(parsed.toString());
+    // md5.string(parsed.toString());
     final path = '${parsed.host}_$hashed$ext';
     final replaced = path.replaceAll('/', '_');
     logger.i('file path: $replaced');

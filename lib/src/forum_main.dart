@@ -408,6 +408,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.chan4:
         result = await _getBoardsForChan4();
         break;
+      case Communities.hatena:
+        result = _getBoardFromHatena();
       default:
     }
     toggleBoardLoading();
@@ -447,7 +449,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
     }
   }
-  // Future<void>
+
+  FetchBoardsResultData? _getBoardFromHatena() {
+    final data = HatenaCategory.values
+        .map((e) =>
+            HatenaBoardData(id: e.id, name: e.label, forum: Communities.hatena))
+        .toList();
+    return FetchBoardsResultData(boards: data);
+  }
 
   Future<FetchBoardsResultData?> _getBoardsForChan4() async =>
       await Chan4Handler.getBoards(parent.selectedNsfw);
@@ -630,6 +639,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.chan4:
         result = await _getThreadsForChan4();
         break;
+      case Communities.hatena:
+        result = await _getThreadsForHatena();
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -832,6 +843,15 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     if (b is MachiBoardData) {
       return await MachiHandler.getThreads(b.id);
+      // return setMachiThreads(result);
+    }
+    return null;
+  }
+
+  Future<FetchThreadsResultData?> _getThreadsForHatena() async {
+    final b = board;
+    if (b is HatenaBoardData) {
+      return await HatenaHandler.getThreads(b.id);
       // return setMachiThreads(result);
     }
     return null;
