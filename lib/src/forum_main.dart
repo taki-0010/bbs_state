@@ -164,7 +164,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         list.sort((a, b) => (a?.resCount ?? 0).compareTo(b?.resCount ?? 0));
         break;
       case ThreadsOrderType.importance:
-        final importances = parent.settings!.boardImportanceList;
+        final importances = parent.titleImportanceList;
         final veryIm = importances
             .where((element) => element?.level == ImportanceList.veryImportant)
             .toList();

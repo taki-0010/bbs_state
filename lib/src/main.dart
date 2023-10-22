@@ -1047,6 +1047,13 @@ abstract class MainStoreBase with Store, WithDateTime {
     await repository.deleteThread(value);
   }
 
+  Future<void> deleteHistoryByThreadData(final ThreadData thread) async {
+    final markData = getSelectedMarkByThreadData(thread, thread.type);
+    if(markData != null){
+       await repository.deleteThread(markData);
+    }
+  }
+
   Future<void> deleteThreadMarkData(final ThreadMarkData value) async {
     // selectedForumState?.history.deleteData(value);
     if (selectedForumState?.type == value.type) {
@@ -1792,6 +1799,11 @@ abstract class MainStoreBase with Store, WithDateTime {
       default:
         return null;
     }
+  }
+
+  ThreadMarkData? getSelectedMarkByThreadData(
+      final ThreadData thread, final Communities forum) {
+    return _selectedForum(forum)?.history.getSelectedMarkData(thread);
   }
 
   ThreadMarkData? getThreadMarkByUri(final Uri uri, final Communities forum) {

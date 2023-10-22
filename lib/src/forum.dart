@@ -729,7 +729,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     final String? thumbnailData,
     final String? boardName,
   ) async {
-    final session = '';
+    // final session = '';
     // final session = await currentSessionId;
     final user = parent.repository.user;
     // final user = await parent.server.userState.getUserAccount;
@@ -755,7 +755,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           // gotAt: DateTime.now().toIso8601String(),
           resCount: resCount,
           url: url.replaceAll('https://', ''),
-          sessionId: session,
+          // sessionId: session,
           boardId: content.boardId,
           thumbnailStr: thumbnailData ??
               jsonEncode(SrcData(thumbnailUri: thumbnail).toJson()),
@@ -1357,7 +1357,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       }
     }
-    final strList = copied.map((e) => jsonEncode(e?.toJson())).toList();
+    final strList = copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
     setSettings(newData);
     await parent.updateForumSettings();
@@ -1370,7 +1370,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
     final copied = [...current];
     copied.removeWhere((element) => element?.level == value);
-    final strList = copied.map((e) => jsonEncode(e?.toJson())).toList();
+    final strList = copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
     setSettings(newData);
     await parent.updateForumSettings();
@@ -1386,7 +1386,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       current.insert(0, value);
     }
     logger.i('imp: ${value.level}, str: ${value.strValue}');
-    final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
+    final strList = current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
@@ -1396,7 +1396,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (thread == null) return;
     final current = [...thread.importanceList];
     current.removeWhere((element) => element?.level == value);
-    final strList = current.map((e) => jsonEncode(e?.toJson())).toList();
+    final strList = current.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = thread.copyWith(importance: strList);
     await parent.repository.updateThreadMark(newData);
   }
