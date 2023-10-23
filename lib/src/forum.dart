@@ -716,6 +716,13 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (first is Chan4Content) {
           return first.time;
         }
+      case Communities.hatena:
+        final last =
+            value.content.length >= 2 ? value.content.lastOrNull : null;
+        if (last?.createdAt != null) {
+          return (last!.createdAt!.millisecondsSinceEpoch  * 0.001).toInt();
+        }
+
       default:
         return null;
     }
@@ -1462,10 +1469,8 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   // @action
-  Future<FetchContentResultData> _getContentForHatena(
-    final String url
-  ) async {
-    final result = await HatenaHandler.getContent(url );
+  Future<FetchContentResultData> _getContentForHatena(final String url) async {
+    final result = await HatenaHandler.getContent(url);
     return result;
   }
 
@@ -1583,7 +1588,8 @@ abstract class ForumStateBase with Store, WithDateTime {
             strValue: value.getUserId!)
         : null;
     logger.d('userId: ${value.getUserId}');
-    await _updateImportantResponse([postId, userId]);
+    // await _updateImportantResponse([postId, userId]);
+    await parent.updateForumImportance([postId, userId]);
   }
 
   Future<void> hideResponse(final ContentData value) async {

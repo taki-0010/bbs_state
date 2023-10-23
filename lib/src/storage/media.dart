@@ -36,7 +36,8 @@ abstract class MediaCacheStateBase with Store {
     final file = parsed.pathSegments.last;
 
     final extIndex = file.lastIndexOf('.');
-    final ext = extIndex == -1 ? '.jpg' : file.substring(extIndex);
+    final extData = extIndex == -1 ? '.jpg' : file.substring(extIndex);
+    final ext = extData.length >= 10 ? '.jpg' : extData;
     final hashed = UrlParser.hashed(parsed.toString());
     // md5.string(parsed.toString());
     final path = '${parsed.host}_$hashed$ext';

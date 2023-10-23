@@ -44,6 +44,13 @@ mixin _$ContentState on ContentStateBase, Store {
       (_$groupListComputed ??= Computed<List<GroupData?>>(() => super.groupList,
               name: 'ContentStateBase.groupList'))
           .value;
+  Computed<String?>? _$getDefaultNameComputed;
+
+  @override
+  String? get getDefaultName => (_$getDefaultNameComputed ??= Computed<String?>(
+          () => super.getDefaultName,
+          name: 'ContentStateBase.getDefaultName'))
+      .value;
   Computed<bool>? _$showBottomChipComputed;
 
   @override
@@ -417,6 +424,7 @@ initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},
 groupList: ${groupList},
+getDefaultName: ${getDefaultName},
 showBottomChip: ${showBottomChip},
 rangeListBy1000Steps: ${rangeListBy1000Steps}
     ''';

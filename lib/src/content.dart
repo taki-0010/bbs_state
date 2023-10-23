@@ -1,4 +1,5 @@
 import 'importer.dart';
+import 'dart:math';
 
 part 'content.g.dart';
 
@@ -161,22 +162,26 @@ abstract class ContentStateBase with Store, WithDateTime {
   @action
   void setTimeago(final TimeagoList value) => timeago = value;
 
-  // @computed
-  // List<ContentData?> get filterd {
-  //   if (filterWord == null || filterWord!.isEmpty) {
-  //     return content.content;
-  //   }
-  //   if (content.content.isEmpty) {
-  //     return [];
-  //   }
-  //   final result = content.content
-  //       .where((element) =>
-  //           element != null &&
-  //           element.body.toLowerCase().contains(filterWord!.toLowerCase()))
-  //       .toList();
-  //   return result;
-  // }
-  // @computed
+  @computed
+  String? get getDefaultName {
+    final names = content.content.map((e) => e?.getUserName).toList();
+    final counter = <String, int>{};
+    for (final value in names) {
+      if (value != null) {
+        counter.update(value, (count) => count + 1, ifAbsent: () => 1);
+      }
+    }
+    final maxNum = counter.values.reduce(max);
+    String? result;
+    for (final i in counter.entries) {
+      if (i.value == maxNum) {
+        result = i.key;
+      }
+    }
+
+    return result;
+  }
+
   List<int?> filterdIndexList(final String value) {
     if (value.isEmpty) {
       return [];

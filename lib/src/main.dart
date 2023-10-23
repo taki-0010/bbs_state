@@ -1933,6 +1933,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    await HatenaHandler.getThreads('it');
+    await HatenaHandler.searchThreads('flutter');
   }
 }

@@ -503,6 +503,11 @@ abstract class LibraryStateBase with Store, WithDateTime {
             if (result.result == FetchResult.success) {
               await setArchived<ThreadData>(result.threads!, b.boardId);
             }
+          case Communities.hatena:
+            result = await HatenaHandler.getThreads(b.boardId);
+            if (result.result == FetchResult.success) {
+              await setArchived<ThreadData>(result.threads!, b.boardId);
+            }
           default:
         }
         List<ThreadData?> threads = [];

@@ -185,6 +185,8 @@ abstract class SearchStateBase with Store {
         if (boardId == null) return;
         final data = await Chan4Handler.searchThreads(keyword, boardId);
         result = data.threads;
+      case Communities.hatena:
+        result = await HatenaHandler.searchThreads(keyword);
       default:
     }
     logger.i('search result: ${result?.length}');
