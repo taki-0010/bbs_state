@@ -360,6 +360,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get currentBoardUrl {
     final board = selectedForumState?.forumMain.board;
     switch (selectedForum) {
+      case Communities.hatena:
+        if (board is HatenaBoardData) {
+          return HatenaData.boardUri(board.id).toString();
+        }
       case Communities.chan4:
         if (board is Chan4BoardData) {
           return board.currentBoardUri.toString();
@@ -1400,6 +1404,10 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (url.isEmpty) {
       return null;
     }
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return null;
+    }
     final cache = await _getMediaFromCache(url);
     if (cache != null) {
       logger.i('get media from cache: $url');
@@ -1730,6 +1738,12 @@ abstract class MainStoreBase with Store, WithDateTime {
   //   }
   //   return uri.host;
   // }
+  // String? getBoardIdFromUriForLinkButton(
+  //     final Uri uri, final Communities forum){
+  //       if(forum == Communities.hatena){
+
+  //       }
+  //     }
 
   String? getBoardIdFromUri(final Uri uri, final Communities forum) {
     switch (forum) {
@@ -1750,6 +1764,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return FutabaData.getBoardIdFromUri(uri);
       case Communities.chan4:
         return Chan4Data.getBoardIdFromUri(uri);
+      case Communities.hatena:
+        return HatenaData.boardIdFromUri(uri);
       default:
     }
     return null;
@@ -1771,6 +1787,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return FutabaData.getThreadIdFromUri(uri);
       case Communities.chan4:
         return Chan4Data.getThreadIdFromUri(uri);
+      case Communities.hatena:
+        return HatenaData.getThreadIdFromUri(uri);
       default:
     }
     return null;
@@ -1792,26 +1810,35 @@ abstract class MainStoreBase with Store, WithDateTime {
         return FutabaData.uriIsThreadOrBoard(uri);
       case Communities.chan4:
         return Chan4Data.uriIsThreadOrBoard(uri);
+      case Communities.hatena:
+        return HatenaData.uriIsThreadOrBoard(uri);
       default:
     }
     return null;
   }
 
-  int? getResNumFromUri(final Uri uri, final Communities forum) {
+  String? getResNumFromUri(final Uri uri, final Communities forum) {
+    int? resNum;
     switch (forum) {
       case Communities.fiveCh || Communities.pinkCh:
-        return FiveChData.getResNumFromUri(uri, forum);
+        resNum = FiveChData.getResNumFromUri(uri, forum);
       case Communities.girlsCh:
-        return GirlsChData.getResNumFromUri(uri);
+        resNum = GirlsChData.getResNumFromUri(uri);
       case Communities.shitaraba:
-        return ShitarabaData.getResNumFromUri(uri);
+        resNum = ShitarabaData.getResNumFromUri(uri);
       case Communities.machi:
-        return MachiData.getResNumFromUri(uri);
+        resNum = MachiData.getResNumFromUri(uri);
       case Communities.open2Ch:
-        return Open2ChData.getResNumFromUri(uri);
+        resNum = Open2ChData.getResNumFromUri(uri);
+      case Communities.hatena:
+        return HatenaData.getCommentNameFromUri(uri);
       default:
         return null;
     }
+    if (resNum != null) {
+      return resNum.toString();
+    }
+    return null;
   }
 
   ThreadMarkData? getSelectedMarkByThreadData(

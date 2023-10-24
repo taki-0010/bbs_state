@@ -31,16 +31,17 @@ abstract class MediaCacheStateBase with Store {
   String get _retentionPeriod => 'retentionPeriod';
 
   String _getPath(final String url) {
-    final parsed = Uri.parse(url);
+    final parsed = Uri.tryParse(url);
     logger.d('persed: $parsed');
-    final file = parsed.pathSegments.last;
+    final fileData = parsed?.pathSegments.lastOrNull;
+    final file = (fileData ?? url);
 
     final extIndex = file.lastIndexOf('.');
     final extData = extIndex == -1 ? '.jpg' : file.substring(extIndex);
     final ext = extData.length >= 10 ? '.jpg' : extData;
     final hashed = UrlParser.hashed(parsed.toString());
     // md5.string(parsed.toString());
-    final path = '${parsed.host}_$hashed$ext';
+    final path = '${parsed?.host}_$hashed$ext';
     final replaced = path.replaceAll('/', '_');
     logger.i('file path: $replaced');
     // if (replaced.length > 40) {

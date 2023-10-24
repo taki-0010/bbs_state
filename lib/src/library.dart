@@ -186,7 +186,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
     return markList.firstWhere(
         (element) =>
             element?.id == id &&
-            (parent.type == Communities.girlsCh
+            (parent.type == Communities.girlsCh || parent.type == Communities.hatena
                 ? true
                 : element?.boardId == boardId),
         orElse: () => null);
@@ -505,9 +505,9 @@ abstract class LibraryStateBase with Store, WithDateTime {
             }
           case Communities.hatena:
             result = await HatenaHandler.getThreads(b.boardId);
-            if (result.result == FetchResult.success) {
-              await setArchived<ThreadData>(result.threads!, b.boardId);
-            }
+            // if (result.result == FetchResult.success) {
+            //   await setArchived<ThreadData>(result.threads!, b.boardId);
+            // }
           default:
         }
         List<ThreadData?> threads = [];
