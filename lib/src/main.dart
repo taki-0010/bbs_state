@@ -809,13 +809,16 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
-  Future<void> updateContent(
+  Future<(FetchResult, int?)?> updateContent(
       {final RangeList? changedRange, final int? changedPage}) async {
-    if (currentContent == null) return;
+    if (currentContent == null) return null;
     toggleContentLoading();
-    await selectedForumState?.updateContent(
+    final result = await selectedForumState?.updateContent(
         changedPage: changedPage, changedRange: changedRange);
-    toggleContentLoading();
+    if (contentLoading) {
+      toggleContentLoading();
+    }
+    return result;
   }
 
   Future<FetchResult> getDataByUrl(final Uri? uri,
@@ -1960,6 +1963,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    await HatenaHandler.searchThreads('flutter');
+    await MalHandler.getContent();
   }
 }

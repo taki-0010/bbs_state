@@ -575,6 +575,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
       final List<T?> newList, final String boardId) async {
     if (parent.type == Communities.futabaCh ||
         parent.type == Communities.open2Ch ||
+        parent.type == Communities.hatena ||
         parent.type == Communities.girlsCh) {
       return;
     }

@@ -581,7 +581,6 @@ abstract class ForumStateBase with Store, WithDateTime {
   @action
   Future<FetchResult> setContent(final String id,
       {required final ThreadBase thread}) async {
-  
     final content = await _getThreadContent(id, thread: thread);
     if (content == null) {
       logger.e('setContent: null');
@@ -619,11 +618,11 @@ abstract class ForumStateBase with Store, WithDateTime {
               orElse: () => null,
             );
             if (diff != null) {
-              if(currentScreen == BottomMenu.forums){
+              if (currentScreen == BottomMenu.forums) {
                 forumMain.content?.setLastResIndex(diff.before);
               }
-              if(currentScreen == BottomMenu.history && parent.largeScreen){
-               history.content?.setLastResIndex(diff.before);
+              if (currentScreen == BottomMenu.history && parent.largeScreen) {
+                history.content?.setLastResIndex(diff.before);
               }
               logger.d('setContent: exist.resCount: ${diff.before}');
             }
@@ -1150,20 +1149,24 @@ abstract class ForumStateBase with Store, WithDateTime {
     }
   }
 
-  Future<FetchResult> updateContent(
+  Future<(FetchResult, int?)> updateContent(
       {final RangeList? changedRange, final int? changedPage
       // final RangeList range = RangeList.last1000
       }) async {
     final thread = currentContentThreadData;
-    if (thread == null) return FetchResult.error;
+    if (thread == null) return (FetchResult.error, null);
     // logger.d('position: 2: ${thread.positionToGet}');
     final currentRange = changedRange ?? currentContentState?.selectedRange;
     final selectedPage = changedPage ?? currentContentState?.selectedPage;
     final result = await _fetchData<ThreadMarkData>(thread.id,
         uri: thread.uri, lastPageForGirlsCh: selectedPage, range: currentRange);
-    if (result == null) return FetchResult.error;
+    if (result == null) return (FetchResult.error, null);
     final content = _getData(result, thread.id, thread.boardId, currentRange);
-    if (content == null) return FetchResult.error;
+    if (content == null) return (FetchResult.error, null);
+    final oldLength = thread.resCount;
+    final newLength = content.threadLength;
+    final diff = newLength - oldLength;
+    logger.d('updateContent: $oldLength, $newLength, diff: $diff');
     final lastReadIndex = changedPage != null || changedRange != null
         ? null
         : currentContentState?.content.content.lastOrNull?.index;
@@ -1171,16 +1174,15 @@ abstract class ForumStateBase with Store, WithDateTime {
         ? null
         : currentContentState?.currentContentIndex;
     currentContentState?.setLastResIndex(lastReadIndex);
-    // if (!parent.cancelInitialScroll) {
-    //   parent.toggleCancelInitialScroll();
-    // }
+
     _updateContent(content);
 
-    return await _updateMarkData(
+    final updated = await _updateMarkData(
       thread,
       content,
       lastOpenedIndex: lastIndex,
     );
+    return (updated, diff);
   }
 
   // Future<void> updatePositionToGet(final PositionToGet value) async {
