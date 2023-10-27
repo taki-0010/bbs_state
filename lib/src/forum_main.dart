@@ -410,6 +410,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.hatena:
         result = _getBoardFromHatena();
+      case Communities.mal:
+        result = await _getBoardsForMal();
       default:
     }
     toggleBoardLoading();
@@ -534,6 +536,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
+  Future<FetchBoardsResultData?> _getBoardsForMal() async {
+    if (boards.isEmpty) {
+      return await MalHandler.getBoards();
+    }
+    return null;
+  }
+
   // @action
   Future<FetchBoardsResultData?> _getBoardsForFutaba() async {
     if (boards.isEmpty) {
@@ -570,7 +579,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     threadsDiff[board?.id]?.removeWhere((element) => element?.id == id);
   }
 
-  Future<void> setThreads(final BoardData value) async {
+  Future<void> setThreads(final dynamic value) async {
+    if (value is! BoardData) return;
     setBoard(value);
     setThreadScrollOffset(null);
     toggleBoardLoading();
@@ -641,6 +651,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         break;
       case Communities.hatena:
         result = await _getThreadsForHatena();
+      case Communities.mal:
+        result = await _getThreadsForMal();
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -818,6 +830,21 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     if (b?.forum == Communities.open2Ch && b is FiveChBoardData) {
       return await Open2ChHandler.getThreads(
           b.directoryName, board!.id, board!.name);
+      // if (result == null) {
+      //   return;
+      // }
+      // await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
+    }
+    return null;
+  }
+
+  Future<FetchThreadsResultData?> _getThreadsForMal() async {
+    final b = board;
+    if (b?.forum == Communities.mal && b is MalBoardData) {
+      final boardId = !b.subboard ? b.id : null;
+      final subboardId = b.subboard ? b.id : null;
+      return await MalHandler.getThreads(
+          boardId: boardId, subboardId: subboardId);
       // if (result == null) {
       //   return;
       // }

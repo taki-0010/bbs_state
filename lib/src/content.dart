@@ -164,6 +164,9 @@ abstract class ContentStateBase with Store, WithDateTime {
 
   @computed
   String? get getDefaultName {
+    if (content.type == Communities.chan4) {
+      return Chan4Data.defaultName;
+    }
     final names = content.content.map((e) => e?.getUserName).toList();
     final counter = <String, int>{};
     for (final value in names) {

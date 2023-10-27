@@ -19,6 +19,7 @@ export 'package:filesize/filesize.dart';
 // export 'package:hashlib/hashlib.dart';
 
 
+export 'player.dart';
 export 'repository.dart';
 export 'storage/forum.dart';
 export 'storage/media.dart';

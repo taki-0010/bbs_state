@@ -1086,6 +1086,12 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.hatena:
         final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
         return await _getContentForHatena(url);
+      case Communities.mal:
+        final threadLength = forumMain.threadList.firstWhere(
+          (e) => e?.id == dataId,
+          orElse: () => null,
+        )?.resCount;
+        return await _getContentForMal(dataId, threadLength);
 
       default:
       // _toggleLoading();
@@ -1342,6 +1348,12 @@ abstract class ForumStateBase with Store, WithDateTime {
   // @action
   Future<FetchContentResultData> _getContentForHatena(final String url) async {
     final result = await HatenaHandler.getContent(url);
+    return result;
+  }
+
+  Future<FetchContentResultData> _getContentForMal(
+      final String threadId, final int? threadLength) async {
+    final result = await MalHandler.getContent(threadId, threadLength);
     return result;
   }
 

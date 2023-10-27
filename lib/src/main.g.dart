@@ -112,6 +112,14 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<List<Communities>?>(() => super.selectedForumList,
               name: 'MainStoreBase.selectedForumList'))
       .value;
+  Computed<List<String>?>? _$selectedForumHostListComputed;
+
+  @override
+  List<String>? get selectedForumHostList =>
+      (_$selectedForumHostListComputed ??= Computed<List<String>?>(
+              () => super.selectedForumHostList,
+              name: 'MainStoreBase.selectedForumHostList'))
+          .value;
   Computed<LangList>? _$getLocaleComputed;
 
   @override
@@ -611,6 +619,22 @@ mixin _$MainStore on MainStoreBase, Store {
     });
   }
 
+  late final _$playerAtom =
+      Atom(name: 'MainStoreBase.player', context: context);
+
+  @override
+  PlayerState? get player {
+    _$playerAtom.reportRead();
+    return super.player;
+  }
+
+  @override
+  set player(PlayerState? value) {
+    _$playerAtom.reportWrite(value, super.player, () {
+      super.player = value;
+    });
+  }
+
   late final _$largeScreenAtom =
       Atom(name: 'MainStoreBase.largeScreen', context: context);
 
@@ -819,6 +843,17 @@ mixin _$MainStore on MainStoreBase, Store {
   }
 
   @override
+  void setPlayer(LinkData? value) {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase.setPlayer');
+    try {
+      return super.setPlayer(value);
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setLog(String value) {
     final _$actionInfo = _$MainStoreBaseActionController.startAction(
         name: 'MainStoreBase.setLog');
@@ -936,6 +971,7 @@ devMode: ${devMode},
 devModeCount: ${devModeCount},
 debugLog: ${debugLog},
 overlayId: ${overlayId},
+player: ${player},
 largeScreen: ${largeScreen},
 entireLoading: ${entireLoading},
 selectedForum: ${selectedForum},
@@ -960,6 +996,7 @@ lastOpenedIndexForVisibleContent: ${lastOpenedIndexForVisibleContent},
 favoritesBoards: ${favoritesBoards},
 userData: ${userData},
 selectedForumList: ${selectedForumList},
+selectedForumHostList: ${selectedForumHostList},
 getLocale: ${getLocale},
 fontsList: ${fontsList},
 selectedForumState: ${selectedForumState},

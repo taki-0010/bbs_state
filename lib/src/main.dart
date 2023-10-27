@@ -25,6 +25,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
   late final chan4 = ForumState(parent: this, type: Communities.chan4);
   late final hatena = ForumState(parent: this, type: Communities.hatena);
+  late final mal = ForumState(parent: this, type: Communities.mal);
 
   // late final SembastCacheStore store;
 
@@ -59,6 +60,18 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @action
   void setOverlayId(final String? id) => overlayId = id;
+
+  @observable
+  PlayerState? player;
+
+  @action
+  void setPlayer(final LinkData? value) {
+    if (value != null) {
+      player = PlayerState(data: value);
+    } else {
+      player = null;
+    }
+  }
 
   // bool? isWeb;
   // bool? isDebugMode;
@@ -180,6 +193,10 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   List<Communities>? get selectedForumList => userData?.forums;
+
+  @computed
+  List<String>? get selectedForumHostList =>
+      userData?.forums.map((e) => e.host).toList();
 
   @computed
   LangList get getLocale => userData?.language ?? LangList.ja;
@@ -704,6 +721,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   //     };
 
   String? boardNameById(final String id) => switch (selectedForum) {
+        Communities.mal => '',
         Communities.fiveCh => FiveChBoardNames.getById(id),
         Communities.girlsCh => GirlsChData.getBoardNameById(id),
         Communities.futabaCh => FutabaChBoardNames.getById(id),
@@ -1497,6 +1515,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.machi => machi,
         Communities.chan4 => chan4,
         Communities.hatena => hatena,
+        Communities.mal => mal,
         null => null
       };
 
@@ -1874,8 +1893,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<bool> postThread({
-    required final PostData data,
+    required final dynamic data,
   }) async {
+    if (data is! PostData) return false;
     return await selectedForumState?.forumMain.postThread(data: data) ?? false;
   }
 
@@ -1961,8 +1981,37 @@ abstract class MainStoreBase with Store, WithDateTime {
   void deleteThreadData(final ThreadMarkData value) =>
       _selectedForum(value.type)?.deleteContent(value);
 
+  // String shitarabaFavoriteBoardStr(
+  //   final String category,
+  //   final String boardId,
+  // ) =>
+  //     ShitarabaData.favoriteBoardStr(category: category, boardId: boardId);
+
+  // String shitarabaEmoji(final String categoryId) =>
+  //     ShitarabaData.categoryEmoji(categoryId);
+
+  // void setInstanceData(
+  //     {required final bool isIos,
+  //     required final bool isAndroid,
+  //     required final bool isWindows,
+  //     required final bool isMacOs,
+  //     required final bool isLinux,
+  //     required final bool isWeb,
+  //     required final bool debugmode,
+  //     required final String malId}) {
+  //   PlatformData.instance.setData(
+  //       iOS: isIos,
+  //       android: isAndroid,
+  //       windows: isWindows,
+  //       mac: isMacOs,
+  //       linux: isLinux,
+  //       web: isWeb,
+  //       debug: debugmode);
+  //   MalData.instance.set(malId);
+  // }
+
   Future<void> openget() async {
     logger.i('open2ch');
-    await MalHandler.getContent();
+    // await MalHandler.getContent();
   }
 }
