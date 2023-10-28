@@ -75,10 +75,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
   @computed
   Set<String?> get boardIdSetOfContentList {
     final boardIdSet = markList.map((element) => element?.boardId).toList();
-    // final boardsData = boardIdSet
-    //     .map((e) => boards.firstWhere((element) => element?.id == e,
-    //         orElse: () => null))
-    //     .toList();
+
     logger.d('historyListByBoard: ${boardIdSet.map((e) => e)},');
     boardIdSet.sort((a, b) => (a ?? '').compareTo((b ?? '')));
     return boardIdSet.toSet();
@@ -575,6 +572,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
       final List<T?> newList, final String boardId) async {
     if (parent.type == Communities.futabaCh ||
         parent.type == Communities.open2Ch ||
+        parent.type == Communities.mal ||
         parent.type == Communities.hatena ||
         parent.type == Communities.girlsCh) {
       return;

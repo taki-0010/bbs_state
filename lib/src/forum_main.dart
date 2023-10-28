@@ -826,7 +826,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     if (b?.forum == Communities.mal && b is MalBoardData) {
       final boardId = !b.subboard ? b.id : null;
-      final subboardId = b.subboard ? b.id : null;
+      final subboardIdData = b.subboard ? b.id : null;
+      final subboardId = subboardIdData?.replaceAll('s', '');
       return await MalHandler.getThreads(
           boardId: boardId, subboardId: subboardId);
       // if (result == null) {

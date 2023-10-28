@@ -759,7 +759,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   String? boardNameById(final String id) => switch (selectedForum) {
-        Communities.mal => '',
+        Communities.mal => MalData.boardNameById(id),
         // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
         Communities.fiveCh => FiveChBoardNames.getById(id),
         Communities.girlsCh => GirlsChData.getBoardNameById(id),
@@ -1115,6 +1115,7 @@ abstract class MainStoreBase with Store, WithDateTime {
       chan4.disposeNonLargeContent();
       open2ch.disposeNonLargeContent();
       hatena.disposeNonLargeContent();
+      mal.disposeNonLargeContent();
       if (bottomBarIndex == 0) {
         setBottomIndex(1);
       }
