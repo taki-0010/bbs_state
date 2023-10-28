@@ -720,12 +720,52 @@ abstract class MainStoreBase with Store, WithDateTime {
   //       BottomMenu.forums => null,
   //     };
 
+  @computed
+  String? get getDefaultName {
+    final content = currentContent;
+    final first = content?.content.firstOrNull;
+    String? name;
+    switch (selectedForum) {
+      case Communities.fiveCh || Communities.pinkCh:
+        if (first is FiveChThreadContentData) {
+          final sub = first.domain.split('.').first;
+          final BoardMetaData? meta = selectedForumState?.boardMetadataSet
+              .firstWhere(
+                  (value) =>
+                      value?.directory == sub &&
+                      value?.boardId == content?.boardId,
+                  orElse: () => null);
+          if (meta != null) {
+            name = FiveChData.defaultName(meta.data);
+          }
+        }
+        break;
+      case Communities.shitaraba:
+        if (first is ShitarabaContentData) {
+          final category = first.category;
+          final boardId = first.boardId;
+          final meta = selectedForumState?.boardMetadataSet.firstWhere(
+              (value) =>
+                  value?.directory == category && value?.boardId == boardId,
+              orElse: () => null);
+          if (meta != null) {
+            name = ShitarabaData.defaultName(meta.data);
+          }
+        }
+      default:
+    }
+    logger.d('defaultName: $name');
+    return name ?? currentContentState?.getDefaultName;
+  }
+
   String? boardNameById(final String id) => switch (selectedForum) {
         Communities.mal => '',
+        // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
         Communities.fiveCh => FiveChBoardNames.getById(id),
         Communities.girlsCh => GirlsChData.getBoardNameById(id),
         Communities.futabaCh => FutabaChBoardNames.getById(id),
-        Communities.pinkCh => FiveChBoardNames.getById(id),
+        // Communities.pinkCh => pinkCh.boardNameByIdFromMetadataSet(id),
+        Communities.pinkCh => FiveChBoardNames.getById(id) ?? id,
         Communities.machi => MachiData.getBoardNameById(id),
         Communities.hatena => HatenaData.boardNameById(id) ?? id,
         Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,

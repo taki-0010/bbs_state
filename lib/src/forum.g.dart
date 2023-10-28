@@ -373,6 +373,22 @@ mixin _$ForumState on ForumStateBase, Store {
     });
   }
 
+  late final _$boardMetadataSetAtom =
+      Atom(name: 'ForumStateBase.boardMetadataSet', context: context);
+
+  @override
+  ObservableSet<BoardMetaData?> get boardMetadataSet {
+    _$boardMetadataSetAtom.reportRead();
+    return super.boardMetadataSet;
+  }
+
+  @override
+  set boardMetadataSet(ObservableSet<BoardMetaData?> value) {
+    _$boardMetadataSetAtom.reportWrite(value, super.boardMetadataSet, () {
+      super.boardMetadataSet = value;
+    });
+  }
+
   late final _$boardsScrollAtom =
       Atom(name: 'ForumStateBase.boardsScroll', context: context);
 
@@ -387,6 +403,15 @@ mixin _$ForumState on ForumStateBase, Store {
     _$boardsScrollAtom.reportWrite(value, super.boardsScroll, () {
       super.boardsScroll = value;
     });
+  }
+
+  late final _$setBoardMetadataAsyncAction =
+      AsyncAction('ForumStateBase.setBoardMetadata', context: context);
+
+  @override
+  Future<void> setBoardMetadata(String directory, String boardId) {
+    return _$setBoardMetadataAsyncAction
+        .run(() => super.setBoardMetadata(directory, boardId));
   }
 
   late final _$getAllCacheSizeAsyncAction =
@@ -576,6 +601,7 @@ hoverdItemY: ${hoverdItemY},
 errorMessage: ${errorMessage},
 thumbnailCacheSize: ${thumbnailCacheSize},
 allCacheSize: ${allCacheSize},
+boardMetadataSet: ${boardMetadataSet},
 boardsScroll: ${boardsScroll},
 thumbnailCacheSizeStr: ${thumbnailCacheSizeStr},
 allCacheSizeStr: ${allCacheSizeStr},

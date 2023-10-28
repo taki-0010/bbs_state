@@ -524,6 +524,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<List<ThreadBase?>>(() => super.searchList,
               name: 'MainStoreBase.searchList'))
       .value;
+  Computed<String?>? _$getDefaultNameComputed;
+
+  @override
+  String? get getDefaultName => (_$getDefaultNameComputed ??= Computed<String?>(
+          () => super.getDefaultName,
+          name: 'MainStoreBase.getDefaultName'))
+      .value;
   Computed<List<String?>>? _$searchWordsComputed;
 
   @override
@@ -1051,6 +1058,7 @@ listByBoardId: ${listByBoardId},
 currentHistoryList: ${currentHistoryList},
 currentSearchList: ${currentSearchList},
 searchList: ${searchList},
+getDefaultName: ${getDefaultName},
 searchWords: ${searchWords},
 searchViewState: ${searchViewState}
     ''';

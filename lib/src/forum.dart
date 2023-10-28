@@ -70,6 +70,10 @@ abstract class ForumStateBase with Store, WithDateTime {
   @observable
   int allCacheSize = 0;
 
+  @observable
+  ObservableSet<BoardMetaData?> boardMetadataSet =
+      ObservableSet<BoardMetaData?>();
+
   @computed
   String get thumbnailCacheSizeStr => filesize(thumbnailCacheSize);
 
@@ -110,6 +114,50 @@ abstract class ForumStateBase with Store, WithDateTime {
       default:
         setErrorMessage('Error!');
     }
+  }
+
+  @action
+  Future<void> setBoardMetadata(
+      final String directory, final String boardId) async {
+    switch (type) {
+      case Communities.fiveCh || Communities.pinkCh:
+        final data =
+            await FiveChHandler.getSettingTxt(directory, boardId, type);
+        if (data != null) {
+          final meta =
+              BoardMetaData(data: data, directory: directory, boardId: boardId);
+          boardMetadataSet.add(meta);
+        }
+        break;
+      case Communities.shitaraba:
+        final data = await ShitarabaHandler.getMetadata(directory, boardId);
+        if (data != null) {
+          final meta =
+              BoardMetaData(data: data, directory: directory, boardId: boardId);
+          boardMetadataSet.add(meta);
+        }
+      default:
+    }
+  }
+
+  String boardNameByIdFromMetadataSet(final String boardId) {
+    switch (type) {
+      case Communities.fiveCh || Communities.pinkCh:
+        final name = boardMetadataSet.firstWhere(
+          (value) => value?.boardId == boardId,
+          orElse: () => null,
+        );
+        if (name != null) {
+          final result = FiveChData.boardNameById(name.data);
+          if (result != null) {
+            return result;
+          }
+        }
+        break;
+
+      default:
+    }
+    return boardId;
   }
 
   // @computed
@@ -1087,10 +1135,12 @@ abstract class ForumStateBase with Store, WithDateTime {
         final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
         return await _getContentForHatena(url);
       case Communities.mal:
-        final threadLength = forumMain.threadList.firstWhere(
-          (e) => e?.id == dataId,
-          orElse: () => null,
-        )?.resCount;
+        final threadLength = forumMain.threadList
+            .firstWhere(
+              (e) => e?.id == dataId,
+              orElse: () => null,
+            )
+            ?.resCount;
         return await _getContentForMal(dataId, threadLength);
 
       default:
@@ -1366,6 +1416,16 @@ abstract class ForumStateBase with Store, WithDateTime {
   }) async {
     final result = await FiveChHandler.getDat(id,
         forum: type, domain: domain, directoryName: directoryName);
+    if (result.result == FetchResult.success) {
+      final sub = domain.split('.').first;
+      final boardMetadata = boardMetadataSet.firstWhere(
+        (value) => value?.directory == sub && value?.boardId == directoryName,
+        orElse: () => null,
+      );
+      if (boardMetadata == null) {
+        await setBoardMetadata(sub, directoryName);
+      }
+    }
     return result;
   }
 
@@ -1405,8 +1465,19 @@ abstract class ForumStateBase with Store, WithDateTime {
       required final String boardId,
       required final String threadId,
       required final RangeList range}) async {
-    return await ShitarabaHandler.getContent(
-        category, boardId, threadId, range);
+    final result =
+        await ShitarabaHandler.getContent(category, boardId, threadId, range);
+    if (result.result == FetchResult.success) {
+      final boardMetadata = boardMetadataSet.firstWhere(
+        (value) => value?.directory == category && value?.boardId == boardId,
+        orElse: () => null,
+      );
+      if (boardMetadata == null) {
+        await setBoardMetadata(category, boardId);
+      }
+      return result;
+    }
+    return FetchContentResultData();
   }
 
   Future<FetchContentResultData> _getContentForMachi({

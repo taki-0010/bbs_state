@@ -167,7 +167,8 @@ abstract class ContentStateBase with Store, WithDateTime {
     if (content.type == Communities.chan4) {
       return Chan4Data.defaultName;
     }
-    final names = content.content.map((e) => e?.getUserName).toList();
+
+    final names = content.content.map((e) => e?.name).toList();
     final counter = <String, int>{};
     for (final value in names) {
       if (value != null) {
@@ -181,6 +182,9 @@ abstract class ContentStateBase with Store, WithDateTime {
         result = i.key;
       }
     }
+    // if (result != null && result.contains('(') && result.contains(')')) {
+    //   return result.substring(0, result.lastIndexOf('('));
+    // }
 
     return result;
   }

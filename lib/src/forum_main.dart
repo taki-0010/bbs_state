@@ -470,26 +470,30 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return null;
   }
 
+  // Future<void> _getCh5TypeBoardMetadata(
+  //     final FetchBoardsResultData result) async {
+  //   if (result.result != FetchResult.success) return;
+  //   for (final b in result.boards!) {
+  //     if (b != null && b.childrenBoards.isNotEmpty) {
+  //       for (final i in b.childrenBoards) {
+  //         if (i is FiveChBoardData) {
+  //           logger.d('5meta: ${i.subdomain}, ${i.id}');
+  //           await parent.setBoardMetadata(
+  //             i.subdomain!,
+  //             i.id,
+  //           );
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
   // @action
   Future<FetchBoardsResultData?> _getBoardsForFiveCh() async {
     if (boards.isEmpty) {
-      return await FiveChHandler.getBoard();
-      // if (boardsData.) {
-      //   return;
-      // }
-      // final result = boardsData.menuList
-      //     .map((e) => e.categoryName != 'BBSPINK'
-      //         ? BoardData(
-      //             id: '',
-      //             name: e.categoryName,
-      //             forum: Communities.fiveCh,
-      //             fiveChCategory: FiveChCategoryData(
-      //               categoryContent: _getFiveChBoardList(e.categoryContent),
-      //               categoryNumber: e.categoryNumber,
-      //             ))
-      //         : null)
-      //     .toList();
-      // boards.addAll([...result]);
+      final result = await FiveChHandler.getBoard();
+      // await _getCh5TypeBoardMetadata(result);
+      return result;
     }
     return null;
   }
@@ -497,29 +501,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   // @action
   Future<FetchBoardsResultData?> _getBoardsForPinkCh() async {
     if (boards.isEmpty) {
-      return await PinkChHandler.getBoard();
-      // if (boardsData == null) {
-      //   return;
-      // }
-      // final category = boardsData
-      //     .map((e) => BoardData(
-      //         id: '',
-      //         name: e.categoryName,
-      //         forum: Communities.pinkCh,
-      //         fiveChCategory: FiveChCategoryData(
-      //           categoryContent: _getFiveChBoardList(e.categoryContent),
-      //           categoryNumber: e.categoryNumber,
-      //         )))
-      //     .toList();
-      // final result = category.firstOrNull?.fiveChCategory?.categoryContent;
-      // if (result == null) {
-      //   return;
-      // }
-      // final pink =
-      //     result.map((e) => e.copyWith(forum: Communities.pinkCh)).toList();
-      // // final data = pink.where((element) => element.fiveCh?.directoryName != 'NONE').toList();
-      // // final data = pink.where((element) => element.).toList();
-      // boards.addAll([...pink]);
+      final result = await PinkChHandler.getBoard();
+      // await _getCh5TypeBoardMetadata(result);
+      return result;
     }
     return null;
   }
@@ -789,15 +773,15 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
-      return await FiveChHandler.getThreads(
+      final result = await FiveChHandler.getThreads(
           domain: domain,
           directoryName: b.directoryName,
           boardName: b.name,
           forum: Communities.fiveCh);
-      // if (result == null) {
-      //   return;
+      // if (result.result == FetchResult.success) {
+      //   await parent.setBoardMetadata(b.subdomain!, b.id);
       // }
-      // await _setThreadsMetadata<FiveChThreadTitleData>(result, b);
+      return result;
     }
     return null;
   }
