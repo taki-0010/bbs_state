@@ -24,6 +24,7 @@ abstract class TemplateStateForLocalBase with Store {
   Future<void> load() async {
     final query = Finder(filter: Filter.matches(_userId, parent.user!.id));
     final list = await store.find(_db, finder: query);
+    logger.d('load templates: ${list.length}, ${list.map((e) => e.key)}');
     if (list.isNotEmpty) {
       for (final i in list) {
         final data = TemplateData.fromJson(i.value);
@@ -52,7 +53,12 @@ abstract class TemplateStateForLocalBase with Store {
   }
 
   Future<void> updateTemplate(final TemplateData value) async {
-    await store.record(value.documentId).update(_db, value.toJson());
+    final record = store.record(value.documentId);
+    if (record.existsSync(_db)) {
+      await record.update(_db, value.toJson());
+    } else {
+      await record.put(_db, value.toJson());
+    }
   }
 
   Future<void> deleteTemplate(final Communities value) async {

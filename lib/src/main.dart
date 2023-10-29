@@ -270,8 +270,28 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get blurThumbnail =>
       selectedForumState?.settings?.blurThumbnail ?? false;
+
   @computed
   bool get enableNsfw => selectedForumState?.settings?.nsfw ?? false;
+
+  @computed
+  bool get saveLastUsedName =>
+      selectedForumState?.settings?.saveLastUsedName ?? false;
+
+  @computed
+  bool get saveLastUsedEmail =>
+      selectedForumState?.settings?.saveLastUsedEmail ?? false;
+
+  @computed
+  bool get saveLastUsedSubject =>
+      selectedForumState?.settings?.saveLastUsedSubject ?? false;
+
+  @computed
+  String? get lastUsedName => selectedForumState?.settings?.lastUsedName;
+  @computed
+  String? get lastUsedEmail => selectedForumState?.settings?.lastUsedEmail;
+  @computed
+  String? get lastUsedSubject => selectedForumState?.settings?.lastUsedSubject;
 
   @computed
   ThreadContentData? get currentContent {
@@ -359,8 +379,8 @@ abstract class MainStoreBase with Store, WithDateTime {
   // @computed
   // bool get viewByBoardInFavorites =>
   //     selectedForumState?.favorite.viewByBoard ?? false;
-  @computed
-  bool get openLinkByWebView => selectedForumState?.settings?.openLink ?? false;
+  // @computed
+  // bool get openLinkByWebView => selectedForumState?.settings?.openLink ?? false;
 
   // @computed
   // int get libraryIndex => switch (currentScreen) {
@@ -861,6 +881,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<void> post(final PostData value) async {
     toggleContentLoading();
     final result = await selectedForumState?.postComment(value);
+    await selectedForumState?.saveLastUsedText(value);
     toggleContentLoading();
     if (result != null && result) {
       await updateContent();
@@ -1560,14 +1581,9 @@ abstract class MainStoreBase with Store, WithDateTime {
         null => null
       };
 
-  // await userStorage.setViewByBoardInHistory(value);
-  Future<void> setOpenLink(final bool value) async {
-    final settnigs = selectedForumState?.settings;
-    if (settnigs == null) return;
-    if (settnigs.openLink == value) return;
-    final newData = settnigs.copyWith(openLink: value);
-    selectedForumState?.setSettings(newData);
-    await updateForumSettings();
+  Future<void> setSaveLastUsedText(
+      final InputCommentFields target, final bool value) async {
+    await selectedForumState?.setSaveLastUsedText(target, value);
   }
 
   Future<void> setDeleteKeyFotFutaba() async {
@@ -2016,6 +2032,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   void setTemplateData(final TemplateData? value) {
+    logger.d('setTemplate: ${value?.forum}, ${value?.bodys}, ');
     _selectedForum(value?.forum)?.setTemplateData(value);
   }
 

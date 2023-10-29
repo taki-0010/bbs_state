@@ -1018,9 +1018,9 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           }
           result = await Open2ChHandler.postThread(data, domain, bbs);
         }
-
       default:
     }
+    await parent.saveLastUsedText(data);
     if (result) {
       await Future.delayed(const Duration(milliseconds: 800));
       await getThreads();

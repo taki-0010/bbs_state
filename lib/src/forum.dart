@@ -1297,8 +1297,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     final strList =
         copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
-    setSettings(newData);
-    await parent.updateForumSettings();
+    await _updateSettings(newData);
+    // await parent.updateForumSettings();
   }
 
   Future<void> clearForumImportance(final ImportanceList value) async {
@@ -1311,8 +1311,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     final strList =
         copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
-    setSettings(newData);
-    await parent.updateForumSettings();
+    await _updateSettings(newData);
   }
 
   Future<void> updateThreadImportance(final ImportanceData value,
@@ -1347,6 +1346,62 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (thread == null) return;
     final newData = thread.copyWith(importance: []);
     await parent.repository.updateThreadMark(newData);
+  }
+
+  Future<void> _updateSettings(final ForumSettingsData value) async {
+    setSettings(value);
+    await parent.updateForumSettings();
+  }
+
+  Future<void> setSaveLastUsedText(
+      final InputCommentFields target, final bool value) async {
+    final current = settings;
+    if (current == null) {
+      return;
+    }
+    bool currentValue = false;
+    switch (target) {
+      case InputCommentFields.name:
+        currentValue = current.saveLastUsedName;
+        break;
+      case InputCommentFields.email:
+        currentValue = current.saveLastUsedEmail;
+        break;
+      case InputCommentFields.subject:
+        currentValue = current.saveLastUsedSubject;
+        break;
+      default:
+    }
+    if (currentValue == value) return;
+    ForumSettingsData data = current;
+    switch (target) {
+      case InputCommentFields.name:
+        data = current.copyWith(saveLastUsedName: value);
+        break;
+      case InputCommentFields.email:
+        data = current.copyWith(saveLastUsedEmail: value);
+        break;
+      case InputCommentFields.subject:
+        data = current.copyWith(saveLastUsedSubject: value);
+        break;
+      default:
+    }
+    await _updateSettings(data);
+  }
+
+  Future<void> saveLastUsedText(final PostData value) async {
+    ForumSettingsData? current = settings;
+    if (current == null) {
+      return;
+    }
+    final saveName = current.saveLastUsedName;
+    final saveEmail = current.saveLastUsedEmail;
+    final saveSubject = current.saveLastUsedSubject;
+    final data = current.copyWith(
+        lastUsedName: saveName ? value.name : null,
+        lastUsedEmail: saveEmail ? value.email : null,
+        lastUsedSubject: saveSubject ? value.title : null);
+    await _updateSettings(data);
   }
 
   // Future<void> deleteImportance(final ImportanceData value) async {
@@ -1710,7 +1765,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           final result =
               await Open2ChHandler.post(value, domain, bbs, threadId);
           if (result != null) {
-            // await Future.delayed(const Duration(milliseconds: 500));
+            await Future.delayed(const Duration(milliseconds: 500));
             final resMark = ResMarkData(index: result, icon: MarkIcon.edit);
             await updateMark(resMark);
             return true;

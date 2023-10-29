@@ -199,6 +199,48 @@ mixin _$MainStore on MainStoreBase, Store {
       (_$enableNsfwComputed ??= Computed<bool>(() => super.enableNsfw,
               name: 'MainStoreBase.enableNsfw'))
           .value;
+  Computed<bool>? _$saveLastUsedNameComputed;
+
+  @override
+  bool get saveLastUsedName => (_$saveLastUsedNameComputed ??= Computed<bool>(
+          () => super.saveLastUsedName,
+          name: 'MainStoreBase.saveLastUsedName'))
+      .value;
+  Computed<bool>? _$saveLastUsedEmailComputed;
+
+  @override
+  bool get saveLastUsedEmail => (_$saveLastUsedEmailComputed ??= Computed<bool>(
+          () => super.saveLastUsedEmail,
+          name: 'MainStoreBase.saveLastUsedEmail'))
+      .value;
+  Computed<bool>? _$saveLastUsedSubjectComputed;
+
+  @override
+  bool get saveLastUsedSubject => (_$saveLastUsedSubjectComputed ??=
+          Computed<bool>(() => super.saveLastUsedSubject,
+              name: 'MainStoreBase.saveLastUsedSubject'))
+      .value;
+  Computed<String?>? _$lastUsedNameComputed;
+
+  @override
+  String? get lastUsedName =>
+      (_$lastUsedNameComputed ??= Computed<String?>(() => super.lastUsedName,
+              name: 'MainStoreBase.lastUsedName'))
+          .value;
+  Computed<String?>? _$lastUsedEmailComputed;
+
+  @override
+  String? get lastUsedEmail =>
+      (_$lastUsedEmailComputed ??= Computed<String?>(() => super.lastUsedEmail,
+              name: 'MainStoreBase.lastUsedEmail'))
+          .value;
+  Computed<String?>? _$lastUsedSubjectComputed;
+
+  @override
+  String? get lastUsedSubject => (_$lastUsedSubjectComputed ??=
+          Computed<String?>(() => super.lastUsedSubject,
+              name: 'MainStoreBase.lastUsedSubject'))
+      .value;
   Computed<ThreadContentData?>? _$currentContentComputed;
 
   @override
@@ -318,13 +360,6 @@ mixin _$MainStore on MainStoreBase, Store {
   TemplateData? get templateData => (_$templateDataComputed ??=
           Computed<TemplateData?>(() => super.templateData,
               name: 'MainStoreBase.templateData'))
-      .value;
-  Computed<bool>? _$openLinkByWebViewComputed;
-
-  @override
-  bool get openLinkByWebView => (_$openLinkByWebViewComputed ??= Computed<bool>(
-          () => super.openLinkByWebView,
-          name: 'MainStoreBase.openLinkByWebView'))
       .value;
   Computed<Map<String, int>>? _$historyDiffComputed;
 
@@ -1015,6 +1050,12 @@ currentAutoDLSizeLimit: ${currentAutoDLSizeLimit},
 currentMovedToLastThread: ${currentMovedToLastThread},
 blurThumbnail: ${blurThumbnail},
 enableNsfw: ${enableNsfw},
+saveLastUsedName: ${saveLastUsedName},
+saveLastUsedEmail: ${saveLastUsedEmail},
+saveLastUsedSubject: ${saveLastUsedSubject},
+lastUsedName: ${lastUsedName},
+lastUsedEmail: ${lastUsedEmail},
+lastUsedSubject: ${lastUsedSubject},
 currentContent: ${currentContent},
 currentMainThreadsLoading: ${currentMainThreadsLoading},
 currentHistoryThreadsLoading: ${currentHistoryThreadsLoading},
@@ -1031,7 +1072,6 @@ retentionPeriod: ${retentionPeriod},
 userFavoritesBoards: ${userFavoritesBoards},
 sortHistory: ${sortHistory},
 templateData: ${templateData},
-openLinkByWebView: ${openLinkByWebView},
 historyDiff: ${historyDiff},
 currentBoardUrl: ${currentBoardUrl},
 currentBoardId: ${currentBoardId},
