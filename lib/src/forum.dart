@@ -560,26 +560,26 @@ abstract class ForumStateBase with Store, WithDateTime {
         orElse: () => null);
   }
 
-  ThreadContentData? _getData(final FetchContentResultData value,
-      final String threadId, final String boardId, final RangeList? range) {
-    if (value.contentList != null && value.threadLength != null) {
-      final hot = getIkioi(int.tryParse(threadId) ?? 0, value.threadLength!);
-      final content = ThreadContentData(
-          id: threadId,
-          boardId: boardId,
-          type: type,
-          content: value.contentList!,
-          threadLength: value.threadLength!,
-          hot: hot,
-          range: range,
-          girlsPages: value.girlsPages,
-          tags: value.tags
-          // archived: value.archived ?? false
-          );
-      return content;
-    }
-    return null;
-  }
+  // ThreadContentData? _getData(final FetchContentResultData value,
+  //     final String threadId, final String boardId, final RangeList? range) {
+  //   if (value.contentList != null && value.threadLength != null) {
+  //     final hot = getIkioi(int.tryParse(threadId) ?? 0, value.threadLength!);
+  //     final content = ThreadContentData(
+  //         id: threadId,
+  //         boardId: boardId,
+  //         type: type,
+  //         content: value.contentList!,
+  //         threadLength: value.threadLength!,
+  //         hot: hot,
+  //         range: range,
+  //         girlsPages: value.girlsPages,
+  //         tags: value.tags
+  //         // archived: value.archived ?? false
+  //         );
+  //     return content;
+  //   }
+  //   return null;
+  // }
 
   int? _getcurrentPageForGirlsCh(final ThreadBase thread) {
     if (thread is ThreadMarkData) {
@@ -623,7 +623,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (result.result != FetchResult.success) {
       return null;
     }
-    return _getData(result, thread.id, thread.boardId, range);
+    return result.content;
+    // return _getData(result, thread.id, thread.boardId, range);
   }
 
   @action
@@ -896,12 +897,12 @@ abstract class ForumStateBase with Store, WithDateTime {
       final Uri uri, final FetchContentResultData content) async {
     switch (type) {
       case Communities.girlsCh:
-        final data = content.contentList?.lastOrNull;
+        final data = content.content?.content.lastOrNull;
         if (data is GirlsChContent) {
           return data.categoryId;
         }
       case Communities.hatena:
-        final item = content.contentList?.firstOrNull;
+        final item = content.content?.content.firstOrNull;
         if (item is HatenaContent) {
           return item.boardId;
         }
@@ -918,7 +919,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         final threadId = GirlsChData.getThreadIdFromUri(uri);
         if (threadId != null) {
           final result = await GirlsChHandler.getRes(threadId, resNum);
-          contentList = result.contentList;
+          contentList = result.content?.content;
         }
         break;
       case Communities.shitaraba:
@@ -930,7 +931,7 @@ abstract class ForumStateBase with Store, WithDateTime {
               ShitarabaData.getThreadUrlPath(
                   category: category, boardId: boardId, threadId: threadId),
               resNum);
-          contentList = result.contentList;
+          contentList = result.content?.content;
         }
 
         break;
@@ -941,13 +942,13 @@ abstract class ForumStateBase with Store, WithDateTime {
           Uri uri
         )? result = await _getDataByUri(uri);
         final contentData = result?.$1;
-        logger.i('getSelectedRes: ${contentData?.contentList?.length}');
+        // logger.i('getSelectedRes: ${contentData?.contentList?.length}');
         if (result == null ||
             contentData == null ||
             contentData.result != FetchResult.success) {
           return null;
         }
-        contentList = contentData.contentList;
+        contentList = contentData.content?.content;
     }
 
     if (contentList == null) {
@@ -996,15 +997,16 @@ abstract class ForumStateBase with Store, WithDateTime {
       return contentData?.result ?? FetchResult.error;
     }
     final uri = result.$3;
-    final threadId = result.$2!;
+    // final threadId = result.$2!;
 
     // final threadId = parent.getThreadIdFromUri(uri, type);
     final boardId = await _getBoardId(uri, contentData);
     if (boardId == null) {
       return FetchResult.error;
     }
+    final content = contentData.content;
 
-    final content = _getData(contentData, threadId, boardId, null);
+    // final content = _getData(contentData, threadId, boardId, null);
     if (content == null) {
       return FetchResult.error;
     }
@@ -1051,6 +1053,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   Future<FetchContentResultData?> _fetchData<T extends ThreadBase>(
       final String dataId,
       {required final Uri uri,
+      // final ThreadData? threadData,
       final int? lastPageForGirlsCh,
       final RangeList? range}) async {
     // final position =
@@ -1135,13 +1138,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
         return await _getContentForHatena(url);
       case Communities.mal:
-        final threadLength = forumMain.threadList
-            .firstWhere(
-              (e) => e?.id == dataId,
-              orElse: () => null,
-            )
-            ?.resCount;
-        return await _getContentForMal(dataId, threadLength);
+        return await _getContentForMal(dataId);
 
       default:
       // _toggleLoading();
@@ -1155,7 +1152,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (parent.userData != null) {
       final data =
           ContentState(content: value, locale: parent.userData!.language.name);
-      data.setHot(value.hot);
+      final ikioi = getIkioi(value.createdAt ?? 0, value.threadLength);
+      data.setHot(ikioi);
       data.setTimeago(selectedTimeagoList);
       data.setSelectedRangeList(value.range);
       data.setSelectedPage(value.girlsPages?.current);
@@ -1217,7 +1215,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     final result = await _fetchData<ThreadMarkData>(thread.id,
         uri: thread.uri, lastPageForGirlsCh: selectedPage, range: currentRange);
     if (result == null) return (FetchResult.error, null);
-    final content = _getData(result, thread.id, thread.boardId, currentRange);
+    // final content = _getData(result, thread.id, thread.boardId, currentRange);
+    final content = result.content;
     if (content == null) return (FetchResult.error, null);
     final oldLength = thread.resCount;
     final newLength = content.threadLength;
@@ -1457,9 +1456,23 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<FetchContentResultData> _getContentForMal(
-      final String threadId, final int? threadLength) async {
-    final result = await MalHandler.getContent(threadId, threadLength);
-    return result;
+      final String threadId) async {
+    int? threadLength;
+    String? boardId;
+    final thread = forumMain.threadList.firstWhere(
+      (e) => e?.id == threadId,
+      orElse: () => null,
+    );
+    if (thread != null) {
+      threadLength = thread.resCount;
+      boardId = thread.boardId;
+    }
+    if (threadLength != null && boardId != null) {
+      final result =
+          await MalHandler.getContent(threadId, thread?.resCount, boardId);
+      return result;
+    }
+    return FetchContentResultData();
   }
 
   @action

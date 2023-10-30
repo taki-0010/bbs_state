@@ -211,21 +211,6 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
-  late final _$hotAtom = Atom(name: 'ContentStateBase.hot', context: context);
-
-  @override
-  double? get hot {
-    _$hotAtom.reportRead();
-    return super.hot;
-  }
-
-  @override
-  set hot(double? value) {
-    _$hotAtom.reportWrite(value, super.hot, () {
-      super.hot = value;
-    });
-  }
-
   late final _$selectedRangeAtom =
       Atom(name: 'ContentStateBase.selectedRange', context: context);
 
@@ -416,7 +401,6 @@ seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
 selectedText: ${selectedText},
 timeago: ${timeago},
-hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
 minIndexForSeekBar: ${minIndexForSeekBar},

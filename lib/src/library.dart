@@ -183,7 +183,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
     return markList.firstWhere(
         (element) =>
             element?.id == id &&
-            (parent.type == Communities.girlsCh || parent.type == Communities.hatena
+            (parent.type == Communities.girlsCh ||
+                    parent.type == Communities.hatena
                 ? true
                 : element?.boardId == boardId),
         orElse: () => null);
@@ -342,78 +343,6 @@ abstract class LibraryStateBase with Store, WithDateTime {
     logger.d(
         'history: updateAll:  map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
     await _updateThreadsByBoard(markListByBoardIdFirstItemList);
-    // for (final b in markListByBoardIdFirstItemList) {
-    //   if (b != null) {
-    //     FetchThreadsResultData? result;
-    //     switch (parent.type) {
-    //       case Communities.fiveCh:
-    //         result = await FiveChHandler.getThreads(
-    //             domain: b.uri.host,
-    //             directoryName: b.boardId,
-    //             boardName: b.boardName ?? '');
-    //         if (result.result == FetchResult.success) {
-    //           setArchived<ThreadData>(result.threads!, b.boardId);
-    //         }
-
-    //         break;
-    //       case Communities.girlsCh:
-    //         result = await GirlsChHandler.getTitleList(
-    //             'topics/category/${b.boardId}',
-    //             categoryId: b.boardId);
-    //         // _setDiff(
-    //         //   result,
-    //         //   currentRes,
-    //         // );
-    //         break;
-    //       case Communities.futabaCh:
-    //         final selectedBoardThreads =
-    //             markList.where((e) => e?.boardId == b.boardId).toList();
-    //         List<FutabaChThread?> threadsData = [];
-    //         for (final i in selectedBoardThreads) {
-    //           if (i != null) {
-    //             // final data =
-    //             //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
-    //             final data =
-    //                 await FutabaChHandler.getContent(i.url, b.futabaDirectory);
-    //             if (data.result == FetchResult.error ||
-    //                 data.statusCode == 404) {
-    //               await parent.parent.deleteThreadMarkData(i);
-    //             } else {
-    //               final rescount = data.contentList?.lastOrNull?.index;
-    //               if (rescount != null && i.resCount != 1001) {
-    //                 final newData = FutabaParser.parseFromJson(rescount, i);
-    //                 threadsData
-    //                     .removeWhere((element) => element?.id == newData?.id);
-    //                 threadsData.add(newData);
-    //               }
-    //             }
-    //           }
-    //         }
-    //         result = FetchThreadsResultData(threads: threadsData);
-    //         break;
-    //       case Communities.pinkCh:
-    //         result = await PinkChHandler.getThreads(
-    //             domain: b.uri.host,
-    //             directoryName: b.boardId,
-    //             boardName: b.boardName ?? '');
-    //         if (result.result == FetchResult.success) {
-    //           setArchived<ThreadData>(result.threads!, b.boardId);
-    //         }
-
-    //         break;
-    //       case Communities.machi:
-    //         result = await MachiHandler.getThreads(b.boardId);
-    //         // result = parent.forumMain.setMachiThreads(data);
-
-    //         break;
-    //       default:
-    //     }
-    //     _setDiff(
-    //       result?.threads,
-    //       currentRes,
-    //     );
-    //   }
-    // }
   }
 
   Future<void> _updateThreadsByBoard(final List<ThreadMarkData?> list,
@@ -449,25 +378,49 @@ abstract class LibraryStateBase with Store, WithDateTime {
             List<FutabaChThread?> threadsData = [];
             for (final i in selectedBoardThreads) {
               if (i != null) {
-                // final data =
-                //     await FutabaChHandler.getContentByJson(b.futabaDirectory, b.boardId, i.id);
-                final data = await FutabaChHandler.getContent(
-                    b.boardId, b.getSubdomain, b.id);
-                if (data.result == FetchResult.error ||
-                    data.statusCode == 404) {
-                  await parent.parent.deleteThreadMarkData(i);
-                } else {
-                  final rescount = data.contentList?.lastOrNull?.index;
-                  if (rescount != null && i.resCount != 1001) {
-                    final newData = FutabaData.parseFromJson(rescount, i);
-                    threadsData
-                        .removeWhere((element) => element?.id == newData?.id);
-                    threadsData.add(newData);
+                final boardThreads = markList
+                    .where((element) => element?.boardId == i.boardId)
+                    .toList();
+                for (final thread in boardThreads) {
+                  if (thread != null) {
+                    final directory =
+                        FutabaData.getDirectoryFromUri(thread.uri);
+                    if (directory != null) {
+                      final data = await FutabaChHandler.getContentByJson(
+                          directory, b.boardId, thread.id);
+                      if (data == null || data.old == 1) {
+                        await parent.parent.deleteThreadMarkData(i);
+                      } else {
+                        final rescount = data.resCount;
+                        if (rescount < 1000) {
+                          final newData =
+                              FutabaData.parseFromJson(rescount, thread);
+                          threadsData.removeWhere(
+                              (element) => element?.id == newData?.id);
+                          threadsData.add(newData);
+                        }
+                      }
+                    }
                   }
                 }
+
+                // final data = await FutabaChHandler.getContent(
+                //     b.boardId, b.getSubdomain, b.id);
+                // if (data.result == FetchResult.error ||
+                //     data.statusCode == 404) {
+                //   await parent.parent.deleteThreadMarkData(i);
+                // } else {
+                //   final rescount = data.contentList?.lastOrNull?.index;
+                //   if (rescount != null && i.resCount != 1001) {
+                //     final newData = FutabaData.parseFromJson(rescount, i);
+                //     threadsData
+                //         .removeWhere((element) => element?.id == newData?.id);
+                //     threadsData.add(newData);
+                //   }
+                // }
               }
             }
-            result = FetchThreadsResultData(threads: threadsData);
+            result = FetchThreadsResultData(threads: [...threadsData]);
             break;
           case Communities.pinkCh:
             result = await PinkChHandler.getThreads(
@@ -490,11 +443,14 @@ abstract class LibraryStateBase with Store, WithDateTime {
             result = await ShitarabaHandler.getThreads(
                 category, boardId, boardName ?? '');
           case Communities.open2Ch:
-            result = await Open2ChHandler.getThreads(
-                b.getSubdomain, b.boardId, b.boardName ?? '');
-            if (result.result == FetchResult.success) {
-              await setArchived<ThreadData>(result.threads!, b.boardId);
+            if (b.getSubdomain != null) {
+              result = await Open2ChHandler.getThreads(
+                  b.getSubdomain!, b.boardId, b.boardName ?? '');
+              if (result.result == FetchResult.success) {
+                await setArchived<ThreadData>(result.threads!, b.boardId);
+              }
             }
+
           case Communities.chan4:
             result = await Chan4Handler.getThreads(b.boardId);
             if (result.result == FetchResult.success) {
@@ -502,9 +458,9 @@ abstract class LibraryStateBase with Store, WithDateTime {
             }
           case Communities.hatena:
             result = await HatenaHandler.getThreads(b.boardId);
-            // if (result.result == FetchResult.success) {
-            //   await setArchived<ThreadData>(result.threads!, b.boardId);
-            // }
+          // if (result.result == FetchResult.success) {
+          //   await setArchived<ThreadData>(result.threads!, b.boardId);
+          // }
           default:
         }
         List<ThreadData?> threads = [];
@@ -601,10 +557,10 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   // @action
-  void _setDiff<T extends ThreadData>(
+  Future<void> _setDiff<T extends ThreadData>(
     final List<T?>? result,
     final Map<String, int> currentRes,
-  ) {
+  ) async{
     if (result == null) return;
     // Set<ThreadMarkData?> willDeleteSet = {};
     // final list =
@@ -628,7 +584,7 @@ abstract class LibraryStateBase with Store, WithDateTime {
             final newData = m.copyWith(
                 resCount: exist.resCount, retentionPeriodSeconds: retention);
             // setLog(newData);
-            parent.parent.repository.updateThreadMark(newData);
+            await parent.parent.repository.updateThreadMark(newData);
           }
         } else {
           logger.d('_setDiff: ${m.title}');

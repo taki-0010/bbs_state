@@ -168,7 +168,7 @@ abstract class ContentStateBase with Store, WithDateTime {
       return Chan4Data.defaultName;
     }
 
-    final names = content.content.map((e) => e?.name).toList();
+    final names = content.content.map((e) => e?.name.trim()).toList();
     final counter = <String, int>{};
     for (final value in names) {
       if (value != null) {
@@ -179,7 +179,7 @@ abstract class ContentStateBase with Store, WithDateTime {
     String? result;
     for (final i in counter.entries) {
       if (i.value == maxNum) {
-        result = i.key;
+        result = i.key.trim();
       }
     }
     // if (result != null && result.contains('(') && result.contains(')')) {
@@ -211,7 +211,8 @@ abstract class ContentStateBase with Store, WithDateTime {
   void updateContent(final ThreadContentData? value) {
     if (value != null) {
       content = value;
-      setHot(value.hot);
+      final ikioi = getIkioi(value.createdAt ?? 0, value.threadLength);
+      setHot(ikioi);
     }
   }
 

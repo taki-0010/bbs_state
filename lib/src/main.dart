@@ -2007,7 +2007,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     // final result = await GirlsChHandler.getRes(threadId, index);
     switch (result?.result) {
       case FetchResult.success:
-        return result?.contentList;
+        return result?.content?.content;
       default:
     }
     return null;
