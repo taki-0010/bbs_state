@@ -88,6 +88,9 @@ abstract class ContentStateBase with Store, WithDateTime {
   @action
   void setSeekHandleValue(final int value) => seekBarHandleValue = value;
 
+  @observable
+  ObservableList malPollList = ObservableList<MalPollBaseJson?>();
+
   @computed
   int get minIndexForSeekBar {
     final first = (content.content.length) >= 2 ? content.content[1]?.index : 1;
@@ -213,6 +216,14 @@ abstract class ContentStateBase with Store, WithDateTime {
       content = value;
       final ikioi = getIkioi(value.createdAt ?? 0, value.threadLength);
       setHot(ikioi);
+    }
+  }
+
+  @action
+  void setPoll(final List<MalPollBaseJson?>? poll) {
+    malPollList.clear();
+    if (poll != null) {
+      malPollList.addAll(poll);
     }
   }
 
@@ -440,7 +451,8 @@ abstract class ContentStateBase with Store, WithDateTime {
   bool get showBottomChip {
     return (rangeListBy1000Steps != null && rangeListBy1000Steps!.isNotEmpty) ||
         futabaLimit != null ||
-        content.girlsPages != null;
+        content.girlsPages != null ||
+        malPollList.isNotEmpty;
   }
 
   @computed

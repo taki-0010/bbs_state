@@ -1157,6 +1157,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       data.setTimeago(selectedTimeagoList);
       data.setSelectedRangeList(value.range);
       data.setSelectedPage(value.girlsPages?.current);
+      data.setPoll(value.malOption?.poll);
       return data;
     }
     return null;
@@ -1466,10 +1467,13 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (thread != null) {
       threadLength = thread.resCount;
       boardId = thread.boardId;
+    } else {
+      boardId = await MalHandler.getFieldsFromHtml(threadId);
+      threadLength = -1;
     }
-    if (threadLength != null && boardId != null) {
+    if (boardId != null) {
       final result =
-          await MalHandler.getContent(threadId, thread?.resCount, boardId);
+          await MalHandler.getContent(threadId, threadLength, boardId);
       return result;
     }
     return FetchContentResultData();

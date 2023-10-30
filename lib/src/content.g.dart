@@ -211,6 +211,21 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$hotAtom = Atom(name: 'ContentStateBase.hot', context: context);
+
+  @override
+  double? get hot {
+    _$hotAtom.reportRead();
+    return super.hot;
+  }
+
+  @override
+  set hot(double? value) {
+    _$hotAtom.reportWrite(value, super.hot, () {
+      super.hot = value;
+    });
+  }
+
   late final _$selectedRangeAtom =
       Atom(name: 'ContentStateBase.selectedRange', context: context);
 
@@ -240,6 +255,22 @@ mixin _$ContentState on ContentStateBase, Store {
   set selectedPage(int? value) {
     _$selectedPageAtom.reportWrite(value, super.selectedPage, () {
       super.selectedPage = value;
+    });
+  }
+
+  late final _$malPollListAtom =
+      Atom(name: 'ContentStateBase.malPollList', context: context);
+
+  @override
+  ObservableList<dynamic> get malPollList {
+    _$malPollListAtom.reportRead();
+    return super.malPollList;
+  }
+
+  @override
+  set malPollList(ObservableList<dynamic> value) {
+    _$malPollListAtom.reportWrite(value, super.malPollList, () {
+      super.malPollList = value;
     });
   }
 
@@ -324,6 +355,17 @@ mixin _$ContentState on ContentStateBase, Store {
   }
 
   @override
+  void setPoll(List<MalPollBaseJson?>? poll) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setPoll');
+    try {
+      return super.setPoll(poll);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setHot(double value) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
         name: 'ContentStateBase.setHot');
@@ -401,8 +443,10 @@ seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
 selectedText: ${selectedText},
 timeago: ${timeago},
+hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
+malPollList: ${malPollList},
 minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
