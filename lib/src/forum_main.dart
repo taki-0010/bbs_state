@@ -773,15 +773,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
-      final result = await FiveChHandler.getThreads(
-          domain: domain,
-          directoryName: b.directoryName,
-          boardName: b.name,
-          forum: Communities.fiveCh);
-      // if (result.result == FetchResult.success) {
-      //   await parent.setBoardMetadata(b.subdomain!, b.id);
-      // }
-      return result;
+      return await parent.getFiveChThreads(domain, b.directoryName, b.name);
     }
     return null;
   }
@@ -789,8 +781,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   // @action
   Future<FetchThreadsResultData?> _getThreadsForPinkCh() async {
     final b = board;
-    // logger.d(
-    //     '_getThreadsForFiveCh: ${b.runtimeType}, b is FiveChBoardData:${b is FiveChBoardData}');
     if (b?.forum == Communities.pinkCh && b is FiveChBoardData) {
       // b as FiveChBoardData;
       final domain = b.domain;
@@ -799,12 +789,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       // if (board == null) return;
       logger.d('_getThreadsForFiveCh: name: ${b.name}');
 
-      return await PinkChHandler.getThreads(
-          domain: domain, directoryName: b.directoryName, boardName: b.name);
-      // if (result == null) {
-      //   return;
-      // }
-      // await _setThreadsMetadata<FiveChThreadTitleData>(result, board!);
+      return await parent.getPinkChThreads(domain, b.directoryName, b.name);
     }
     return null;
   }
@@ -812,7 +797,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForOpen2Ch() async {
     final b = board;
     if (b?.forum == Communities.open2Ch && b is FiveChBoardData) {
-      return await Open2ChHandler.getThreads(
+      return await parent.getOpen2chThreads(
           b.directoryName, board!.id, board!.name);
       // if (result == null) {
       //   return;
@@ -854,7 +839,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForMachi() async {
     final b = board;
     if (b is MachiBoardData) {
-      return await MachiHandler.getThreads(b.id);
+      return await parent.getMachiThreads(b.id);
       // return setMachiThreads(result);
     }
     return null;
@@ -872,7 +857,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForChan4() async {
     final b = board;
     if (b is Chan4BoardData) {
-      return await Chan4Handler.getThreads(b.id);
+      return await parent.getChan4Threads(b.id);
       // return setMachiThreads(result);
     }
     return null;
@@ -881,7 +866,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForShitaraba() async {
     final b = board;
     if (b is ShitarabaBoardData) {
-      return await ShitarabaHandler.getThreads(b.category, b.id, b.name);
+      return await parent.getShitarabaThreads(b.category, b.id, b.name);
       // return setMachiThreads(result);
     }
     return null;

@@ -1661,7 +1661,8 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> updateLibrary() async {
     toggleHistoryThreadsLoading();
-    await selectedForumState?.history.updateAllList();
+    await selectedForumState?.history.updateAll();
+    // await selectedForumState?.history.updateAllList();
     toggleHistoryThreadsLoading();
   }
 
@@ -1722,13 +1723,13 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> updateThreadsByBoard(final String boardId) async {
     selectedForumState?.history.toggleThreadsLoading();
-    await selectedForumState?.history.updateThreadsByBoard(boardId);
+    await selectedForumState?.history.updateByBoard(boardId);
     selectedForumState?.history.toggleThreadsLoading();
   }
 
   Future<void> updateThreadsByHistory(final String history) async {
     selectedForumState?.history.toggleThreadsLoading();
-    await selectedForumState?.history.updateThreadsByLastReadAt(history);
+    await selectedForumState?.history.updateByHistory(history);
     selectedForumState?.history.toggleThreadsLoading();
   }
 

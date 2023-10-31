@@ -2,6 +2,20 @@ import 'importer.dart';
 
 part 'library.g.dart';
 
+class UpdateFieldData {
+  const UpdateFieldData(
+      {required this.id,
+      this.boardId,
+      required this.newResCount,
+      this.archived = false,
+      this.deleted = false});
+  final String id;
+  final String? boardId;
+  final int newResCount;
+  final bool archived;
+  final bool deleted;
+}
+
 class LibraryState = LibraryStateBase with _$LibraryState;
 
 abstract class LibraryStateBase with Store, WithDateTime {
@@ -42,16 +56,16 @@ abstract class LibraryStateBase with Store, WithDateTime {
   // @observable
   // ThreadContentData? libraryContent;
 
-  @computed
-  Map<String, int> get currentMarksResCount {
-    Map<String, int> result = {};
-    for (final m in markList) {
-      if (m != null) {
-        result[m.id] = m.resCount;
-      }
-    }
-    return result;
-  }
+  // @computed
+  // Map<String, int> get currentMarksResCount {
+  //   Map<String, int> result = {};
+  //   for (final m in markList) {
+  //     if (m != null) {
+  //       result[m.id] = m.resCount;
+  //     }
+  //   }
+  //   return result;
+  // }
 
   @observable
   ObservableMap<String, int> markListDiff = ObservableMap();
@@ -247,30 +261,30 @@ abstract class LibraryStateBase with Store, WithDateTime {
     await _clearThreads([...markList]);
   }
 
-  Future<void> updateThreadsByBoard(final String boardId) async {
-    final data = markList.firstWhere(
-      (element) => element?.boardId == boardId,
-      orElse: () => null,
-    );
-    await _updateThreadsByBoard([data]);
-  }
+  // Future<void> updateThreadsByBoard(final String boardId) async {
+  //   final data = markList.firstWhere(
+  //     (element) => element?.boardId == boardId,
+  //     orElse: () => null,
+  //   );
+  //   await _updateThreadsByBoard([data]);
+  // }
 
-  Future<void> updateThreadsByLastReadAt(final String keyName) async {
-    final list = [...?markListByLastReadAt[keyName]];
-    List<ThreadMarkData?> byBoard = [];
-    for (final i in list) {
-      if (i != null) {
-        final exist = byBoard.firstWhere(
-          (element) => element?.boardId == i.boardId,
-          orElse: () => null,
-        );
-        if (exist == null) {
-          byBoard.add(i);
-        }
-      }
-    }
-    await _updateThreadsByBoard(byBoard, willUpdateList: list);
-  }
+  // Future<void> updateThreadsByLastReadAt(final String keyName) async {
+  //   final list = [...?markListByLastReadAt[keyName]];
+  //   List<ThreadMarkData?> byBoard = [];
+  //   for (final i in list) {
+  //     if (i != null) {
+  //       final exist = byBoard.firstWhere(
+  //         (element) => element?.boardId == i.boardId,
+  //         orElse: () => null,
+  //       );
+  //       if (exist == null) {
+  //         byBoard.add(i);
+  //       }
+  //     }
+  //   }
+  //   await _updateThreadsByBoard(byBoard, willUpdateList: list);
+  // }
 
   // @action
   Future<void> clearThreadsByBoard(final String boardId) async {
@@ -330,159 +344,460 @@ abstract class LibraryStateBase with Store, WithDateTime {
 
   // @action
   // void setViewIndex(final int index) => viewIndex = index;
-
-  Future<void> updateAllList() async {
-    // for (final i in markList) {
-    //   if (i != null) {
-    //     // await parent.updateContent(i);
-    //   }
-    // }
-    // final currentRes = {...currentMarksResCount};
-    final markListByBoardIdFirstItemList =
-        markListByBoardId.values.map((e) => e?.firstOrNull).toList();
-    logger.d(
-        'history: updateAll:  map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
-    await _updateThreadsByBoard(markListByBoardIdFirstItemList);
+  Future<void> updateAll() async {
+    final list = [...markList];
+    final updateList = await _getUpdateDataFromThreads(list);
+    if (updateList.isNotEmpty) {
+      await _update(updateList);
+    }
   }
 
-  Future<void> _updateThreadsByBoard(final List<ThreadMarkData?> list,
-      {final List<ThreadMarkData?>? willUpdateList}) async {
-    final currentRes = {...currentMarksResCount};
-    for (final b in list) {
-      if (b != null) {
-        FetchThreadsResultData? result;
-        switch (parent.type) {
-          case Communities.fiveCh:
-            result = await FiveChHandler.getThreads(
-                domain: b.uri.host,
-                directoryName: b.boardId,
-                boardName: b.boardName ?? '',
-                forum: Communities.fiveCh);
-            if (result.result == FetchResult.success) {
-              await setArchived<ThreadData>(result.threads!, b.boardId);
+  Future<void> updateByBoard(final String boardId) async {
+    final list = markList
+        .where(
+          (element) => element?.boardId == boardId,
+        )
+        .toList();
+    final updateList = await _getUpdateDataFromThreads(list);
+    if (updateList.isNotEmpty) {
+      await _update(updateList);
+    }
+  }
+
+  Future<void> updateByHistory(final String keyName) async {
+    final list = [...?markListByLastReadAt[keyName]];
+    final updateList = await _getUpdateDataFromThreads(list);
+    if (updateList.isNotEmpty) {
+      await _update(updateList);
+    }
+  }
+
+  Future<void> _update(final List<UpdateFieldData?> value) async {
+    final list = [...markList];
+    for (final i in value) {
+      if (i != null) {
+        final exist = list.firstWhere(
+          (element) =>
+              element != null && element.id == i.id && !element.archived,
+          orElse: () => null,
+        );
+
+        ThreadMarkData? newData;
+        if (exist != null) {
+          if (!i.archived) {
+            final diff = i.newResCount - exist.resCount;
+            setDiffValue(i.id, diff);
+            if (diff != 0) {
+              final retention =
+                  parent.getRetentionSinceEpoch(i.newResCount, exist);
+              newData = exist.copyWith(
+                  resCount: i.newResCount, retentionPeriodSeconds: retention);
+              // setLog(newData);
             }
+          } else {
+            newData = exist.copyWith(archived: true);
+          }
+        }
+        // logger.d(
+        //     'history update: ${i.id}, ${i.newResCount}, ${i.archived}, ${i.boardId}, exist: ${exist?.id}, newData: ${newData?.id}');
+        if (newData != null) {
+          await parent.parent.repository.updateThreadMark(newData);
+        }
+      }
+    }
+  }
 
-            break;
-          case Communities.girlsCh:
-            result = await GirlsChHandler.getTitleList(
-                'topics/category/${b.boardId}',
-                categoryId: b.boardId);
-            // _setDiff(
-            //   result,
-            //   currentRes,
-            // );
-            break;
-          case Communities.futabaCh:
-            final selectedBoardThreads =
-                markList.where((e) => e?.boardId == b.boardId).toList();
-            List<FutabaChThread?> threadsData = [];
-            for (final i in selectedBoardThreads) {
-              if (i != null) {
-                final boardThreads = markList
-                    .where((element) => element?.boardId == i.boardId)
-                    .toList();
-                for (final thread in boardThreads) {
-                  if (thread != null) {
-                    final directory =
-                        FutabaData.getDirectoryFromUri(thread.uri);
-                    if (directory != null) {
-                      final data = await FutabaChHandler.getContentByJson(
-                          directory, b.boardId, thread.id);
-                      if (data == null || data.old == 1) {
-                        await parent.parent.deleteThreadMarkData(i);
-                      } else {
-                        final rescount = data.resCount;
-                        if (rescount < 1000) {
-                          final newData =
-                              FutabaData.parseFromJson(rescount, thread);
-                          threadsData.removeWhere(
-                              (element) => element?.id == newData?.id);
-                          threadsData.add(newData);
-                        }
-                      }
-                    }
-                  }
+  // Future<void> updateAllList() async {
+  //   final markListByBoardIdFirstItemList =
+  //       markListByBoardId.values.map((e) => e?.firstOrNull).toList();
+  //   logger.d(
+  //       'history: updateAll:  map:${markListByBoardId.values.length}, markListByBoardIdFirstItemList:${markListByBoardIdFirstItemList.length}');
+  //   await _updateThreadsByBoard(markListByBoardIdFirstItemList);
+  // }
+
+  // Future<void> _updateThreadsByBoard(final List<ThreadMarkData?> list,
+  //     {final List<ThreadMarkData?>? willUpdateList}) async {
+  //   final currentRes = {...currentMarksResCount};
+  //   for (final b in list) {
+  //     if (b != null) {
+  //       FetchThreadsResultData? result;
+  //       switch (parent.type) {
+  //         case Communities.fiveCh:
+  //           result = await FiveChHandler.getThreads(
+  //               domain: b.uri.host,
+  //               directoryName: b.boardId,
+  //               boardName: b.boardName ?? '',
+  //               forum: Communities.fiveCh);
+  //           if (result.result == FetchResult.success) {
+  //             await setArchived<ThreadData>(result.threads!, b.boardId);
+  //           }
+
+  //           break;
+  //         case Communities.girlsCh:
+  //           result = await GirlsChHandler.getTitleList(
+  //               'topics/category/${b.boardId}',
+  //               categoryId: b.boardId);
+
+  //           break;
+  //         case Communities.futabaCh:
+  //           final selectedBoardThreads =
+  //               markList.where((e) => e?.boardId == b.boardId).toList();
+  //           List<FutabaChThread?> threadsData = [];
+  //           for (final i in selectedBoardThreads) {
+  //             if (i != null) {
+  //               //   final boardThreads = markList
+  //               //       .where((element) => element?.boardId == i.boardId)
+  //               //       .toList();
+  //               // for (final thread in boardThreads) {
+  //               // if (i != null) {
+  //               final directory = FutabaData.getDirectoryFromUri(i.uri);
+  //               if (directory != null) {
+  //                 final data = await FutabaChHandler.getContentByJson(
+  //                     directory, b.boardId, i.id);
+  //                 if (data == null || data.old == 1) {
+  //                   await parent.parent.deleteThreadMarkData(i);
+  //                 } else {
+  //                   final rescount = data.resCount;
+  //                   if (rescount < 1000) {
+  //                     final newData = FutabaData.parseFromJson(rescount, i);
+  //                     threadsData
+  //                         .removeWhere((element) => element?.id == newData?.id);
+  //                     threadsData.add(newData);
+  //                   }
+  //                   // }
+  //                   // }
+  //                 }
+  //               }
+
+  //               // final data = await FutabaChHandler.getContent(
+  //               //     b.boardId, b.getSubdomain, b.id);
+  //               // if (data.result == FetchResult.error ||
+  //               //     data.statusCode == 404) {
+  //               //   await parent.parent.deleteThreadMarkData(i);
+  //               // } else {
+  //               //   final rescount = data.contentList?.lastOrNull?.index;
+  //               //   if (rescount != null && i.resCount != 1001) {
+  //               //     final newData = FutabaData.parseFromJson(rescount, i);
+  //               //     threadsData
+  //               //         .removeWhere((element) => element?.id == newData?.id);
+  //               //     threadsData.add(newData);
+  //               //   }
+  //               // }
+  //             }
+  //           }
+  //           result = FetchThreadsResultData(threads: [...threadsData]);
+  //           break;
+  //         case Communities.pinkCh:
+  //           result = await PinkChHandler.getThreads(
+  //               domain: b.uri.host,
+  //               directoryName: b.boardId,
+  //               boardName: b.boardName ?? '');
+  //           if (result.result == FetchResult.success) {
+  //             await setArchived<ThreadData>(result.threads!, b.boardId);
+  //           }
+
+  //           break;
+  //         case Communities.machi:
+  //           result = await MachiHandler.getThreads(b.boardId);
+  //           break;
+  //         case Communities.shitaraba:
+  //           final boardId = b.boardId;
+  //           final category = b.shitarabaCategory;
+  //           final boardName =
+  //               b.boardName ?? parent.parent.boardNameById(boardId);
+  //           result = await ShitarabaHandler.getThreads(
+  //               category, boardId, boardName ?? '');
+  //         case Communities.open2Ch:
+  //           if (b.getSubdomain != null) {
+  //             result = await Open2ChHandler.getThreads(
+  //                 b.getSubdomain!, b.boardId, b.boardName ?? '');
+  //             if (result.result == FetchResult.success) {
+  //               await setArchived<ThreadData>(result.threads!, b.boardId);
+  //             }
+  //           }
+
+  //         case Communities.chan4:
+  //           result = await Chan4Handler.getThreads(b.boardId);
+  //           if (result.result == FetchResult.success) {
+  //             await setArchived<ThreadData>(result.threads!, b.boardId);
+  //           }
+  //         case Communities.hatena:
+  //           // result = await HatenaHandler.getThreads(b.boardId);
+  //           List<HatenaThreadData?> resultList = [];
+  //           final selectedBoardThreads =
+  //               markList.where((e) => e?.boardId == b.boardId).toList();
+  //           for (final i in selectedBoardThreads) {
+  //             if (i != null) {
+  //               final newData = await HatenaHandler.getCount(i.id);
+  //               if (newData != null) {
+  //                 // final resCount = newData.content!.threadLength;
+  //                 logger.d('hatena update: id: ${i.id}, ${newData.$2}');
+  //                 final data = HatenaThreadData(
+  //                   id: i.id,
+  //                   title: i.title,
+  //                   dec: '',
+  //                   resCount: newData.$2,
+  //                   boardId: i.boardId,
+  //                   dateUtc:
+  //                       DateTime.fromMillisecondsSinceEpoch(i.createdAt ?? 0),
+  //                   type: Communities.hatena,
+  //                   url: HatenaData.parseThreadPath(i.id),
+  //                   // originalUrl: url,
+  //                   thumbnailFullUrl: i.thumbnailFullUrl,
+  //                   // thumbnailStr: img != null
+  //                   //     ? jsonEncode(SrcData(thumbnailUri: img).toJson())
+  //                   //     : null,
+  //                   // url: '${HatenaData.domain}/${HatenaData.hotentry}/$boardId.rss'
+  //                 );
+  //                 resultList.add(data);
+  //               }
+  //             }
+  //           }
+  //           result = FetchThreadsResultData(threads: [...resultList]);
+  //         default:
+  //       }
+  //       List<ThreadData?> threads = [];
+  //       if (willUpdateList != null) {
+  //         for (final i in willUpdateList) {
+  //           final exist = result?.threads?.firstWhere(
+  //               (element) =>
+  //                   element?.id == i?.id && element?.boardId == i?.boardId,
+  //               orElse: () => null);
+  //           if (exist != null) {
+  //             threads.add(exist);
+  //           }
+  //         }
+  //       } else {
+  //         threads.addAll([...?result?.threads]);
+  //       }
+  //       _setDiff(
+  //         threads,
+  //         currentRes,
+  //       );
+  //     }
+  //   }
+  // }
+
+  Future<List<UpdateFieldData?>> _getUpdateDataFromThreads(
+      final List<ThreadMarkData?> value) async {
+    List<UpdateFieldData?> result = [];
+    switch (parent.type) {
+      case Communities.fiveCh ||
+            Communities.pinkCh ||
+            Communities.machi ||
+            Communities.chan4 ||
+            Communities.shitaraba ||
+            Communities.open2Ch:
+        Set<String?> boardIdSet = {};
+        for (final i in value) {
+          if (i != null) {
+            boardIdSet.add(i.boardId);
+          }
+        }
+        if (boardIdSet.isNotEmpty) {
+          List<ThreadMarkData?> byBoardId = [];
+          for (final b in boardIdSet) {
+            final exist = value.firstWhere(
+              (element) =>
+                  element != null && element.boardId == b && !element.archived,
+              orElse: () => null,
+            );
+            if (exist != null) {
+              byBoardId.add(exist);
+            }
+          }
+          // logger.d('history update: byBoardId: ${byBoardId.length}');
+          if (byBoardId.isNotEmpty) {
+            for (final k in byBoardId) {
+              if (k != null) {
+                switch (k.type) {
+                  case Communities.fiveCh:
+                    final data = await _getFiveChUpdate(k);
+                    result.addAll(data);
+                  case Communities.pinkCh:
+                    final data = await _getPinkChUpdate(k);
+                    result.addAll(data);
+                  case Communities.open2Ch:
+                    final data = await _getOpen2chUpdate(k);
+                    result.addAll(data);
+                  case Communities.machi:
+                    final data = await _getMachiUpdate(k);
+                    result.addAll(data);
+                  case Communities.shitaraba:
+                    final data = await _getShitarabaUpdate(k);
+                    result.addAll(data);
+                  case Communities.chan4:
+                    final data = await _getChan4Update(k);
+                    result.addAll(data);
+                  default:
                 }
-
-                // final data = await FutabaChHandler.getContent(
-                //     b.boardId, b.getSubdomain, b.id);
-                // if (data.result == FetchResult.error ||
-                //     data.statusCode == 404) {
-                //   await parent.parent.deleteThreadMarkData(i);
-                // } else {
-                //   final rescount = data.contentList?.lastOrNull?.index;
-                //   if (rescount != null && i.resCount != 1001) {
-                //     final newData = FutabaData.parseFromJson(rescount, i);
-                //     threadsData
-                //         .removeWhere((element) => element?.id == newData?.id);
-                //     threadsData.add(newData);
-                //   }
+              }
+            }
+          }
+        }
+        break;
+      case Communities.futabaCh:
+        for (final i in value) {
+          if (i != null) {
+            final directory = FutabaData.getDirectoryFromUri(i.uri);
+            if (directory != null) {
+              final data = await FutabaChHandler.getContentByJson(
+                  directory, i.boardId, i.id);
+              if (data == null || data.old == 1) {
+                await parent.parent.deleteThreadMarkData(i);
+              } else {
+                final rescount = data.resCount;
+                if (rescount < 1000) {
+                  final update =
+                      UpdateFieldData(id: i.id, newResCount: rescount);
+                  result.add(update);
+                }
+                // }
                 // }
               }
             }
-            result = FetchThreadsResultData(threads: [...threadsData]);
-            break;
-          case Communities.pinkCh:
-            result = await PinkChHandler.getThreads(
-                domain: b.uri.host,
-                directoryName: b.boardId,
-                boardName: b.boardName ?? '');
-            if (result.result == FetchResult.success) {
-              await setArchived<ThreadData>(result.threads!, b.boardId);
-            }
-
-            break;
-          case Communities.machi:
-            result = await MachiHandler.getThreads(b.boardId);
-            break;
-          case Communities.shitaraba:
-            final boardId = b.boardId;
-            final category = b.shitarabaCategory;
-            final boardName =
-                b.boardName ?? parent.parent.boardNameById(boardId);
-            result = await ShitarabaHandler.getThreads(
-                category, boardId, boardName ?? '');
-          case Communities.open2Ch:
-            if (b.getSubdomain != null) {
-              result = await Open2ChHandler.getThreads(
-                  b.getSubdomain!, b.boardId, b.boardName ?? '');
-              if (result.result == FetchResult.success) {
-                await setArchived<ThreadData>(result.threads!, b.boardId);
-              }
-            }
-
-          case Communities.chan4:
-            result = await Chan4Handler.getThreads(b.boardId);
-            if (result.result == FetchResult.success) {
-              await setArchived<ThreadData>(result.threads!, b.boardId);
-            }
-          case Communities.hatena:
-            result = await HatenaHandler.getThreads(b.boardId);
-          // if (result.result == FetchResult.success) {
-          //   await setArchived<ThreadData>(result.threads!, b.boardId);
-          // }
-          default:
+          }
         }
-        List<ThreadData?> threads = [];
-        if (willUpdateList != null) {
-          for (final i in willUpdateList) {
-            final exist = result?.threads?.firstWhere(
-                (element) =>
-                    element?.id == i?.id && element?.boardId == i?.boardId,
-                orElse: () => null);
-            if (exist != null) {
-              threads.add(exist);
+      case Communities.hatena:
+        for (final i in value) {
+          if (i != null) {
+            final newData = await HatenaHandler.getCount(i.id);
+            if (newData != null) {
+              // final resCount = newData.content!.threadLength;
+              logger.d('hatena update: id: ${i.id}, ${newData.$2}');
+              final update = UpdateFieldData(
+                id: i.id,
+                newResCount: newData.$2,
+              );
+              result.add(update);
             }
           }
-        } else {
-          threads.addAll([...?result?.threads]);
         }
-        _setDiff(
-          threads,
-          currentRes,
-        );
+      case Communities.girlsCh:
+        for (final i in value) {
+          if (i != null) {
+            final data = await GirlsChHandler.getContent(i.id, 1);
+            if (data.result == FetchResult.success) {
+              final resCount = data.content?.threadLength;
+              if (resCount != null && resCount != 0) {
+                final update = UpdateFieldData(id: i.id, newResCount: resCount);
+                result.add(update);
+              } else {
+                // await parent.parent.deleteThreadMarkData(i);
+              }
+            }
+          }
+        }
+      default:
+    }
+    return result;
+  }
+
+  Future<List<UpdateFieldData?>> _getFiveChUpdate(
+      final ThreadMarkData value) async {
+    final data = await parent.getFiveChThreads(
+        value.uri.host, value.boardId, value.boardName ?? '');
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  Future<List<UpdateFieldData?>> _getMachiUpdate(
+    final ThreadMarkData value,
+  ) async {
+    final data = await parent.getMachiThreads(value.boardId);
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  Future<List<UpdateFieldData?>> _getChan4Update(
+    final ThreadMarkData value,
+  ) async {
+    final data = await parent.getChan4Threads(value.boardId);
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  Future<List<UpdateFieldData?>> _getPinkChUpdate(
+    final ThreadMarkData value,
+  ) async {
+    final data = await parent.getPinkChThreads(
+        value.uri.host, value.boardId, value.boardName ?? '');
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  Future<List<UpdateFieldData?>> _getOpen2chUpdate(
+    final ThreadMarkData value,
+  ) async {
+    final directory = Open2ChData.getDirectoryFromUri(value.uri);
+    if (directory == null) {
+      return [];
+    }
+    final data = await parent.getOpen2chThreads(
+        directory, value.boardId, value.boardName ?? '');
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  Future<List<UpdateFieldData?>> _getShitarabaUpdate(
+    final ThreadMarkData value,
+  ) async {
+    final directory = ShitarabaData.getCategoryFromUri(value.uri);
+    if (directory == null) {
+      return [];
+    }
+    final data = await parent.getShitarabaThreads(
+        directory, value.boardId, value.boardName ?? '');
+    if (data.result != FetchResult.success) {
+      return [];
+    }
+    final threads = data.threads!;
+    return _getUpdateListFromFiveChType(threads, value.boardId);
+  }
+
+  List<UpdateFieldData?> _getUpdateListFromFiveChType(
+      final List<ThreadData?> threads, final String boardId) {
+    List<UpdateFieldData?> list = [];
+    final base =
+        markList.where((element) => element?.boardId == boardId).toList();
+    for (final i in base) {
+      if (i != null) {
+        final exist = threads.firstWhere(
+            (element) => element?.id == i.id && element?.boardId == i.boardId,
+            orElse: () => null);
+
+        if (exist != null) {
+          final update = UpdateFieldData(
+              id: i.id, newResCount: exist.resCount, boardId: i.boardId);
+          // logger.d(
+          //     'history update: updated: ${i.id}, ${exist.resCount}, ${i.boardId}');
+          list.add(update);
+        } else {
+          final archived = UpdateFieldData(
+              id: i.id,
+              newResCount: i.resCount,
+              boardId: i.boardId,
+              archived: true);
+          list.add(archived);
+        }
       }
     }
+    return list;
   }
 
   Future<void> updateResCountWhenUpdateBoard(
@@ -557,42 +872,42 @@ abstract class LibraryStateBase with Store, WithDateTime {
   }
 
   // @action
-  Future<void> _setDiff<T extends ThreadData>(
-    final List<T?>? result,
-    final Map<String, int> currentRes,
-  ) async{
-    if (result == null) return;
-    // Set<ThreadMarkData?> willDeleteSet = {};
-    // final list =
-    //     [...markList.where((element) => element?.boardId == boardId).toList()];
-    for (final m in markList) {
-      if (m != null) {
-        final exist = result.firstWhere(
-          (element) =>
-              element?.id == m.id &&
-              element?.boardId == m.boardId &&
-              !m.archived,
-          orElse: () => null,
-        );
-        if (exist != null) {
-          final current = currentRes[m.id];
-          final diff = exist.resCount - (current ?? exist.resCount);
-          setDiffValue(m.id, diff);
+  // Future<void> _setDiff<T extends ThreadData>(
+  //   final List<T?>? result,
+  //   final Map<String, int> currentRes,
+  // ) async {
+  //   if (result == null) return;
+  //   // Set<ThreadMarkData?> willDeleteSet = {};
+  //   // final list =
+  //   //     [...markList.where((element) => element?.boardId == boardId).toList()];
+  //   for (final m in markList) {
+  //     if (m != null) {
+  //       final exist = result.firstWhere(
+  //         (element) =>
+  //             element?.id == m.id &&
+  //             element?.boardId == m.boardId &&
+  //             !m.archived,
+  //         orElse: () => null,
+  //       );
+  //       if (exist != null) {
+  //         final current = currentRes[m.id];
+  //         final diff = exist.resCount - (current ?? exist.resCount);
+  //         setDiffValue(m.id, diff);
 
-          if (diff != 0) {
-            final retention = parent.getRetentionSinceEpoch(exist.resCount, m);
-            final newData = m.copyWith(
-                resCount: exist.resCount, retentionPeriodSeconds: retention);
-            // setLog(newData);
-            await parent.parent.repository.updateThreadMark(newData);
-          }
-        } else {
-          logger.d('_setDiff: ${m.title}');
-          // willDeleteSet.add(m);
-        }
-      }
-    }
-  }
+  //         if (diff != 0) {
+  //           final retention = parent.getRetentionSinceEpoch(exist.resCount, m);
+  //           final newData = m.copyWith(
+  //               resCount: exist.resCount, retentionPeriodSeconds: retention);
+  //           // setLog(newData);
+  //           await parent.parent.repository.updateThreadMark(newData);
+  //         }
+  //       } else {
+  //         logger.d('_setDiff: ${m.title}');
+  //         // willDeleteSet.add(m);
+  //       }
+  //     }
+  //   }
+  // }
 
   @action
   void deleteContentState() => content = null;

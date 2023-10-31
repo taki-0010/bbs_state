@@ -89,7 +89,7 @@ abstract class ContentStateBase with Store, WithDateTime {
   void setSeekHandleValue(final int value) => seekBarHandleValue = value;
 
   @observable
-  ObservableList malPollList = ObservableList<MalPollBaseJson?>();
+  MalPollBaseJson? malPoll;
 
   @computed
   int get minIndexForSeekBar {
@@ -220,11 +220,8 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   @action
-  void setPoll(final List<MalPollBaseJson?>? poll) {
-    malPollList.clear();
-    if (poll != null) {
-      malPollList.addAll(poll);
-    }
+  void setPoll(final MalPollBaseJson? poll) {
+    malPoll = poll;
   }
 
   @action
@@ -452,7 +449,7 @@ abstract class ContentStateBase with Store, WithDateTime {
     return (rangeListBy1000Steps != null && rangeListBy1000Steps!.isNotEmpty) ||
         futabaLimit != null ||
         content.girlsPages != null ||
-        malPollList.isNotEmpty;
+        malPoll != null;
   }
 
   @computed

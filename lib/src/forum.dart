@@ -1501,6 +1501,39 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
+  Future<FetchThreadsResultData> getFiveChThreads(
+      final String domain, final String directory, final String name) async {
+    return await FiveChHandler.getThreads(
+        domain: domain,
+        directoryName: directory,
+        boardName: name,
+        forum: Communities.fiveCh);
+  }
+
+  Future<FetchThreadsResultData> getPinkChThreads(
+      final String domain, final String directory, final String name) async {
+    return await PinkChHandler.getThreads(
+        domain: domain, directoryName: directory, boardName: name);
+  }
+
+  Future<FetchThreadsResultData> getOpen2chThreads(
+      final String directory, final String boardId, final String name) async {
+    return await Open2ChHandler.getThreads(directory, boardId, name);
+  }
+
+  Future<FetchThreadsResultData> getMachiThreads(final String boardId) async {
+    return await MachiHandler.getThreads(boardId);
+  }
+
+  Future<FetchThreadsResultData> getChan4Threads(final String boardId) async {
+    return await Chan4Handler.getThreads(boardId);
+  }
+
+  Future<FetchThreadsResultData> getShitarabaThreads(
+      final String category, final String boardId, final String? name) async {
+    return await ShitarabaHandler.getThreads(category, boardId, name ?? '');
+  }
+
   @action
   Future<FetchContentResultData> _getContentForGirlsCh(final String id,
       {required final int page

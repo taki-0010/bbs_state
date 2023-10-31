@@ -258,19 +258,19 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
-  late final _$malPollListAtom =
-      Atom(name: 'ContentStateBase.malPollList', context: context);
+  late final _$malPollAtom =
+      Atom(name: 'ContentStateBase.malPoll', context: context);
 
   @override
-  ObservableList<dynamic> get malPollList {
-    _$malPollListAtom.reportRead();
-    return super.malPollList;
+  MalPollBaseJson? get malPoll {
+    _$malPollAtom.reportRead();
+    return super.malPoll;
   }
 
   @override
-  set malPollList(ObservableList<dynamic> value) {
-    _$malPollListAtom.reportWrite(value, super.malPollList, () {
-      super.malPollList = value;
+  set malPoll(MalPollBaseJson? value) {
+    _$malPollAtom.reportWrite(value, super.malPoll, () {
+      super.malPoll = value;
     });
   }
 
@@ -355,7 +355,7 @@ mixin _$ContentState on ContentStateBase, Store {
   }
 
   @override
-  void setPoll(List<MalPollBaseJson?>? poll) {
+  void setPoll(MalPollBaseJson? poll) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
         name: 'ContentStateBase.setPoll');
     try {
@@ -446,7 +446,7 @@ timeago: ${timeago},
 hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
-malPollList: ${malPollList},
+malPoll: ${malPoll},
 minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},

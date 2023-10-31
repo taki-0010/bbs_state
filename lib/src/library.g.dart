@@ -16,14 +16,6 @@ mixin _$LibraryState on LibraryStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'LibraryStateBase.settings'))
           .value;
-  Computed<Map<String, int>>? _$currentMarksResCountComputed;
-
-  @override
-  Map<String, int> get currentMarksResCount =>
-      (_$currentMarksResCountComputed ??= Computed<Map<String, int>>(
-              () => super.currentMarksResCount,
-              name: 'LibraryStateBase.currentMarksResCount'))
-          .value;
   Computed<SortHistoryList>? _$sortHistoryComputed;
 
   @override
@@ -301,7 +293,6 @@ selectedPrimaryView: ${selectedPrimaryView},
 markList: ${markList},
 markListDiff: ${markListDiff},
 settings: ${settings},
-currentMarksResCount: ${currentMarksResCount},
 sortHistory: ${sortHistory},
 boardIdSetOfContentList: ${boardIdSetOfContentList},
 markListByBoardId: ${markListByBoardId},
