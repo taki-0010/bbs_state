@@ -1042,8 +1042,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         return MachiData.htmlToDatUri(uri);
       case Communities.open2Ch:
         return Open2ChData.htmlToDatUri(uri);
-      case Communities.hatena:
-        return HatenaData.htmlToJsonUri(uri);
+      // case Communities.hatena:
+      //   return HatenaData.htmlToJsonUri(uri);
       default:
     }
     return uri;
@@ -1135,8 +1135,8 @@ abstract class ForumStateBase with Store, WithDateTime {
               boardId: boardId, threadId: threadId);
         }
       case Communities.hatena:
-        final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
-        return await _getContentForHatena(url);
+        // final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
+        return await _getContentForHatena(dataId);
       case Communities.mal:
         return await _getContentForMal(dataId);
 
@@ -1158,6 +1158,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       data.setSelectedRangeList(value.range);
       data.setSelectedPage(value.girlsPages?.current);
       data.setPoll(value.malOption?.poll);
+      data.setMallPaging(value.malOption?.paging);
       return data;
     }
     return null;
@@ -1312,6 +1313,61 @@ abstract class ForumStateBase with Store, WithDateTime {
         copied.map((e) => e != null ? jsonEncode(e.toJson()) : null).toList();
     final newData = settings!.copyWith(importanceList: strList);
     await _updateSettings(newData);
+  }
+
+  Future<void> deleteTemplate(
+      final InputCommentFields field, final String value) async {
+    TemplateData? current = template;
+    if (current == null) {
+      return;
+    }
+    switch (field) {
+      case InputCommentFields.body:
+        final list = [...current.bodys];
+        list.removeWhere((element) => element == value);
+        current = current.copyWith(bodys: list);
+        break;
+      case InputCommentFields.name:
+        final list = [...current.names];
+        list.removeWhere((element) => element == value);
+        current = current.copyWith(names: list);
+        break;
+      case InputCommentFields.email:
+        final list = [...current.emails];
+        list.removeWhere((element) => element == value);
+        current = current.copyWith(emails: list);
+        break;
+      case InputCommentFields.subject:
+        final list = [...current.subjects];
+        list.removeWhere((element) => element == value);
+        current = current.copyWith(subjects: list);
+        break;
+      default:
+    }
+    await parent.repository.updateTemplateData(current);
+  }
+
+  Future<void> clearTemplate(final InputCommentFields value) async {
+    TemplateData? current = template;
+    if (current == null) {
+      return;
+    }
+    switch (value) {
+      case InputCommentFields.body:
+        current = current.copyWith(bodys: []);
+        break;
+      case InputCommentFields.name:
+        current = current.copyWith(names: []);
+        break;
+      case InputCommentFields.email:
+        current = current.copyWith(emails: []);
+        break;
+      case InputCommentFields.subject:
+        current = current.copyWith(subjects: []);
+        break;
+      default:
+    }
+    await parent.repository.updateTemplateData(current);
   }
 
   Future<void> updateThreadImportance(final ImportanceData value,

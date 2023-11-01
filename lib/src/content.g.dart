@@ -274,6 +274,22 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$malPagingAtom =
+      Atom(name: 'ContentStateBase.malPaging', context: context);
+
+  @override
+  MalPaging? get malPaging {
+    _$malPagingAtom.reportRead();
+    return super.malPaging;
+  }
+
+  @override
+  set malPaging(MalPaging? value) {
+    _$malPagingAtom.reportWrite(value, super.malPaging, () {
+      super.malPaging = value;
+    });
+  }
+
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
 
@@ -366,6 +382,17 @@ mixin _$ContentState on ContentStateBase, Store {
   }
 
   @override
+  void setMallPaging(MalPaging? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setMallPaging');
+    try {
+      return super.setMallPaging(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setHot(double value) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
         name: 'ContentStateBase.setHot');
@@ -447,6 +474,7 @@ hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
 malPoll: ${malPoll},
+malPaging: ${malPaging},
 minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},

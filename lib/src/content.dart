@@ -91,6 +91,9 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   MalPollBaseJson? malPoll;
 
+  @observable
+  MalPaging? malPaging;
+
   @computed
   int get minIndexForSeekBar {
     final first = (content.content.length) >= 2 ? content.content[1]?.index : 1;
@@ -222,6 +225,11 @@ abstract class ContentStateBase with Store, WithDateTime {
   @action
   void setPoll(final MalPollBaseJson? poll) {
     malPoll = poll;
+  }
+
+  @action
+  void setMallPaging(final MalPaging? value) {
+    malPaging = value;
   }
 
   @action

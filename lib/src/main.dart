@@ -2037,6 +2037,14 @@ abstract class MainStoreBase with Store, WithDateTime {
     _selectedForum(value?.forum)?.setTemplateData(value);
   }
 
+  Future<void> deleteTemplate(final InputCommentFields field, final String value) async {
+    await selectedForumState?.deleteTemplate(field, value);
+  }
+
+  Future<void> clearTemplate(final InputCommentFields field) async {
+    await selectedForumState?.clearTemplate(field);
+  }
+
   void deleteThreadData(final ThreadMarkData value) =>
       _selectedForum(value.type)?.deleteContent(value);
 
