@@ -448,9 +448,13 @@ mixin _$ForumState on ForumStateBase, Store {
       String dataId,
       {required Uri uri,
       int? lastPageForGirlsCh,
-      RangeList? range}) {
+      RangeList? range,
+      int? malOffset}) {
     return _$_fetchDataAsyncAction.run(() => super._fetchData<T>(dataId,
-        uri: uri, lastPageForGirlsCh: lastPageForGirlsCh, range: range));
+        uri: uri,
+        lastPageForGirlsCh: lastPageForGirlsCh,
+        range: range,
+        malOffset: malOffset));
   }
 
   late final _$_getContentForFiveChAsyncAction =

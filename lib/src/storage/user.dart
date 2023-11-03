@@ -27,6 +27,7 @@ abstract class UserStateForLocalBase with Store {
         Communities.girlsCh,
         Communities.machi,
         Communities.shitaraba,
+        Communities.hatena,
         // Communities.open2Ch
       ],
       randomAvatar: StringMethodData.generateRandomString(15),

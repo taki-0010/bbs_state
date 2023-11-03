@@ -1055,7 +1055,8 @@ abstract class ForumStateBase with Store, WithDateTime {
       {required final Uri uri,
       // final ThreadData? threadData,
       final int? lastPageForGirlsCh,
-      final RangeList? range}) async {
+      final RangeList? range,
+      final int? malOffset}) async {
     // final position =
     //     positionToGet ?? settings?.positionToGet ?? PositionToGet.first;
     switch (type) {
@@ -1138,7 +1139,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         // final url = !dataId.startsWith('http') ? 'https://$dataId' : dataId;
         return await _getContentForHatena(dataId);
       case Communities.mal:
-        return await _getContentForMal(dataId);
+        return await _getContentForMal(dataId, offset: malOffset);
 
       default:
       // _toggleLoading();
@@ -1158,7 +1159,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       data.setSelectedRangeList(value.range);
       data.setSelectedPage(value.girlsPages?.current);
       data.setPoll(value.malOption?.poll);
-      data.setMallPaging(value.malOption?.paging);
+      data.setMalPaging(value.malOption?.paging);
       return data;
     }
     return null;
@@ -1206,16 +1207,23 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<(FetchResult, int?)> updateContent(
-      {final RangeList? changedRange, final int? changedPage
+      {final RangeList? changedRange,
+      final int? changedPage,
+      final int? malOffset
       // final RangeList range = RangeList.last1000
       }) async {
     final thread = currentContentThreadData;
     if (thread == null) return (FetchResult.error, null);
+    final disableUpdateIndex =
+        changedPage != null || changedRange != null || malOffset != null;
     // logger.d('position: 2: ${thread.positionToGet}');
     final currentRange = changedRange ?? currentContentState?.selectedRange;
     final selectedPage = changedPage ?? currentContentState?.selectedPage;
     final result = await _fetchData<ThreadMarkData>(thread.id,
-        uri: thread.uri, lastPageForGirlsCh: selectedPage, range: currentRange);
+        uri: thread.uri,
+        lastPageForGirlsCh: selectedPage,
+        range: currentRange,
+        malOffset: malOffset);
     if (result == null) return (FetchResult.error, null);
     // final content = _getData(result, thread.id, thread.boardId, currentRange);
     final content = result.content;
@@ -1224,12 +1232,14 @@ abstract class ForumStateBase with Store, WithDateTime {
     final newLength = content.threadLength;
     final diff = newLength - oldLength;
     logger.d('updateContent: $oldLength, $newLength, diff: $diff');
-    final lastReadIndex = changedPage != null || changedRange != null
-        ? null
-        : currentContentState?.content.content.lastOrNull?.index;
-    final lastIndex = changedPage != null || changedRange != null
-        ? null
-        : currentContentState?.currentContentIndex;
+    final lastReadIndex =
+        disableUpdateIndex
+            ? null
+            : currentContentState?.content.content.lastOrNull?.index;
+    final lastIndex =
+        disableUpdateIndex
+            ? null
+            : currentContentState?.currentContentIndex;
     currentContentState?.setLastResIndex(lastReadIndex);
 
     _updateContent(content);
@@ -1512,8 +1522,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     return result;
   }
 
-  Future<FetchContentResultData> _getContentForMal(
-      final String threadId) async {
+  Future<FetchContentResultData> _getContentForMal(final String threadId,
+      {final int? offset}) async {
     int? threadLength;
     String? boardId;
     final thread = forumMain.threadList.firstWhere(
@@ -1528,8 +1538,9 @@ abstract class ForumStateBase with Store, WithDateTime {
       threadLength = -1;
     }
     if (boardId != null) {
-      final result =
-          await MalHandler.getContent(threadId, threadLength, boardId);
+      final result = await MalHandler.getContent(
+          threadId, threadLength, boardId,
+          offset: offset);
       return result;
     }
     return FetchContentResultData();

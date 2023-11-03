@@ -889,11 +889,15 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<(FetchResult, int?)?> updateContent(
-      {final RangeList? changedRange, final int? changedPage}) async {
+      {final RangeList? changedRange,
+      final int? changedPage,
+      final int? malOffset}) async {
     if (currentContent == null) return null;
     toggleContentLoading();
     final result = await selectedForumState?.updateContent(
-        changedPage: changedPage, changedRange: changedRange);
+        changedPage: changedPage,
+        changedRange: changedRange,
+        malOffset: malOffset);
     if (contentLoading) {
       toggleContentLoading();
     }
@@ -2037,7 +2041,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     _selectedForum(value?.forum)?.setTemplateData(value);
   }
 
-  Future<void> deleteTemplate(final InputCommentFields field, final String value) async {
+  Future<void> deleteTemplate(
+      final InputCommentFields field, final String value) async {
     await selectedForumState?.deleteTemplate(field, value);
   }
 

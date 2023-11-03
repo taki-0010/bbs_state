@@ -382,11 +382,11 @@ mixin _$ContentState on ContentStateBase, Store {
   }
 
   @override
-  void setMallPaging(MalPaging? value) {
+  void setMalPaging(MalPaging? value) {
     final _$actionInfo = _$ContentStateBaseActionController.startAction(
-        name: 'ContentStateBase.setMallPaging');
+        name: 'ContentStateBase.setMalPaging');
     try {
-      return super.setMallPaging(value);
+      return super.setMalPaging(value);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }

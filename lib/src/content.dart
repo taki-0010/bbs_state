@@ -219,6 +219,7 @@ abstract class ContentStateBase with Store, WithDateTime {
       content = value;
       final ikioi = getIkioi(value.createdAt ?? 0, value.threadLength);
       setHot(ikioi);
+      setMalPaging(value.malOption?.paging);
     }
   }
 
@@ -228,7 +229,7 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   @action
-  void setMallPaging(final MalPaging? value) {
+  void setMalPaging(final MalPaging? value) {
     malPaging = value;
   }
 
@@ -457,7 +458,8 @@ abstract class ContentStateBase with Store, WithDateTime {
     return (rangeListBy1000Steps != null && rangeListBy1000Steps!.isNotEmpty) ||
         futabaLimit != null ||
         content.girlsPages != null ||
-        malPoll != null;
+        malPoll != null ||
+        malPaging != null;
   }
 
   @computed
