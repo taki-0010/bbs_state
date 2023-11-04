@@ -611,7 +611,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     final range = ShitarabaData.getRange(thread);
     final currentPageOfGirlsCh = _getcurrentPageForGirlsCh(thread);
     // final position = thread is ThreadMarkData ? thread.positionToGet : null;
-
+    // logger.d('_getThreadContent: id');
     final result = await _fetchData(id,
         uri: thread.uri,
         lastPageForGirlsCh: currentPageOfGirlsCh,
@@ -1232,14 +1232,11 @@ abstract class ForumStateBase with Store, WithDateTime {
     final newLength = content.threadLength;
     final diff = newLength - oldLength;
     logger.d('updateContent: $oldLength, $newLength, diff: $diff');
-    final lastReadIndex =
-        disableUpdateIndex
-            ? null
-            : currentContentState?.content.content.lastOrNull?.index;
+    final lastReadIndex = disableUpdateIndex
+        ? null
+        : currentContentState?.content.content.lastOrNull?.index;
     final lastIndex =
-        disableUpdateIndex
-            ? null
-            : currentContentState?.currentContentIndex;
+        disableUpdateIndex ? null : currentContentState?.currentContentIndex;
     currentContentState?.setLastResIndex(lastReadIndex);
 
     _updateContent(content);
@@ -1526,18 +1523,24 @@ abstract class ForumStateBase with Store, WithDateTime {
       {final int? offset}) async {
     int? threadLength;
     String? boardId;
-    final thread = forumMain.threadList.firstWhere(
+    final threadMain = forumMain.threadList.firstWhere(
       (e) => e?.id == threadId,
       orElse: () => null,
     );
-    if (thread != null) {
-      threadLength = thread.resCount;
-      boardId = thread.boardId;
+    final threadHistory = history.markList.firstWhere(
+      (e) => e?.id == threadId,
+      orElse: () => null,
+    );
+    if (threadMain != null || threadHistory != null) {
+      threadLength = threadMain?.resCount ?? threadHistory?.resCount;
+      boardId = threadMain?.boardId ?? threadHistory?.boardId;
     } else {
-      boardId = await MalHandler.getFieldsFromHtml(threadId);
-      threadLength = -1;
+      final fields = await MalHandler.getFieldsFromHtml(threadId);
+      boardId = fields?.$1;
+      threadLength = fields?.$2;
+      logger.d('_getContentForMal: $boardId, $threadLength');
     }
-    if (boardId != null) {
+    if (boardId != null && boardId.isNotEmpty) {
       final result = await MalHandler.getContent(
           threadId, threadLength, boardId,
           offset: offset);

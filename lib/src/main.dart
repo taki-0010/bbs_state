@@ -627,6 +627,8 @@ abstract class MainStoreBase with Store, WithDateTime {
           final boards = await Chan4Handler.getBoards(chan4.selectedNsfw);
           return boards.boards;
         }
+      case Communities.mal:
+        return MalData.searchBoardList;
       default:
     }
     return null;
@@ -1703,6 +1705,9 @@ abstract class MainStoreBase with Store, WithDateTime {
       case Communities.chan4:
         chan4.setSettings(newData);
         break;
+      case Communities.mal:
+        mal.setSettings(newData);
+        break;
       default:
     }
     await updateForumSettings();
@@ -2084,6 +2089,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    // await MalHandler.getContent();
+    // await MalHandler.searchThreads('piece');
   }
 }

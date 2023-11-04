@@ -151,24 +151,6 @@ abstract class SearchStateBase with Store {
         if (board is! FutabaChBoard) return;
         result = await FutabaChHandler.searchThreadsByJson(
             keyword, board.directory, board.id);
-        // final result = await FutabaChHandler.searchThreads(
-        //   keyword: keyword,
-        //   catalog: FutabaParser.getBoardPath(
-        //       directory: board!.futabaCh!.directory,
-        //       boardId: board.id,
-        //       order: ThreadsOrder.catalog),
-        //   newer: FutabaParser.getBoardPath(
-        //       directory: board.futabaCh!.directory,
-        //       boardId: board.id,
-        //       order: ThreadsOrder.newOrder),
-        //   hug: FutabaParser.getBoardPath(
-        //       directory: board.futabaCh!.directory,
-        //       boardId: board.id,
-        //       order: ThreadsOrder.biggerResCount),
-        //   boardId: board.id,
-        //   directory: board.futabaCh!.directory,
-        // );
-        // _setSearchThreads(result);
         break;
       case Communities.pinkCh:
         result = await PinkChHandler.searchTheads<T>(keyword);
@@ -187,6 +169,11 @@ abstract class SearchStateBase with Store {
         result = data.threads;
       case Communities.hatena:
         result = await HatenaHandler.searchThreads(keyword);
+      case Communities.mal:
+      final boardId = parent.parent.boardIdForSearch;
+        if (boardId == null) return;
+        final data = await MalHandler.searchThreads(keyword, boardId);
+        result = data.threads;
       default:
     }
     logger.i('search result: ${result?.length}');
