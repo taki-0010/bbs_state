@@ -56,6 +56,8 @@ abstract class ContentStateBase with Store, WithDateTime {
 
   @observable
   int? selectedPage;
+  @observable
+  int? malOffset;
 
   @action
   void setSelectedText(final String? value) {
@@ -72,6 +74,13 @@ abstract class ContentStateBase with Store, WithDateTime {
   @action
   void setSelectedPage(final int? value) {
     selectedPage = value;
+    currentContentIndex = 0;
+    currentContentItemIndex = 1;
+  }
+
+  @action
+  void setMalOffset(final int? value) {
+    malOffset = value;
     currentContentIndex = 0;
     currentContentItemIndex = 1;
   }

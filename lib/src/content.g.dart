@@ -258,6 +258,22 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$malOffsetAtom =
+      Atom(name: 'ContentStateBase.malOffset', context: context);
+
+  @override
+  int? get malOffset {
+    _$malOffsetAtom.reportRead();
+    return super.malOffset;
+  }
+
+  @override
+  set malOffset(int? value) {
+    _$malOffsetAtom.reportWrite(value, super.malOffset, () {
+      super.malOffset = value;
+    });
+  }
+
   late final _$malPollAtom =
       Atom(name: 'ContentStateBase.malPoll', context: context);
 
@@ -321,6 +337,17 @@ mixin _$ContentState on ContentStateBase, Store {
         name: 'ContentStateBase.setSelectedPage');
     try {
       return super.setSelectedPage(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setMalOffset(int? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setMalOffset');
+    try {
+      return super.setMalOffset(value);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -473,6 +500,7 @@ timeago: ${timeago},
 hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
+malOffset: ${malOffset},
 malPoll: ${malPoll},
 malPaging: ${malPaging},
 minIndexForSeekBar: ${minIndexForSeekBar},

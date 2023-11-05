@@ -906,6 +906,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (item is HatenaContent) {
           return item.boardId;
         }
+      case Communities.mal:
+        return content.content?.boardId;
       default:
         return parent.getBoardIdFromUri(uri, type);
     }
@@ -1171,6 +1173,7 @@ abstract class ForumStateBase with Store, WithDateTime {
   ) {
     final data = _getContentState(value);
     if (parent.largeScreen) {
+      // history.deleteContentState();
       history.setContent(data);
     } else {
       switch (currentScreen) {
@@ -1219,11 +1222,12 @@ abstract class ForumStateBase with Store, WithDateTime {
     // logger.d('position: 2: ${thread.positionToGet}');
     final currentRange = changedRange ?? currentContentState?.selectedRange;
     final selectedPage = changedPage ?? currentContentState?.selectedPage;
+    final selectedOffset = malOffset ?? currentContentState?.malOffset;
     final result = await _fetchData<ThreadMarkData>(thread.id,
         uri: thread.uri,
         lastPageForGirlsCh: selectedPage,
         range: currentRange,
-        malOffset: malOffset);
+        malOffset: selectedOffset);
     if (result == null) return (FetchResult.error, null);
     // final content = _getData(result, thread.id, thread.boardId, currentRange);
     final content = result.content;
@@ -1691,17 +1695,24 @@ abstract class ForumStateBase with Store, WithDateTime {
                 level: ImportanceList.veryUnimportant,
                 strValue: first.getPostId!)
             : null;
+        final userId = first.getUserId != null
+            ? ImportanceData(
+                id: randomInt(),
+                target: ImportanceTarget.userId,
+                level: ImportanceList.veryUnimportant,
+                strValue: first.getUserId!)
+            : null;
         final title = ImportanceData(
             id: randomInt(),
             target: ImportanceTarget.title,
             level: ImportanceList.veryUnimportant,
             strValue: thread.title);
-        await parent.updateForumImportance([data, title]);
+        await parent.updateForumImportance([userId ?? data, title]);
       }
     }
   }
 
-  Future<void> blockThreadResponseUser(final ContentData value) async {
+  Future<void> blockResponseUser(final ContentData value) async {
     final postId = value.getPostId != null
         ? ImportanceData(
             id: randomInt(),
@@ -1718,7 +1729,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         : null;
     logger.d('userId: ${value.getUserId}');
     // await _updateImportantResponse([postId, userId]);
-    await parent.updateForumImportance([postId, userId]);
+    await parent.updateForumImportance([userId ?? postId]);
   }
 
   Future<void> hideResponse(final ContentData value) async {

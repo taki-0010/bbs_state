@@ -397,6 +397,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get currentBoardUrl {
     final board = selectedForumState?.forumMain.board;
     switch (selectedForum) {
+      case Communities.mal:
+        if (board is MalBoardData) {
+          return board.boardUri.toString();
+        }
       case Communities.hatena:
         if (board is HatenaBoardData) {
           return HatenaData.boardUri(board.id).toString();
@@ -539,6 +543,14 @@ abstract class MainStoreBase with Store, WithDateTime {
         return list
             .where((element) =>
                 element == ThreadsOrderType.hot ||
+                element == ThreadsOrderType.newerResponce ||
+                element == ThreadsOrderType.importance ||
+                element == ThreadsOrderType.newerThread ||
+                element == ThreadsOrderType.resCountDesc)
+            .toList();
+      case Communities.mal:
+        return list
+            .where((element) =>
                 element == ThreadsOrderType.newerResponce ||
                 element == ThreadsOrderType.importance ||
                 element == ThreadsOrderType.newerThread ||
@@ -859,6 +871,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     // toggleContentLoading();
     if (largeScreen) {
       await _updateLastOpenedIndexWhenScreenTransition();
+      selectedForumState?.history.deleteContentState();
     }
     final result = await selectedForumState?.setContent(id, thread: thread);
     // toggleContentLoading();
@@ -1223,7 +1236,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<void> blockThreadResponseUser(final ContentData value) async {
-    await selectedForumState?.blockThreadResponseUser(value);
+    await selectedForumState?.blockResponseUser(value);
   }
 
   Future<void> hideResponse(final ContentData value) async {
@@ -1878,6 +1891,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Chan4Data.getThreadIdFromUri(uri);
       case Communities.hatena:
         return HatenaData.getThreadIdFromUri(uri);
+      case Communities.mal:
+        return MalData.getThreadIdFromUri(uri);
       default:
     }
     return null;

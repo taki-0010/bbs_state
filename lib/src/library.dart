@@ -198,7 +198,8 @@ abstract class LibraryStateBase with Store, WithDateTime {
         (element) =>
             element?.id == id &&
             (parent.type == Communities.girlsCh ||
-                    parent.type == Communities.hatena
+                    parent.type == Communities.hatena ||
+                    parent.type == Communities.mal
                 ? true
                 : element?.boardId == boardId),
         orElse: () => null);
