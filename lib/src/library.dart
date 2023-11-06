@@ -689,6 +689,17 @@ abstract class LibraryStateBase with Store, WithDateTime {
             }
           }
         }
+      case Communities.mal:
+        for (final i in value) {
+          if (i != null) {
+            final data = await MalHandler.getFieldsFromHtml(i.id);
+            final resCount = data?.$2;
+            if (resCount != null) {
+              final update = UpdateFieldData(id: i.id, newResCount: resCount);
+              result.add(update);
+            }
+          }
+        }
       default:
     }
     return result;
