@@ -64,6 +64,22 @@ mixin _$SearchState on SearchStateBase, Store {
     });
   }
 
+  late final _$searchWordAtom =
+      Atom(name: 'SearchStateBase.searchWord', context: context);
+
+  @override
+  String? get searchWord {
+    _$searchWordAtom.reportRead();
+    return super.searchWord;
+  }
+
+  @override
+  set searchWord(String? value) {
+    _$searchWordAtom.reportWrite(value, super.searchWord, () {
+      super.searchWord = value;
+    });
+  }
+
   late final _$contentLoadingAtom =
       Atom(name: 'SearchStateBase.contentLoading', context: context);
 
@@ -173,6 +189,17 @@ mixin _$SearchState on SearchStateBase, Store {
   }
 
   @override
+  void _setSearchWord(String? value) {
+    final _$actionInfo = _$SearchStateBaseActionController.startAction(
+        name: 'SearchStateBase._setSearchWord');
+    try {
+      return super._setSearchWord(value);
+    } finally {
+      _$SearchStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void _setSearchThreads(List<ThreadData?>? value) {
     final _$actionInfo = _$SearchStateBaseActionController.startAction(
         name: 'SearchStateBase._setSearchThreads');
@@ -209,6 +236,7 @@ mixin _$SearchState on SearchStateBase, Store {
   String toString() {
     return '''
 content: ${content},
+searchWord: ${searchWord},
 contentLoading: ${contentLoading},
 threadsLoading: ${threadsLoading},
 primaryView: ${primaryView},

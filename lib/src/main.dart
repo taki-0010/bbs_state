@@ -73,14 +73,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
-  // bool? isWeb;
-  // bool? isDebugMode;
-
-  // @observable
-  // UserSettingsData? userSettings;
-
-  // @computed
-  // String? get randomStr => repository.threadLocal.randomString;
+  @observable
+  bool enableAd = true;
 
   @observable
   bool largeScreen = false;
@@ -119,6 +113,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   @observable
   String? addForumName;
 
+  @observable
+  bool onOpenedPopup = false;
+
   @computed
   bool get disableSearch => selectedForum == Communities.shitaraba;
 
@@ -133,6 +130,9 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   // @observable
   // bool cancelInitialScroll = false;
+
+  @computed
+  bool get insertAd => (Platform.isIOS || Platform.isAndroid) && enableAd;
 
   @computed
   bool get contentLoading => selectedForumState?.contentLoading ?? false;
@@ -743,8 +743,69 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   List<ThreadBase?> get searchList => selectedForumState?.searchList ?? [];
 
+  @computed
+  bool get showSearchWordChipOnPrimary {
+    final main = selectedForumState?.forumMain.searchThreadWord;
+    final search = selectedForumState?.search.searchWord;
+    if (largeScreen) {
+      return main != null && main.isNotEmpty;
+    } else {
+      if (currentScreen == BottomMenu.forums &&
+          selectedForumPrimaryBody == PrimaryViewState.threads) {
+        return main != null && main.isNotEmpty;
+      }
+      if (currentScreen == BottomMenu.search &&
+          selectedForumPrimaryBody == PrimaryViewState.threads) {
+        return search != null && search.isNotEmpty;
+      }
+    }
+    return false;
+  }
+
+  @computed
+  String? get mainSearchWord {
+    if (largeScreen) {
+      return selectedForumState?.forumMain.searchThreadWord;
+    } else {
+      if (currentScreen == BottomMenu.forums &&
+          selectedForumPrimaryBody == PrimaryViewState.threads) {
+        return selectedForumState?.forumMain.searchThreadWord;
+      }
+    }
+    return null;
+  }
+
+  @computed
+  String? get searchScreenWord {
+    if (!largeScreen &&
+        currentScreen == BottomMenu.search &&
+        selectedForumPrimaryBody == PrimaryViewState.threads) {
+      return selectedForumState?.search.searchWord;
+    }
+    return null;
+  }
+
+  void clearSearchWord() {
+    if (searchScreenWord != null) {
+      selectedForumState?.search.clear();
+    }
+    if (mainSearchWord != null) {
+      selectedForumState?.forumMain.clearSearchWord();
+    }
+  }
+
   void setCurrentContentIndex(final int index) {
     currentContentState?.setCurrentContentIndex(index);
+  }
+
+  @action
+  void setOnOpenedPopup() {
+    onOpenedPopup = true;
+  }
+
+  @action
+  void setOnClosedPopup() {
+    onOpenedPopup = false;
   }
 
   // @computed

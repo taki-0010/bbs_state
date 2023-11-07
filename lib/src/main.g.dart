@@ -32,6 +32,12 @@ mixin _$MainStore on MainStoreBase, Store {
                   () => super.autoDownloadableSizeLimit,
                   name: 'MainStoreBase.autoDownloadableSizeLimit'))
           .value;
+  Computed<bool>? _$insertAdComputed;
+
+  @override
+  bool get insertAd => (_$insertAdComputed ??=
+          Computed<bool>(() => super.insertAd, name: 'MainStoreBase.insertAd'))
+      .value;
   Computed<bool>? _$contentLoadingComputed;
 
   @override
@@ -559,6 +565,28 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<List<ThreadBase?>>(() => super.searchList,
               name: 'MainStoreBase.searchList'))
       .value;
+  Computed<bool>? _$showSearchWordChipOnPrimaryComputed;
+
+  @override
+  bool get showSearchWordChipOnPrimary =>
+      (_$showSearchWordChipOnPrimaryComputed ??= Computed<bool>(
+              () => super.showSearchWordChipOnPrimary,
+              name: 'MainStoreBase.showSearchWordChipOnPrimary'))
+          .value;
+  Computed<String?>? _$mainSearchWordComputed;
+
+  @override
+  String? get mainSearchWord => (_$mainSearchWordComputed ??= Computed<String?>(
+          () => super.mainSearchWord,
+          name: 'MainStoreBase.mainSearchWord'))
+      .value;
+  Computed<String?>? _$searchScreenWordComputed;
+
+  @override
+  String? get searchScreenWord => (_$searchScreenWordComputed ??=
+          Computed<String?>(() => super.searchScreenWord,
+              name: 'MainStoreBase.searchScreenWord'))
+      .value;
   Computed<String?>? _$getDefaultNameComputed;
 
   @override
@@ -674,6 +702,22 @@ mixin _$MainStore on MainStoreBase, Store {
   set player(PlayerState? value) {
     _$playerAtom.reportWrite(value, super.player, () {
       super.player = value;
+    });
+  }
+
+  late final _$enableAdAtom =
+      Atom(name: 'MainStoreBase.enableAd', context: context);
+
+  @override
+  bool get enableAd {
+    _$enableAdAtom.reportRead();
+    return super.enableAd;
+  }
+
+  @override
+  set enableAd(bool value) {
+    _$enableAdAtom.reportWrite(value, super.enableAd, () {
+      super.enableAd = value;
     });
   }
 
@@ -806,6 +850,22 @@ mixin _$MainStore on MainStoreBase, Store {
     });
   }
 
+  late final _$onOpenedPopupAtom =
+      Atom(name: 'MainStoreBase.onOpenedPopup', context: context);
+
+  @override
+  bool get onOpenedPopup {
+    _$onOpenedPopupAtom.reportRead();
+    return super.onOpenedPopup;
+  }
+
+  @override
+  set onOpenedPopup(bool value) {
+    _$onOpenedPopupAtom.reportWrite(value, super.onOpenedPopup, () {
+      super.onOpenedPopup = value;
+    });
+  }
+
   late final _$reverseForumSwitchAnimationAtom =
       Atom(name: 'MainStoreBase.reverseForumSwitchAnimation', context: context);
 
@@ -890,6 +950,28 @@ mixin _$MainStore on MainStoreBase, Store {
         name: 'MainStoreBase.setPlayer');
     try {
       return super.setPlayer(value);
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setOnOpenedPopup() {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase.setOnOpenedPopup');
+    try {
+      return super.setOnOpenedPopup();
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setOnClosedPopup() {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase.setOnClosedPopup');
+    try {
+      return super.setOnClosedPopup();
     } finally {
       _$MainStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -1014,6 +1096,7 @@ devModeCount: ${devModeCount},
 debugLog: ${debugLog},
 overlayId: ${overlayId},
 player: ${player},
+enableAd: ${enableAd},
 largeScreen: ${largeScreen},
 entireLoading: ${entireLoading},
 selectedForum: ${selectedForum},
@@ -1022,11 +1105,13 @@ currentContentIndex: ${currentContentIndex},
 currentContentItemIndex: ${currentContentItemIndex},
 deletedThreadTitle: ${deletedThreadTitle},
 addForumName: ${addForumName},
+onOpenedPopup: ${onOpenedPopup},
 reverseForumSwitchAnimation: ${reverseForumSwitchAnimation},
 reverseAnimationForPrymaryScreen: ${reverseAnimationForPrymaryScreen},
 disableSearch: ${disableSearch},
 snackMessage: ${snackMessage},
 autoDownloadableSizeLimit: ${autoDownloadableSizeLimit},
+insertAd: ${insertAd},
 contentLoading: ${contentLoading},
 selectedForumIndex: ${selectedForumIndex},
 currentContentThreadData: ${currentContentThreadData},
@@ -1098,6 +1183,9 @@ listByBoardId: ${listByBoardId},
 currentHistoryList: ${currentHistoryList},
 currentSearchList: ${currentSearchList},
 searchList: ${searchList},
+showSearchWordChipOnPrimary: ${showSearchWordChipOnPrimary},
+mainSearchWord: ${mainSearchWord},
+searchScreenWord: ${searchScreenWord},
 getDefaultName: ${getDefaultName},
 searchWords: ${searchWords},
 searchViewState: ${searchViewState}

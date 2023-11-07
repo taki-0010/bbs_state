@@ -14,6 +14,9 @@ abstract class SearchStateBase with Store {
   ContentState? content;
 
   @observable
+  String? searchWord;
+
+  @observable
   bool contentLoading = false;
   @observable
   bool threadsLoading = false;
@@ -170,7 +173,7 @@ abstract class SearchStateBase with Store {
       case Communities.hatena:
         result = await HatenaHandler.searchThreads(keyword);
       case Communities.mal:
-      final boardId = parent.parent.boardIdForSearch;
+        final boardId = parent.parent.boardIdForSearch;
         if (boardId == null) return;
         final data = await MalHandler.searchThreads(keyword, boardId);
         result = data.threads;
@@ -178,6 +181,7 @@ abstract class SearchStateBase with Store {
     }
     logger.i('search result: ${result?.length}');
     _setSearchThreads(result);
+    _setSearchWord(keyword);
     await setSearchWords(keyword);
     // await parent.parent.userStorage.setSearchWords(keyword);
   }
@@ -194,6 +198,11 @@ abstract class SearchStateBase with Store {
     }
     final newForum = settings!.copyWith(searchWordList: list);
     parent.setSettings(newForum);
+  }
+
+  @action
+  void _setSearchWord(final String? value) {
+    searchWord = value;
   }
 
   @action
@@ -219,6 +228,7 @@ abstract class SearchStateBase with Store {
 
   @action
   void clear() {
+    _setSearchWord(null);
     searchThreadList.clear();
     deleteContentState();
   }

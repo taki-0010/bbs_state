@@ -211,6 +211,23 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$hoverdOnThumbnailSrcAtom =
+      Atom(name: 'ContentStateBase.hoverdOnThumbnailSrc', context: context);
+
+  @override
+  String? get hoverdOnThumbnailSrc {
+    _$hoverdOnThumbnailSrcAtom.reportRead();
+    return super.hoverdOnThumbnailSrc;
+  }
+
+  @override
+  set hoverdOnThumbnailSrc(String? value) {
+    _$hoverdOnThumbnailSrcAtom.reportWrite(value, super.hoverdOnThumbnailSrc,
+        () {
+      super.hoverdOnThumbnailSrc = value;
+    });
+  }
+
   late final _$hotAtom = Atom(name: 'ContentStateBase.hot', context: context);
 
   @override
@@ -308,6 +325,17 @@ mixin _$ContentState on ContentStateBase, Store {
 
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
+
+  @override
+  void setSrc(String? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setSrc');
+    try {
+      return super.setSrc(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setSelectedText(String? value) {
@@ -497,6 +525,7 @@ seekBarHandleValue: ${seekBarHandleValue},
 currentContentItemIndex: ${currentContentItemIndex},
 selectedText: ${selectedText},
 timeago: ${timeago},
+hoverdOnThumbnailSrc: ${hoverdOnThumbnailSrc},
 hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},

@@ -49,6 +49,9 @@ abstract class ContentStateBase with Store, WithDateTime {
   TimeagoList timeago = TimeagoList.enable;
 
   @observable
+  String? hoverdOnThumbnailSrc;
+
+  @observable
   double? hot;
 
   @observable
@@ -58,6 +61,11 @@ abstract class ContentStateBase with Store, WithDateTime {
   int? selectedPage;
   @observable
   int? malOffset;
+
+  @action
+  void setSrc(final String? value) {
+    hoverdOnThumbnailSrc = value;
+  }
 
   @action
   void setSelectedText(final String? value) {
