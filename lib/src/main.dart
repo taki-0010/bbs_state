@@ -116,6 +116,14 @@ abstract class MainStoreBase with Store, WithDateTime {
   @observable
   bool onOpenedPopup = false;
 
+  @observable
+  bool openedDrawer = false;
+  @observable
+  bool openedDialog = false;
+
+  @computed
+  bool get openedMenu => onOpenedPopup || openedDrawer || openedDialog;
+
   @computed
   bool get disableSearch => selectedForum == Communities.shitaraba;
 
@@ -806,6 +814,15 @@ abstract class MainStoreBase with Store, WithDateTime {
   @action
   void setOnClosedPopup() {
     onOpenedPopup = false;
+  }
+
+  @action
+  void setChangedDrawer(final bool v) {
+    openedDrawer = v;
+  }
+  @action
+  void setOpenedDialog() {
+    openedDialog = !openedDialog;
   }
 
   // @computed
