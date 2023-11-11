@@ -37,6 +37,13 @@ mixin _$ContentState on ContentStateBase, Store {
       (_$getJumpIndexComputed ??= Computed<int>(() => super.getJumpIndex,
               name: 'ContentStateBase.getJumpIndex'))
           .value;
+  Computed<String?>? _$youtubeCommentsCountComputed;
+
+  @override
+  String? get youtubeCommentsCount => (_$youtubeCommentsCountComputed ??=
+          Computed<String?>(() => super.youtubeCommentsCount,
+              name: 'ContentStateBase.youtubeCommentsCount'))
+      .value;
   Computed<List<GroupData?>>? _$groupListComputed;
 
   @override
@@ -291,6 +298,71 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$youtubeChannelLogoSrcAtom =
+      Atom(name: 'ContentStateBase.youtubeChannelLogoSrc', context: context);
+
+  @override
+  ObservableMap<String, String?> get youtubeChannelLogoSrc {
+    _$youtubeChannelLogoSrcAtom.reportRead();
+    return super.youtubeChannelLogoSrc;
+  }
+
+  @override
+  set youtubeChannelLogoSrc(ObservableMap<String, String?> value) {
+    _$youtubeChannelLogoSrcAtom.reportWrite(value, super.youtubeChannelLogoSrc,
+        () {
+      super.youtubeChannelLogoSrc = value;
+    });
+  }
+
+  late final _$youtubeRepliesAtom =
+      Atom(name: 'ContentStateBase.youtubeReplies', context: context);
+
+  @override
+  ObservableList<ContentData?> get youtubeReplies {
+    _$youtubeRepliesAtom.reportRead();
+    return super.youtubeReplies;
+  }
+
+  @override
+  set youtubeReplies(ObservableList<ContentData?> value) {
+    _$youtubeRepliesAtom.reportWrite(value, super.youtubeReplies, () {
+      super.youtubeReplies = value;
+    });
+  }
+
+  late final _$ytCommentsListDataAtom =
+      Atom(name: 'ContentStateBase.ytCommentsListData', context: context);
+
+  @override
+  YoutubeCommentsListData? get ytCommentsListData {
+    _$ytCommentsListDataAtom.reportRead();
+    return super.ytCommentsListData;
+  }
+
+  @override
+  set ytCommentsListData(YoutubeCommentsListData? value) {
+    _$ytCommentsListDataAtom.reportWrite(value, super.ytCommentsListData, () {
+      super.ytCommentsListData = value;
+    });
+  }
+
+  late final _$ytReplyCountAtom =
+      Atom(name: 'ContentStateBase.ytReplyCount', context: context);
+
+  @override
+  int? get ytReplyCount {
+    _$ytReplyCountAtom.reportRead();
+    return super.ytReplyCount;
+  }
+
+  @override
+  set ytReplyCount(int? value) {
+    _$ytReplyCountAtom.reportWrite(value, super.ytReplyCount, () {
+      super.ytReplyCount = value;
+    });
+  }
+
   late final _$malPollAtom =
       Atom(name: 'ContentStateBase.malPoll', context: context);
 
@@ -323,8 +395,57 @@ mixin _$ContentState on ContentStateBase, Store {
     });
   }
 
+  late final _$getNextRepliesAsyncAction =
+      AsyncAction('ContentStateBase.getNextReplies', context: context);
+
+  @override
+  Future<void> getNextReplies() {
+    return _$getNextRepliesAsyncAction.run(() => super.getNextReplies());
+  }
+
+  late final _$getYtNextCommentsAsyncAction =
+      AsyncAction('ContentStateBase.getYtNextComments', context: context);
+
+  @override
+  Future<void> getYtNextComments() {
+    return _$getYtNextCommentsAsyncAction.run(() => super.getYtNextComments());
+  }
+
   late final _$ContentStateBaseActionController =
       ActionController(name: 'ContentStateBase', context: context);
+
+  @override
+  void _setYtReplyCount(int? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase._setYtReplyCount');
+    try {
+      return super._setYtReplyCount(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void _setYtCommentsListData(YoutubeCommentsListData? value) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase._setYtCommentsListData');
+    try {
+      return super._setYtCommentsListData(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void _setYoutubeReplies() {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase._setYoutubeReplies');
+    try {
+      return super._setYoutubeReplies();
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setSrc(String? value) {
@@ -376,6 +497,17 @@ mixin _$ContentState on ContentStateBase, Store {
         name: 'ContentStateBase.setMalOffset');
     try {
       return super.setMalOffset(value);
+    } finally {
+      _$ContentStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setYoutubeChannnelLogoSrc(String id, String url) {
+    final _$actionInfo = _$ContentStateBaseActionController.startAction(
+        name: 'ContentStateBase.setYoutubeChannnelLogoSrc');
+    try {
+      return super.setYoutubeChannnelLogoSrc(id, url);
     } finally {
       _$ContentStateBaseActionController.endAction(_$actionInfo);
     }
@@ -530,12 +662,17 @@ hot: ${hot},
 selectedRange: ${selectedRange},
 selectedPage: ${selectedPage},
 malOffset: ${malOffset},
+youtubeChannelLogoSrc: ${youtubeChannelLogoSrc},
+youtubeReplies: ${youtubeReplies},
+ytCommentsListData: ${ytCommentsListData},
+ytReplyCount: ${ytReplyCount},
 malPoll: ${malPoll},
 malPaging: ${malPaging},
 minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},
+youtubeCommentsCount: ${youtubeCommentsCount},
 groupList: ${groupList},
 getDefaultName: ${getDefaultName},
 showBottomChip: ${showBottomChip},

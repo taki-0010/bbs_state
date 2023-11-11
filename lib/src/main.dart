@@ -26,6 +26,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final chan4 = ForumState(parent: this, type: Communities.chan4);
   late final hatena = ForumState(parent: this, type: Communities.hatena);
   late final mal = ForumState(parent: this, type: Communities.mal);
+  late final youtube = ForumState(parent: this, type: Communities.youtube);
 
   // late final SembastCacheStore store;
 
@@ -820,6 +821,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   void setChangedDrawer(final bool v) {
     openedDrawer = v;
   }
+
   @action
   void setOpenedDialog() {
     openedDialog = !openedDialog;
@@ -871,6 +873,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   String? boardNameById(final String id) => switch (selectedForum) {
+        Communities.youtube => 'yt',
         Communities.mal => MalData.boardNameById(id),
         // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
         Communities.fiveCh => FiveChBoardNames.getById(id),
@@ -1675,6 +1678,7 @@ abstract class MainStoreBase with Store, WithDateTime {
         Communities.chan4 => chan4,
         Communities.hatena => hatena,
         Communities.mal => mal,
+        Communities.youtube => youtube,
         null => null
       };
 
@@ -1898,33 +1902,6 @@ abstract class MainStoreBase with Store, WithDateTime {
     return _selectedForum(forum)?.selectedTheme ?? currentTheme;
   }
 
-  // String linkButtonLabel(final Uri uri, final Communities forum) {
-  //   final tob = uriIsThreadOrBoard(uri, forum);
-  //   if (tob == null) {
-  //     return uri.host;
-  //   }
-  //   final boardId = getBoardIdFromUri(uri, forum);
-  //   if (tob) {
-  //     final markData = getThreadMarkByUri(uri, forum);
-  //     if (markData != null) {
-  //       return markData.title;
-  //     }
-  //     if (boardId != null) {
-  //       return '$boardId Board Thread';
-  //     }
-  //   }
-  //   if (boardId != null) {
-  //     return '$boardId Board';
-  //   }
-  //   return uri.host;
-  // }
-  // String? getBoardIdFromUriForLinkButton(
-  //     final Uri uri, final Communities forum){
-  //       if(forum == Communities.hatena){
-
-  //       }
-  //     }
-
   String? getBoardIdFromUri(final Uri uri, final Communities forum) {
     switch (forum) {
       case Communities.fiveCh || Communities.pinkCh:
@@ -1946,6 +1923,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Chan4Data.getBoardIdFromUri(uri);
       case Communities.hatena:
         return HatenaData.boardIdFromUri(uri);
+      case Communities.youtube:
+        return YoutubeData.getBoardIdFromUri(uri);
       default:
     }
     return null;
@@ -1971,6 +1950,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return HatenaData.getThreadIdFromUri(uri);
       case Communities.mal:
         return MalData.getThreadIdFromUri(uri);
+      case Communities.youtube:
+        return YoutubeData.getThreadIdFromUri(uri);
       default:
     }
     return null;
@@ -1994,6 +1975,8 @@ abstract class MainStoreBase with Store, WithDateTime {
         return Chan4Data.uriIsThreadOrBoard(uri);
       case Communities.hatena:
         return HatenaData.uriIsThreadOrBoard(uri);
+      case Communities.youtube:
+        return YoutubeData.uriIsThreadOrBoard(uri);
       default:
     }
     return null;
@@ -2078,6 +2061,23 @@ abstract class MainStoreBase with Store, WithDateTime {
     return repository.mediaLocal.getFullPath(url).path;
   }
 
+  Future<String?> getYoutubeChannelLogoUri(final String? id) async {
+    if (id == null) {
+      return null;
+    }
+    final content = currentContentState?.youtubeChannelLogoSrc;
+    if (content == null) {
+      return null;
+    }
+    if (content[id] == null) {
+      final uri = await YoutubeHandler.getChannelLogoUri(id);
+      currentContentState?.setYoutubeChannnelLogoSrc(id, uri.toString());
+      return uri.toString();
+    } else {
+      return content[id]!;
+    }
+  }
+
   Future<bool> report(final ContentData content) async {
     switch (content.forum) {
       case Communities.girlsCh:
@@ -2088,6 +2088,19 @@ abstract class MainStoreBase with Store, WithDateTime {
       default:
     }
     return false;
+  }
+
+  Future<void> getYoutubeReplies(final ContentData item) async {
+    if (item is! YoutubeContent) {
+      return;
+    }
+    toggleContentLoading();
+    final result = await YoutubeHandler.getRepies(item);
+    if (result != null) {
+      currentContentState?.setYtReplies(result, item.replyCount);
+    }
+    toggleContentLoading();
+    // return result;
   }
 
   Future<List<ContentData?>?> getRes(
@@ -2182,6 +2195,6 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    // await MalHandler.searchThreads('piece');
+    // await YoutubeHandler.getThreadsFromChannel('UCabq3No3wXbs6Ut-Pux6SzA');
   }
 }

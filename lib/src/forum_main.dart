@@ -102,7 +102,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         //           (final element) => element?.id == e,
         //           orElse: () => null))
         //       .toList();
-        case Communities.shitaraba:
+        case Communities.shitaraba || Communities.youtube:
           return favoriteBoardsData;
 
         default:
@@ -412,6 +412,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         result = _getBoardFromHatena();
       case Communities.mal:
         result = await _getBoardsForMal();
+      case Communities.youtube:
+        await getFavBoards();
       default:
     }
     toggleBoardLoading();
@@ -439,16 +441,21 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final favorites = settings?.favoritesBoardList;
 
     if (favorites != null && favorites.isNotEmpty) {
+      List<BoardData?>? fav;
+      toggleBoardLoading();
       switch (parent.type) {
         case Communities.shitaraba:
-          toggleBoardLoading();
-          final fav = await ShitarabaHandler.getBoardInfoList(favorites);
-          favoriteBoardsData.clear();
-          favoriteBoardsData.addAll([...?fav]);
-          toggleBoardLoading();
+          fav = await ShitarabaHandler.getBoardInfoList(favorites);
+
           break;
+        case Communities.youtube:
+          fav = await YoutubeHandler.getFavBoards(favorites);
+
         default:
       }
+      favoriteBoardsData.clear();
+      favoriteBoardsData.addAll([...?fav]);
+      toggleBoardLoading();
     }
   }
 
@@ -637,6 +644,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         result = await _getThreadsForHatena();
       case Communities.mal:
         result = await _getThreadsForMal();
+      case Communities.youtube:
+        result = await _getThreadsForYoutube();
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -840,6 +849,15 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     if (b is MachiBoardData) {
       return await parent.getMachiThreads(b.id);
+      // return setMachiThreads(result);
+    }
+    return null;
+  }
+
+  Future<FetchThreadsResultData?> _getThreadsForYoutube() async {
+    final b = board;
+    if (b is YoutubeBoardData && b.parsedId != null) {
+      return await YoutubeHandler.getThreadsFromChannel(b.parsedId!);
       // return setMachiThreads(result);
     }
     return null;

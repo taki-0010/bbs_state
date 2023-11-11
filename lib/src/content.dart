@@ -62,6 +62,53 @@ abstract class ContentStateBase with Store, WithDateTime {
   @observable
   int? malOffset;
 
+  @observable
+  ObservableMap<String, String?> youtubeChannelLogoSrc = ObservableMap();
+
+  @observable
+  ObservableList<ContentData?> youtubeReplies = ObservableList();
+
+  @observable
+  YoutubeCommentsListData? ytCommentsListData;
+
+  @observable
+  int? ytReplyCount;
+
+  void setYtReplies(final YoutubeCommentsListData? value, final int? rep) {
+    _setYtReplyCount(rep);
+    _setYtCommentsListData(value);
+    _setYoutubeReplies();
+  }
+
+  @action
+  void _setYtReplyCount(final int? value) => ytReplyCount = value;
+
+  @action
+  void _setYtCommentsListData(final YoutubeCommentsListData? value) =>
+      ytCommentsListData = value;
+
+  @action
+  void _setYoutubeReplies() {
+    if (ytCommentsListData == null) {
+      return;
+    }
+    final list = YoutubeData.getComList(ytCommentsListData!.data);
+    youtubeReplies.clear();
+    youtubeReplies.addAll(list);
+    logger.d('yt: ${list.length}');
+  }
+
+  @action
+  Future<void> getNextReplies() async {
+    final result = await ytCommentsListData?.data.nextPage();
+    if (result == null) {
+      return;
+    }
+    _setYtCommentsListData(YoutubeCommentsListData(data: result));
+    final list = YoutubeData.getComList(result);
+    youtubeReplies.addAll(list);
+  }
+
   @action
   void setSrc(final String? value) {
     hoverdOnThumbnailSrc = value;
@@ -91,6 +138,11 @@ abstract class ContentStateBase with Store, WithDateTime {
     malOffset = value;
     currentContentIndex = 0;
     currentContentItemIndex = 1;
+  }
+
+  @action
+  void setYoutubeChannnelLogoSrc(final String id, final String url) {
+    youtubeChannelLogoSrc[id] = url;
   }
 
   // @observable
@@ -152,6 +204,44 @@ abstract class ContentStateBase with Store, WithDateTime {
     final value = panY / 60;
     final result = content.content.lastOrNull!.index * value;
     return result.toInt();
+  }
+
+  @computed
+  String? get youtubeCommentsCount {
+    if (content.type != Communities.youtube) {
+      return null;
+    }
+    final current = [...content.content];
+    if (current.isEmpty) {
+      return null;
+    }
+    current.removeAt(0);
+    final total = content.threadLength;
+    if (current.length >= total) {
+      return null;
+    }
+    return '${current.length} / $total';
+  }
+
+  @action
+  Future<void> getYtNextComments() async {
+    if (content.type != Communities.youtube) {
+      return;
+    }
+    final coms = content.ytComments;
+    if (coms == null) {
+      return;
+    }
+    final result = await coms.nextPage();
+    if (result == null) {
+      return;
+    }
+    // logger.d('getYtNextComments: old: ${coms.length}, new: ${result?.length}');
+    final old = [...content.content];
+    final newList = YoutubeData.getComList(result);
+    final newData =
+        content.copyWith(ytComments: result, content: [...old, ...newList]);
+    content = newData;
   }
 
   @computed
@@ -476,7 +566,8 @@ abstract class ContentStateBase with Store, WithDateTime {
         futabaLimit != null ||
         content.girlsPages != null ||
         malPoll != null ||
-        malPaging != null;
+        malPaging != null ||
+        youtubeCommentsCount != null;
   }
 
   @computed

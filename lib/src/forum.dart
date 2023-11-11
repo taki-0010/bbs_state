@@ -1142,6 +1142,8 @@ abstract class ForumStateBase with Store, WithDateTime {
         return await _getContentForHatena(dataId);
       case Communities.mal:
         return await _getContentForMal(dataId, offset: malOffset);
+      case Communities.youtube:
+        return _getContentForYoutube(dataId);
 
       default:
       // _toggleLoading();
@@ -1520,6 +1522,11 @@ abstract class ForumStateBase with Store, WithDateTime {
   // @action
   Future<FetchContentResultData> _getContentForHatena(final String url) async {
     final result = await HatenaHandler.getContent(url);
+    return result;
+  }
+
+  Future<FetchContentResultData> _getContentForYoutube(final String id) async {
+    final result = await YoutubeHandler.getContent(id);
     return result;
   }
 
