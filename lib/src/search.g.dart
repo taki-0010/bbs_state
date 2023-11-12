@@ -16,6 +16,13 @@ mixin _$SearchState on SearchStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'SearchStateBase.settings'))
           .value;
+  Computed<bool>? _$showNextButtonComputed;
+
+  @override
+  bool get showNextButton =>
+      (_$showNextButtonComputed ??= Computed<bool>(() => super.showNextButton,
+              name: 'SearchStateBase.showNextButton'))
+          .value;
   Computed<Set<String?>>? _$boardIdSetOfContentListComputed;
 
   @override
@@ -144,6 +151,22 @@ mixin _$SearchState on SearchStateBase, Store {
     });
   }
 
+  late final _$ytVideoResultAtom =
+      Atom(name: 'SearchStateBase.ytVideoResult', context: context);
+
+  @override
+  YoutubeVideoSearchResult? get ytVideoResult {
+    _$ytVideoResultAtom.reportRead();
+    return super.ytVideoResult;
+  }
+
+  @override
+  set ytVideoResult(YoutubeVideoSearchResult? value) {
+    _$ytVideoResultAtom.reportWrite(value, super.ytVideoResult, () {
+      super.ytVideoResult = value;
+    });
+  }
+
   late final _$setPrimaryViewAsyncAction =
       AsyncAction('SearchStateBase.setPrimaryView', context: context);
 
@@ -211,6 +234,17 @@ mixin _$SearchState on SearchStateBase, Store {
   }
 
   @override
+  void _setYtVideoSearchResult(YoutubeVideoSearchResult? value) {
+    final _$actionInfo = _$SearchStateBaseActionController.startAction(
+        name: 'SearchStateBase._setYtVideoSearchResult');
+    try {
+      return super._setYtVideoSearchResult(value);
+    } finally {
+      _$SearchStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void deleteContentState() {
     final _$actionInfo = _$SearchStateBaseActionController.startAction(
         name: 'SearchStateBase.deleteContentState');
@@ -241,7 +275,9 @@ contentLoading: ${contentLoading},
 threadsLoading: ${threadsLoading},
 primaryView: ${primaryView},
 searchThreadList: ${searchThreadList},
+ytVideoResult: ${ytVideoResult},
 settings: ${settings},
+showNextButton: ${showNextButton},
 boardIdSetOfContentList: ${boardIdSetOfContentList},
 searchListByBoardId: ${searchListByBoardId},
 appBarTitle: ${appBarTitle},

@@ -857,7 +857,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForYoutube() async {
     final b = board;
     if (b is YoutubeBoardData && b.parsedId != null) {
-      return await YoutubeHandler.getThreadsFromChannel(b.parsedId!);
+      return await YoutubeHandler.getThreadsFromChannel(b.parsedId!, b.name);
       // return setMachiThreads(result);
     }
     return null;

@@ -33,6 +33,12 @@ abstract class SearchStateBase with Store {
   @observable
   ObservableList<ThreadData?> searchThreadList = ObservableList<ThreadData?>();
 
+  @observable
+  YoutubeVideoSearchResult? ytVideoResult;
+
+  @computed
+  bool get showNextButton => ytVideoResult != null;
+
   // @observable
   // ThreadContentData? searchedContent;
 
@@ -70,24 +76,6 @@ abstract class SearchStateBase with Store {
     }
     return result;
   }
-
-  // @computed
-  // String? get selectedBoardName {
-  //   if (boardIdSetOfContentList.isEmpty) return null;
-  //   final boardId = boardIdSetOfContentList.elementAt(viewIndex);
-  //   if (boardId == null) return null;
-  //   final mark = searchThreadList.firstWhere(
-  //     (element) => element?.boardId == boardId,
-  //     orElse: () => null,
-  //   );
-  //   logger.d(
-  //       'selectedBoardName: vewIndex: $viewIndex, boardId: $boardId, name: ${mark?.boardName}');
-  //   // final data = await parent.boardStorage.getBoardData(boardId);
-  //   // if (data != null) {
-  //   //   return data.board.name;
-  //   // }
-  //   return mark?.boardName;
-  // }
 
   @computed
   String get appBarTitle => switch (primaryView) {
@@ -137,6 +125,17 @@ abstract class SearchStateBase with Store {
   // @action
   // void setViewIndex(final int index) => viewIndex = index;
 
+  Future<void> searchNextThreads() async {
+    switch (parent.type) {
+      case Communities.youtube:
+        if (ytVideoResult != null) {
+          await searchServerThreads(ytVideoResult!.keyword);
+        }
+        break;
+      default:
+    }
+  }
+
   Future<void> searchServerThreads<T extends ThreadData>(
       final String keyword) async {
     List<ThreadData?>? result = [];
@@ -177,6 +176,23 @@ abstract class SearchStateBase with Store {
         if (boardId == null) return;
         final data = await MalHandler.searchThreads(keyword, boardId);
         result = data.threads;
+      case Communities.youtube:
+        if (ytVideoResult == null) {
+          final data = await YoutubeData.searchFirstThreads(keyword);
+          result = data.result;
+          _setYtVideoSearchResult(data);
+        } else {
+          if (ytVideoResult!.keyword == keyword) {
+            final data = await YoutubeData.searchNextThreads(ytVideoResult!);
+            result = data.result;
+            _setYtVideoSearchResult(data);
+          } else {
+            final data = await YoutubeData.searchFirstThreads(keyword);
+            result = data.result;
+            _setYtVideoSearchResult(data);
+          }
+        }
+
       default:
     }
     logger.i('search result: ${result?.length}');
@@ -214,6 +230,11 @@ abstract class SearchStateBase with Store {
     }
   }
 
+  @action
+  void _setYtVideoSearchResult(final YoutubeVideoSearchResult? value) {
+    ytVideoResult = value;
+  }
+
   void deleteData(final ThreadMarkData value) {
     if (content?.content.id == value.id) {
       deleteContentState();
@@ -231,5 +252,6 @@ abstract class SearchStateBase with Store {
     _setSearchWord(null);
     searchThreadList.clear();
     deleteContentState();
+    _setYtVideoSearchResult(null);
   }
 }

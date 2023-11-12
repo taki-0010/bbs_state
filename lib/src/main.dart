@@ -759,17 +759,24 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (largeScreen) {
       return main != null && main.isNotEmpty;
     } else {
+      logger.d(
+          'showSearchWordChipOnPrimary: $search, $currentScreen, $selectedForumPrimaryBody');
       if (currentScreen == BottomMenu.forums &&
           selectedForumPrimaryBody == PrimaryViewState.threads) {
         return main != null && main.isNotEmpty;
       }
       if (currentScreen == BottomMenu.search &&
-          selectedForumPrimaryBody == PrimaryViewState.threads) {
+          primarySearchView == PrimaryViewState.threads) {
         return search != null && search.isNotEmpty;
       }
     }
     return false;
   }
+
+  @computed
+  bool get showNextButtonForSearch =>
+      currentScreen == BottomMenu.search &&
+      (selectedForumState?.search.showNextButton ?? false);
 
   @computed
   String? get mainSearchWord {
@@ -788,7 +795,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get searchScreenWord {
     if (!largeScreen &&
         currentScreen == BottomMenu.search &&
-        selectedForumPrimaryBody == PrimaryViewState.threads) {
+        primarySearchView == PrimaryViewState.threads) {
       return selectedForumState?.search.searchWord;
     }
     return null;
@@ -801,6 +808,10 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (mainSearchWord != null) {
       selectedForumState?.forumMain.clearSearchWord();
     }
+  }
+
+  Future<void> searchNextThreads() async {
+    await selectedForumState?.search.searchNextThreads();
   }
 
   void setCurrentContentIndex(final int index) {
@@ -873,7 +884,6 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   String? boardNameById(final String id) => switch (selectedForum) {
-        Communities.youtube => 'yt',
         Communities.mal => MalData.boardNameById(id),
         // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
         Communities.fiveCh => FiveChBoardNames.getById(id),
@@ -892,6 +902,7 @@ abstract class MainStoreBase with Store, WithDateTime {
                 )
                 ?.boardName ??
             id,
+        Communities.youtube => _youtubeBoardNameById(id),
         Communities.chan4 => selectedForumState?.forumMain.boards
                 .firstWhere(
                   (element) => element?.id == id,
@@ -901,6 +912,28 @@ abstract class MainStoreBase with Store, WithDateTime {
             id,
         null => null
       };
+
+  String? _youtubeBoardNameById(final String id) {
+    if (currentScreen == BottomMenu.search) {
+      return selectedForumState?.searchList
+              .firstWhere(
+                (element) =>
+                    element?.boardId == id && element?.boardName != null,
+                orElse: () => null,
+              )
+              ?.boardName ??
+          id;
+    } else {
+      return selectedForumState?.history.markList
+              .firstWhere(
+                (element) =>
+                    element?.boardId == id && element?.boardName != null,
+                orElse: () => null,
+              )
+              ?.boardName ??
+          id;
+    }
+  }
 
   // @computed
   // Future<String?> get selectedBoardNameFavorite async {
@@ -1038,6 +1071,13 @@ abstract class MainStoreBase with Store, WithDateTime {
   //   toggleEntireLoading();
   // }
 
+  ImportanceData? getImportanceByThread(final ThreadBase item) {
+    final byUserId = _getImportanceByUserId(item.getUserId);
+    final title = getImportanceByTitle(item.title);
+    // logger.d('getImportanceByThread: item.getUserId: ${item.getUserId}, ${byUserId?.level}, ${title?.strValue}');
+    return byUserId ?? title;
+  }
+
   ImportanceData? getImportanceByContent(final ContentData value) {
     final byPostId = _getImportanceByPostId(value.getPostId);
     final byUserId = _getImportanceByUserId(value.getUserId);
@@ -1174,6 +1214,7 @@ abstract class MainStoreBase with Store, WithDateTime {
 
     reverseForumSwitchAnimation = newIndex < (selectedForumIndex ?? 0);
     selectedForum = selected;
+    // _setInitialPrimaryView();
   }
 
   // int? lastReadTimeBySelectedThread(final ThreadBase item) {
@@ -1205,7 +1246,18 @@ abstract class MainStoreBase with Store, WithDateTime {
   void _setBottomIndex(final int value) {
     reverseAnimationForPrymaryScreen = bottomBarIndex > value;
     bottomBarIndex = value;
+    // _setInitialPrimaryView();
   }
+
+  // void _setInitialPrimaryView() {
+  //   if (largeScreen) {
+  //   } else {
+
+  //     if (bottomBarIndex == 2 && selectedForumState?.search.content == null) {
+  //       setPrimaryView(PrimaryViewState.threads);
+  //     }
+  //   }
+  // }
 
   Future<void> _updateLastOpenedIndexWhenScreenTransition() async {
     final contentState = currentContentState;
@@ -1313,7 +1365,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<void> blockThreadPostUser(final ThreadData thread) async {
+    toggleMainThreadsLoading();
     await selectedForumState?.blockThreadPostUser(thread);
+    toggleMainThreadsLoading();
   }
 
   Future<void> blockThreadResponseUser(final ContentData value) async {
@@ -1581,6 +1635,17 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<Uint8List?> getFavicon(final String uri) async {
     return await FetchData.getFavicon(uri);
+  }
+
+  Future<(Uint8List?, String?)?> getAvatarData(final ContentData item) async {
+    Uri? uri = item.avatarUri;
+    if (item.forum == Communities.youtube) {
+      uri = await getYoutubeChannelLogoUri((item as YoutubeContent).channelId);
+    }
+    if (uri == null) {
+      return null;
+    }
+    return await getMediaData(uri.toString());
   }
 
   Future<(Uint8List?, String?)?> getMediaData(final String url) async {
@@ -2061,7 +2126,7 @@ abstract class MainStoreBase with Store, WithDateTime {
     return repository.mediaLocal.getFullPath(url).path;
   }
 
-  Future<String?> getYoutubeChannelLogoUri(final String? id) async {
+  Future<Uri?> getYoutubeChannelLogoUri(final String? id) async {
     if (id == null) {
       return null;
     }
@@ -2072,9 +2137,10 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (content[id] == null) {
       final uri = await YoutubeHandler.getChannelLogoUri(id);
       currentContentState?.setYoutubeChannnelLogoSrc(id, uri.toString());
-      return uri.toString();
+      return uri;
     } else {
-      return content[id]!;
+      final url = content[id]!;
+      return Uri.parse(url);
     }
   }
 

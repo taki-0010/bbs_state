@@ -403,9 +403,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   @computed
   List<ImportanceData?> get getCurrentImportanceList {
     final thread = currentContentThreadData;
-    if (thread == null) return [];
+    // if (thread == null) return [];
     final settingsData = settings?.getImportanceList;
-    return [...thread.importanceList, ...?settingsData];
+    return [...?thread?.importanceList, ...?settingsData];
   }
 
   // @action
@@ -710,7 +710,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         (element) =>
             element?.id == thread.id && element?.boardId == thread.boardId,
         orElse: () => null);
-    logger.i('_updateMarkData: ${exist?.id}');
+    logger.i('_updateMarkData: ${exist?.id}, url: ${thread.url}');
     if (exist != null) {
       return _updateMarkData(exist, content);
     } else {
@@ -908,6 +908,11 @@ abstract class ForumStateBase with Store, WithDateTime {
         }
       case Communities.mal:
         return content.content?.boardId;
+      case Communities.youtube:
+        final item = content.content?.content.firstOrNull;
+        if (item is YoutubeContent) {
+          return item.channelId;
+        }
       default:
         return parent.getBoardIdFromUri(uri, type);
     }
@@ -1019,9 +1024,9 @@ abstract class ForumStateBase with Store, WithDateTime {
     // final thumbnail =
     //     thmb != null ? jsonEncode(SrcData(thumbnailUri: thmb).toJson()) : null;
     // logger.d('thmb: $thmb');
-
+    final url = uri.toString().replaceAll('https://', '');
     final markResult = await _setInitialThreadMarkData(
-        content, '${uri.host}${uri.path}', thmb, null);
+        content, url, thmb, null);
     if (markResult != FetchResult.success) {
       return contentData.result;
     }

@@ -580,6 +580,13 @@ mixin _$MainStore on MainStoreBase, Store {
               () => super.showSearchWordChipOnPrimary,
               name: 'MainStoreBase.showSearchWordChipOnPrimary'))
           .value;
+  Computed<bool>? _$showNextButtonForSearchComputed;
+
+  @override
+  bool get showNextButtonForSearch => (_$showNextButtonForSearchComputed ??=
+          Computed<bool>(() => super.showNextButtonForSearch,
+              name: 'MainStoreBase.showNextButtonForSearch'))
+      .value;
   Computed<String?>? _$mainSearchWordComputed;
 
   @override
@@ -1248,6 +1255,7 @@ currentHistoryList: ${currentHistoryList},
 currentSearchList: ${currentSearchList},
 searchList: ${searchList},
 showSearchWordChipOnPrimary: ${showSearchWordChipOnPrimary},
+showNextButtonForSearch: ${showNextButtonForSearch},
 mainSearchWord: ${mainSearchWord},
 searchScreenWord: ${searchScreenWord},
 getDefaultName: ${getDefaultName},
