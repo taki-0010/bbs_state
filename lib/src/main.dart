@@ -406,6 +406,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   String? get currentBoardUrl {
     final board = selectedForumState?.forumMain.board;
     switch (selectedForum) {
+      case Communities.youtube:
+        if (board is YoutubeBoardData) {
+          return board.boardUri.toString();
+        }
       case Communities.mal:
         if (board is MalBoardData) {
           return board.boardUri.toString();
@@ -759,8 +763,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     if (largeScreen) {
       return main != null && main.isNotEmpty;
     } else {
-      logger.d(
-          'showSearchWordChipOnPrimary: $search, $currentScreen, $selectedForumPrimaryBody');
+      // logger.d(
+      //     'showSearchWordChipOnPrimary: $search, $currentScreen, $selectedForumPrimaryBody');
       if (currentScreen == BottomMenu.forums &&
           selectedForumPrimaryBody == PrimaryViewState.threads) {
         return main != null && main.isNotEmpty;
@@ -772,6 +776,18 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
     return false;
   }
+
+  @computed
+  bool get showNextButtonForForum {
+    final show = selectedForumPrimaryBody == PrimaryViewState.threads &&
+      (selectedForumState?.forumMain.hasYtThreadsClient ?? false);
+    if(largeScreen){
+      return show;
+    }else{
+      return currentScreen == BottomMenu.forums && show;
+    }
+  }
+  
 
   @computed
   bool get showNextButtonForSearch =>
@@ -1762,6 +1778,19 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
   // await userStorage.setOpenLink(value);
 
+  bool isFavoritesBoard(final String value) {
+    return currentFavoritesBoards.firstWhere(
+          (element) => element != null && element.contains(value),
+          orElse: () => null,
+        ) !=
+        null;
+  }
+
+  Future<void> setFavBoardById(final String value,
+      {final bool remove = false}) async {
+    await selectedForumState?.setFavBoardById(value, remove: remove);
+  }
+
   Future<void> setFavoritesBoards(final List<String?> value) async {
     final settnigs = selectedForumState?.settings;
     if (settnigs == null) return;
@@ -2261,6 +2290,8 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   Future<void> openget() async {
     logger.i('open2ch');
-    // await YoutubeHandler.getThreadsFromChannel('UCabq3No3wXbs6Ut-Pux6SzA');
+    if (PlatformData.instance.isDebugMode) {
+      // await YoutubeHandler.getTrends();
+    }
   }
 }

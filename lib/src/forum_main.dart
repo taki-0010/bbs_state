@@ -44,6 +44,15 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   @observable
   ObservableMap<String, List<ThreadDataForDiff?>> threadsDiff = ObservableMap();
 
+  @observable
+  String? searchThreadWord;
+
+  @observable
+  YoutubeThreadsResult? ytThreadsResult;
+
+  @computed
+  bool get hasYtThreadsClient => ytThreadsResult?.data != null;
+
   @computed
   List<ThreadDataForDiff?>? get currentBoardDiff => threadsDiff[board?.id];
 
@@ -64,9 +73,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   // @observable
   // ThreadContentData? mainContent;
-
-  @observable
-  String? searchThreadWord;
 
   @computed
   List<BoardData?> get boardsData {
@@ -376,6 +382,11 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @action
+  void _setYtThreadsResult(final YoutubeThreadsResult? value) {
+    ytThreadsResult = value;
+  }
+
+  @action
   Future<void> getBoards() async {
     clearSearchWord();
     if (boards.isNotEmpty) return;
@@ -413,6 +424,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.mal:
         result = await _getBoardsForMal();
       case Communities.youtube:
+        result = _getBoardForYoutube();
         await getFavBoards();
       default:
     }
@@ -457,6 +469,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       favoriteBoardsData.addAll([...?fav]);
       toggleBoardLoading();
     }
+  }
+
+  FetchBoardsResultData? _getBoardForYoutube() {
+    final data = YoutubeInitialBoards.values
+        .map((e) => YoutubeBoardData(
+            id: e.name, name: e.title, forum: Communities.youtube, initial: e))
+        .toList();
+    return FetchBoardsResultData(boards: data);
   }
 
   FetchBoardsResultData? _getBoardFromHatena() {
@@ -646,6 +666,8 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         result = await _getThreadsForMal();
       case Communities.youtube:
         result = await _getThreadsForYoutube();
+        _setYtThreadsResult(result?.ytThreadsResult);
+        logger.d('fetchThreads: yt: ${result?.ytThreadsResult}');
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -856,11 +878,41 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   Future<FetchThreadsResultData?> _getThreadsForYoutube() async {
     final b = board;
-    if (b is YoutubeBoardData && b.parsedId != null) {
-      return await YoutubeHandler.getThreadsFromChannel(b.parsedId!, b.name);
+    if (b is YoutubeBoardData) {
+      if (b.parsedId != null) {
+        return await YoutubeHandler.getThreadsFromChannel(b.parsedId!, b.name);
+      }
+      if (b.initial != null) {
+        return await YoutubeHandler.getTrends(value: b.initial!);
+      }
+
       // return setMachiThreads(result);
     }
     return null;
+  }
+
+  @action
+  Future<void> getNextForYoutube() async {
+    if (ytThreadsResult?.data != null && board is YoutubeBoardData) {
+      final id = (board as YoutubeBoardData).parsedId;
+      if (id == null) return;
+      final first = await ytThreadsResult?.data.nextPage();
+      final result = first
+          ?.map((final v) => YoutubeData.getThread(v, boardId: id))
+          .toList();
+      final second = await first?.nextPage();
+      final s = second
+          ?.map((final v) => YoutubeData.getThread(v, boardId: id))
+          .toList();
+      final li = [...?result, ...?s];
+      threadList.addAll([...li]);
+      if (first != null || second != null) {
+        final d = second ?? first;
+        _setYtThreadsResult(YoutubeThreadsResult(data: d!));
+      } else {
+        _setYtThreadsResult(null);
+      }
+    }
   }
 
   Future<FetchThreadsResultData?> _getThreadsForHatena() async {

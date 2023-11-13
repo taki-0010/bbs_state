@@ -781,14 +781,17 @@ abstract class ForumStateBase with Store, WithDateTime {
     // final user = await parent.server.userState.getUserAccount;
     if (user != null && settings != null) {
       final resCount = content.threadLength;
-      // final resCount = content.lastIndex ?? 0;
-      final title = content.content.firstOrNull?.title;
+      final first = content.content.firstOrNull;
+      final title = first?.title;
       // final thumbnail = content.content.firstOrNull?.srcThumbnail;
       final hot = getIkioi(int.tryParse(content.id) ?? 0, resCount);
       final retention = _getRetentionPeriodSeconds(hot);
       final documentId = _getDocumentId(content.id, content.boardId);
       final createdAtBySeconds = _getCreatedAtBySecounds(content);
       final now = DateTime.now();
+      final viewCount = first?.forum == Communities.youtube
+          ? (first as YoutubeContent).viewCount
+          : null;
 
       final newLog = ThreadMarkData(
           id: content.id,
@@ -801,6 +804,7 @@ abstract class ForumStateBase with Store, WithDateTime {
           // gotAt: DateTime.now().toIso8601String(),
           resCount: resCount,
           url: url.replaceAll('https://', ''),
+          viewCount: viewCount,
           // sessionId: session,
           boardId: content.boardId,
           // thumbnailStr: thumbnailData,
@@ -847,6 +851,10 @@ abstract class ForumStateBase with Store, WithDateTime {
     // if (resCount == thread.resCount) return true;
     final index = lastOpenedIndex;
     logger.i('_updateMarkData');
+    final first = content.content.firstOrNull;
+    final viewCount = first?.forum == Communities.youtube
+        ? (first as YoutubeContent).viewCount
+        : null;
 
     final newMark = thread.copyWith(
         boardId: content.boardId,
@@ -854,6 +862,7 @@ abstract class ForumStateBase with Store, WithDateTime {
         range: content.range,
         lastPageOfGirlsCh: content.girlsPages?.current,
         lastOpendIndex: index ?? thread.lastOpendIndex,
+        viewCount: viewCount,
         lastReadAt: index != null
             ? DateTime.now().millisecondsSinceEpoch
             : thread.lastReadAt,
@@ -1025,8 +1034,8 @@ abstract class ForumStateBase with Store, WithDateTime {
     //     thmb != null ? jsonEncode(SrcData(thumbnailUri: thmb).toJson()) : null;
     // logger.d('thmb: $thmb');
     final url = uri.toString().replaceAll('https://', '');
-    final markResult = await _setInitialThreadMarkData(
-        content, url, thmb, null);
+    final markResult =
+        await _setInitialThreadMarkData(content, url, thmb, null);
     if (markResult != FetchResult.success) {
       return contentData.result;
     }
@@ -1148,7 +1157,7 @@ abstract class ForumStateBase with Store, WithDateTime {
       case Communities.mal:
         return await _getContentForMal(dataId, offset: malOffset);
       case Communities.youtube:
-        return _getContentForYoutube(dataId);
+        return await _getContentForYoutube(dataId);
 
       default:
       // _toggleLoading();
@@ -1693,6 +1702,29 @@ abstract class ForumStateBase with Store, WithDateTime {
       threadId,
     );
     return result;
+  }
+
+  Future<void> setFavBoardById(final String value,
+      {final bool remove = false}) async {
+    String id = value;
+    switch (type) {
+      case Communities.youtube:
+        id = 'ch/$value';
+        break;
+      default:
+    }
+    if (settings == null) {
+      return;
+    }
+    final list = [...?settings?.favoritesBoardList];
+    list.removeWhere((element) => element == id);
+    if (!remove) {
+      list.add(id);
+    }
+    final newData = settings!.copyWith(favoritesBoardList: list);
+    setSettings(newData);
+    await parent.updateForumSettings();
+    await forumMain.getFavBoards();
   }
 
   Future<void> blockThreadPostUser(final ThreadData thread) async {

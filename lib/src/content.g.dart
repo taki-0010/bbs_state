@@ -399,7 +399,7 @@ mixin _$ContentState on ContentStateBase, Store {
       AsyncAction('ContentStateBase.getNextReplies', context: context);
 
   @override
-  Future<void> getNextReplies() {
+  Future<int?> getNextReplies() {
     return _$getNextRepliesAsyncAction.run(() => super.getNextReplies());
   }
 

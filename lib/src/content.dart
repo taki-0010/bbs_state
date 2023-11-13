@@ -99,14 +99,17 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   @action
-  Future<void> getNextReplies() async {
+  Future<int?> getNextReplies() async {
+    final prev = youtubeReplies.length;
     final result = await ytCommentsListData?.data.nextPage();
     if (result == null) {
-      return;
+      return null;
     }
-    _setYtCommentsListData(YoutubeCommentsListData(data: result));
     final list = YoutubeData.getComList(result);
+    //  logger.d('yt: nextLength: ${list.length}');
+    _setYtCommentsListData(YoutubeCommentsListData(data: result));
     youtubeReplies.addAll(list);
+    return prev;
   }
 
   @action

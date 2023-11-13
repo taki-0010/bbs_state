@@ -782,10 +782,22 @@
       "languageVersion": "2.19"
     },
     {
+      "name": "xml2json",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/xml2json-5.3.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "yaml",
       "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/yaml-3.1.2",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "youtube_data_api",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/youtube_data_api-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "youtube_explode_dart",
@@ -806,7 +818,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-11-09T10:31:30.200591Z",
+  "generated": "2023-11-13T06:03:49.698618Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

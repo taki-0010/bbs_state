@@ -16,6 +16,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'ForumMainStateBase.settings'))
           .value;
+  Computed<bool>? _$hasYtThreadsClientComputed;
+
+  @override
+  bool get hasYtThreadsClient => (_$hasYtThreadsClientComputed ??=
+          Computed<bool>(() => super.hasYtThreadsClient,
+              name: 'ForumMainStateBase.hasYtThreadsClient'))
+      .value;
   Computed<List<ThreadDataForDiff?>?>? _$currentBoardDiffComputed;
 
   @override
@@ -264,6 +271,22 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
     });
   }
 
+  late final _$ytThreadsResultAtom =
+      Atom(name: 'ForumMainStateBase.ytThreadsResult', context: context);
+
+  @override
+  YoutubeThreadsResult? get ytThreadsResult {
+    _$ytThreadsResultAtom.reportRead();
+    return super.ytThreadsResult;
+  }
+
+  @override
+  set ytThreadsResult(YoutubeThreadsResult? value) {
+    _$ytThreadsResultAtom.reportWrite(value, super.ytThreadsResult, () {
+      super.ytThreadsResult = value;
+    });
+  }
+
   late final _$setPrimaryViewAsyncAction =
       AsyncAction('ForumMainStateBase.setPrimaryView', context: context);
 
@@ -295,6 +318,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   Future<void> _setThreadsMetadata<T extends ThreadData>(List<T?> result) {
     return _$_setThreadsMetadataAsyncAction
         .run(() => super._setThreadsMetadata<T>(result));
+  }
+
+  late final _$getNextForYoutubeAsyncAction =
+      AsyncAction('ForumMainStateBase.getNextForYoutube', context: context);
+
+  @override
+  Future<void> getNextForYoutube() {
+    return _$getNextForYoutubeAsyncAction.run(() => super.getNextForYoutube());
   }
 
   late final _$ForumMainStateBaseActionController =
@@ -350,6 +381,17 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
         name: 'ForumMainStateBase.setBoard');
     try {
       return super.setBoard(value);
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void _setYtThreadsResult(YoutubeThreadsResult? value) {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase._setYtThreadsResult');
+    try {
+      return super._setYtThreadsResult(value);
     } finally {
       _$ForumMainStateBaseActionController.endAction(_$actionInfo);
     }
@@ -458,7 +500,9 @@ board: ${board},
 threadList: ${threadList},
 threadsDiff: ${threadsDiff},
 searchThreadWord: ${searchThreadWord},
+ytThreadsResult: ${ytThreadsResult},
 settings: ${settings},
+hasYtThreadsClient: ${hasYtThreadsClient},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
