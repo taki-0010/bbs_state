@@ -9,6 +9,13 @@ part of 'main.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$MainStore on MainStoreBase, Store {
+  Computed<bool?>? _$getYtChannelOrPlayListComputed;
+
+  @override
+  bool? get getYtChannelOrPlayList => (_$getYtChannelOrPlayListComputed ??=
+          Computed<bool?>(() => super.getYtChannelOrPlayList,
+              name: 'MainStoreBase.getYtChannelOrPlayList'))
+      .value;
   Computed<bool>? _$openedMenuComputed;
 
   @override
@@ -608,6 +615,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<String?>(() => super.searchScreenWord,
               name: 'MainStoreBase.searchScreenWord'))
       .value;
+  Computed<String?>? _$postOnSiteUrlComputed;
+
+  @override
+  String? get postOnSiteUrl =>
+      (_$postOnSiteUrlComputed ??= Computed<String?>(() => super.postOnSiteUrl,
+              name: 'MainStoreBase.postOnSiteUrl'))
+          .value;
   Computed<String?>? _$getDefaultNameComputed;
 
   @override
@@ -1185,6 +1199,7 @@ openedDrawer: ${openedDrawer},
 openedDialog: ${openedDialog},
 reverseForumSwitchAnimation: ${reverseForumSwitchAnimation},
 reverseAnimationForPrymaryScreen: ${reverseAnimationForPrymaryScreen},
+getYtChannelOrPlayList: ${getYtChannelOrPlayList},
 openedMenu: ${openedMenu},
 disableSearch: ${disableSearch},
 snackMessage: ${snackMessage},
@@ -1266,6 +1281,7 @@ showNextButtonForForum: ${showNextButtonForForum},
 showNextButtonForSearch: ${showNextButtonForSearch},
 mainSearchWord: ${mainSearchWord},
 searchScreenWord: ${searchScreenWord},
+postOnSiteUrl: ${postOnSiteUrl},
 getDefaultName: ${getDefaultName},
 searchWords: ${searchWords},
 searchViewState: ${searchViewState}

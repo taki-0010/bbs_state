@@ -89,10 +89,10 @@ abstract class ContentStateBase with Store, WithDateTime {
 
   @action
   void _setYoutubeReplies() {
-    if (ytCommentsListData == null) {
+    if (ytCommentsListData?.data == null) {
       return;
     }
-    final list = YoutubeData.getComList(ytCommentsListData!.data);
+    final list = YoutubeData.getComList(ytCommentsListData!.data!);
     youtubeReplies.clear();
     youtubeReplies.addAll(list);
     logger.d('yt: ${list.length}');
@@ -101,7 +101,7 @@ abstract class ContentStateBase with Store, WithDateTime {
   @action
   Future<int?> getNextReplies() async {
     final prev = youtubeReplies.length;
-    final result = await ytCommentsListData?.data.nextPage();
+    final result = await ytCommentsListData?.data?.nextPage();
     if (result == null) {
       return null;
     }
@@ -210,20 +210,23 @@ abstract class ContentStateBase with Store, WithDateTime {
   }
 
   @computed
-  String? get youtubeCommentsCount {
+  bool get showYtNextCommentsButton {
     if (content.type != Communities.youtube) {
-      return null;
+      return false;
     }
     final current = [...content.content];
     if (current.isEmpty) {
-      return null;
+      return false;
     }
-    current.removeAt(0);
-    final total = content.threadLength;
-    if (current.length >= total) {
-      return null;
+    if (content.ytComments == null) {
+      return false;
     }
-    return '${current.length} / $total';
+    // current.removeAt(0);
+    // final total = content.threadLength;
+    // if (current.length >= total) {
+    //   return false;
+    // }
+    return true;
   }
 
   @action
@@ -237,6 +240,7 @@ abstract class ContentStateBase with Store, WithDateTime {
     }
     final result = await coms.nextPage();
     if (result == null) {
+      content = content.copyWith(ytComments: null);
       return;
     }
     // logger.d('getYtNextComments: old: ${coms.length}, new: ${result?.length}');
@@ -570,7 +574,7 @@ abstract class ContentStateBase with Store, WithDateTime {
         content.girlsPages != null ||
         malPoll != null ||
         malPaging != null ||
-        youtubeCommentsCount != null;
+        showYtNextCommentsButton;
   }
 
   @computed

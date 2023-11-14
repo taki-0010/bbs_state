@@ -50,6 +50,23 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   @observable
   YoutubeThreadsResult? ytThreadsResult;
 
+  @observable
+  YoutubeSortData ytSort = YoutubeSortData();
+
+  @observable
+  bool ytChannelOrPlaylist = true;
+
+  @computed
+  bool? get getYtChannelOrPlayList {
+    if (parent.type != Communities.youtube) {
+      return null;
+    }
+    if (selectedPrimaryView != PrimaryViewState.boards) {
+      return null;
+    }
+    return ytChannelOrPlaylist;
+  }
+
   @computed
   bool get hasYtThreadsClient => ytThreadsResult?.data != null;
 
@@ -667,7 +684,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.youtube:
         result = await _getThreadsForYoutube();
         _setYtThreadsResult(result?.ytThreadsResult);
-        logger.d('fetchThreads: yt: ${result?.ytThreadsResult}');
+        logger.d('fetchThreads: yt: ${result?.threads?.length}');
       default:
     }
     logger.d('fetchThreads: ${result?.result}');
@@ -880,7 +897,18 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     final b = board;
     if (b is YoutubeBoardData) {
       if (b.parsedId != null) {
-        return await YoutubeHandler.getThreadsFromChannel(b.parsedId!, b.name);
+        switch (b.idType) {
+          case YoutubeIdType.channel:
+            return await YoutubeHandler.getThreadsFromChannel(
+                b.parsedId!, b.name,
+                sort: ytSort);
+          case YoutubeIdType.playList:
+            return await YoutubeHandler.getThreadsFromPlaylist(
+              b.parsedId!,
+              b.name,
+            );
+          default:
+        }
       }
       if (b.initial != null) {
         return await YoutubeHandler.getTrends(value: b.initial!);
@@ -892,11 +920,22 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @action
-  Future<void> getNextForYoutube() async {
+  void _setYtSort(final YoutubeSortData value) {
+    ytSort = value;
+  }
+
+  Future<void> reFetchYtThreadsWhenChangedSort(
+      final YoutubeSortData value) async {
+    _setYtSort(value);
+    await getThreads();
+  }
+
+  @action
+  Future<void> getNextThreadsForYoutube() async {
     if (ytThreadsResult?.data != null && board is YoutubeBoardData) {
       final id = (board as YoutubeBoardData).parsedId;
       if (id == null) return;
-      final first = await ytThreadsResult?.data.nextPage();
+      final first = await ytThreadsResult?.data?.nextPage();
       final result = first
           ?.map((final v) => YoutubeData.getThread(v, boardId: id))
           .toList();
@@ -1006,6 +1045,27 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
     }
     return null;
+  }
+
+  Future<YoutubeBoardData?> getYtDetail(final String id) async {
+    final chOrPl = ytChannelOrPlaylist;
+    return chOrPl
+        ? await YoutubeHandler.getChannelPage(id)
+        : await YoutubeHandler.getPLayListPage(id);
+  }
+
+  Future<List<BoardData?>> searchYt(final String keyword) async {
+    final chOrPl = ytChannelOrPlaylist;
+    logger.d('yt: $keyword, $chOrPl');
+    return chOrPl
+        ? await YoutubeData.searchChannel(keyword)
+        : await YoutubeData.searchPlaylist(keyword);
+    // return [];
+  }
+
+  @action
+  void setYtChannelOrPlaylist(final bool value) {
+    ytChannelOrPlaylist = value;
   }
 
   Future<bool> postThread({required final PostData data}) async {
@@ -1141,5 +1201,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     threadList.clear();
     threadsDiff.clear();
     deleteContentState();
+    _setYtThreadsResult(null);
   }
 }

@@ -16,6 +16,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
       (_$settingsComputed ??= Computed<ForumSettingsData?>(() => super.settings,
               name: 'ForumMainStateBase.settings'))
           .value;
+  Computed<bool?>? _$getYtChannelOrPlayListComputed;
+
+  @override
+  bool? get getYtChannelOrPlayList => (_$getYtChannelOrPlayListComputed ??=
+          Computed<bool?>(() => super.getYtChannelOrPlayList,
+              name: 'ForumMainStateBase.getYtChannelOrPlayList'))
+      .value;
   Computed<bool>? _$hasYtThreadsClientComputed;
 
   @override
@@ -287,6 +294,38 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
     });
   }
 
+  late final _$ytSortAtom =
+      Atom(name: 'ForumMainStateBase.ytSort', context: context);
+
+  @override
+  YoutubeSortData get ytSort {
+    _$ytSortAtom.reportRead();
+    return super.ytSort;
+  }
+
+  @override
+  set ytSort(YoutubeSortData value) {
+    _$ytSortAtom.reportWrite(value, super.ytSort, () {
+      super.ytSort = value;
+    });
+  }
+
+  late final _$ytChannelOrPlaylistAtom =
+      Atom(name: 'ForumMainStateBase.ytChannelOrPlaylist', context: context);
+
+  @override
+  bool get ytChannelOrPlaylist {
+    _$ytChannelOrPlaylistAtom.reportRead();
+    return super.ytChannelOrPlaylist;
+  }
+
+  @override
+  set ytChannelOrPlaylist(bool value) {
+    _$ytChannelOrPlaylistAtom.reportWrite(value, super.ytChannelOrPlaylist, () {
+      super.ytChannelOrPlaylist = value;
+    });
+  }
+
   late final _$setPrimaryViewAsyncAction =
       AsyncAction('ForumMainStateBase.setPrimaryView', context: context);
 
@@ -320,12 +359,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
         .run(() => super._setThreadsMetadata<T>(result));
   }
 
-  late final _$getNextForYoutubeAsyncAction =
-      AsyncAction('ForumMainStateBase.getNextForYoutube', context: context);
+  late final _$getNextThreadsForYoutubeAsyncAction = AsyncAction(
+      'ForumMainStateBase.getNextThreadsForYoutube',
+      context: context);
 
   @override
-  Future<void> getNextForYoutube() {
-    return _$getNextForYoutubeAsyncAction.run(() => super.getNextForYoutube());
+  Future<void> getNextThreadsForYoutube() {
+    return _$getNextThreadsForYoutubeAsyncAction
+        .run(() => super.getNextThreadsForYoutube());
   }
 
   late final _$ForumMainStateBaseActionController =
@@ -432,6 +473,28 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   }
 
   @override
+  void _setYtSort(YoutubeSortData value) {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase._setYtSort');
+    try {
+      return super._setYtSort(value);
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setYtChannelOrPlaylist(bool value) {
+    final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
+        name: 'ForumMainStateBase.setYtChannelOrPlaylist');
+    try {
+      return super.setYtChannelOrPlaylist(value);
+    } finally {
+      _$ForumMainStateBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setContent(ContentState? value) {
     final _$actionInfo = _$ForumMainStateBaseActionController.startAction(
         name: 'ForumMainStateBase.setContent');
@@ -501,7 +564,10 @@ threadList: ${threadList},
 threadsDiff: ${threadsDiff},
 searchThreadWord: ${searchThreadWord},
 ytThreadsResult: ${ytThreadsResult},
+ytSort: ${ytSort},
+ytChannelOrPlaylist: ${ytChannelOrPlaylist},
 settings: ${settings},
+getYtChannelOrPlayList: ${getYtChannelOrPlayList},
 hasYtThreadsClient: ${hasYtThreadsClient},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},

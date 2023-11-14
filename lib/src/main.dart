@@ -123,6 +123,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   bool openedDialog = false;
 
   @computed
+  bool? get getYtChannelOrPlayList =>
+      selectedForumState?.forumMain.getYtChannelOrPlayList;
+
+  @computed
   bool get openedMenu => onOpenedPopup || openedDrawer || openedDialog;
 
   @computed
@@ -780,14 +784,13 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   bool get showNextButtonForForum {
     final show = selectedForumPrimaryBody == PrimaryViewState.threads &&
-      (selectedForumState?.forumMain.hasYtThreadsClient ?? false);
-    if(largeScreen){
+        (selectedForumState?.forumMain.hasYtThreadsClient ?? false);
+    if (largeScreen) {
       return show;
-    }else{
+    } else {
       return currentScreen == BottomMenu.forums && show;
     }
   }
-  
 
   @computed
   bool get showNextButtonForSearch =>
@@ -815,6 +818,16 @@ abstract class MainStoreBase with Store, WithDateTime {
       return selectedForumState?.search.searchWord;
     }
     return null;
+  }
+
+  @computed
+  String? get postOnSiteUrl {
+    switch (selectedForum) {
+      case Communities.girlsCh:
+        return GirlsChParser.createThreadUrl;
+      default:
+        return currentBoardUrl;
+    }
   }
 
   void clearSearchWord() {

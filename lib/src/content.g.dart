@@ -37,12 +37,12 @@ mixin _$ContentState on ContentStateBase, Store {
       (_$getJumpIndexComputed ??= Computed<int>(() => super.getJumpIndex,
               name: 'ContentStateBase.getJumpIndex'))
           .value;
-  Computed<String?>? _$youtubeCommentsCountComputed;
+  Computed<bool>? _$showYtNextCommentsButtonComputed;
 
   @override
-  String? get youtubeCommentsCount => (_$youtubeCommentsCountComputed ??=
-          Computed<String?>(() => super.youtubeCommentsCount,
-              name: 'ContentStateBase.youtubeCommentsCount'))
+  bool get showYtNextCommentsButton => (_$showYtNextCommentsButtonComputed ??=
+          Computed<bool>(() => super.showYtNextCommentsButton,
+              name: 'ContentStateBase.showYtNextCommentsButton'))
       .value;
   Computed<List<GroupData?>>? _$groupListComputed;
 
@@ -672,7 +672,7 @@ minIndexForSeekBar: ${minIndexForSeekBar},
 initialSeekableIndex: ${initialSeekableIndex},
 futabaLimit: ${futabaLimit},
 getJumpIndex: ${getJumpIndex},
-youtubeCommentsCount: ${youtubeCommentsCount},
+showYtNextCommentsButton: ${showYtNextCommentsButton},
 groupList: ${groupList},
 getDefaultName: ${getDefaultName},
 showBottomChip: ${showBottomChip},

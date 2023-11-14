@@ -74,6 +74,15 @@ abstract class ForumStateBase with Store, WithDateTime {
   ObservableSet<BoardMetaData?> boardMetadataSet =
       ObservableSet<BoardMetaData?>();
 
+  // @computed
+  // bool? get getYtChannelOrPlayList {
+  //   if (parent.largeScreen) {
+  //     return forumMain.getYtChannelOrPlayList;
+  //   } else{
+
+  //   }
+  // }
+
   @computed
   String get thumbnailCacheSizeStr => filesize(thumbnailCacheSize);
 
