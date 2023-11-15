@@ -1057,10 +1057,11 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<YoutubeSearchResult> searchYt(final String keyword) async {
     final chOrPl = ytChannelOrPlaylist;
     logger.d('yt: $keyword, $chOrPl');
-    return chOrPl
+    final result = chOrPl
         ? await YoutubeData.searchChannel(keyword)
         : await YoutubeData.searchPlaylist(keyword);
-    // return [];
+    await parent.search.setSearchWords(keyword);
+    return result;
   }
 
   @action

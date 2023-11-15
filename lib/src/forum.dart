@@ -1740,6 +1740,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (settings == null) {
       return;
     }
+    forumMain.toggleBoardLoading();
     final list = [...?settings?.favoritesBoardList];
     list.removeWhere((element) => element == id);
     if (!remove) {
@@ -1749,6 +1750,7 @@ abstract class ForumStateBase with Store, WithDateTime {
     setSettings(newData);
     await parent.updateForumSettings();
     await forumMain.getFavBoards();
+    forumMain.toggleBoardLoading();
   }
 
   Future<void> blockThreadPostUser(final ThreadData thread) async {
