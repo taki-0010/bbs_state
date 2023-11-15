@@ -24,6 +24,7 @@ abstract class UserStateForLocalBase with Store {
       id: StringMethodData.generateRandomString(23),
       forums: [
         Communities.fiveCh,
+        Communities.youtube,
         Communities.girlsCh,
         Communities.machi,
         Communities.shitaraba,

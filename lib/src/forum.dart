@@ -84,6 +84,14 @@ abstract class ForumStateBase with Store, WithDateTime {
   // }
 
   @computed
+  bool get showUpdateHistoryButton {
+    if (type != Communities.youtube) {
+      return true;
+    }
+    return false;
+  }
+
+  @computed
   String get thumbnailCacheSizeStr => filesize(thumbnailCacheSize);
 
   @computed
@@ -830,7 +838,7 @@ abstract class ForumStateBase with Store, WithDateTime {
 
       // history.setLog(newLog);
       logger.f(
-          '_setInitialThreadMarkData: $retention, title: $title, hot: $hot, retention: $thumbnailData, lastRead: ${newLog.lastReadAt}');
+          '_setInitialThreadMarkData: $retention, title: $title, hot: $hot, retention: $thumbnailData, lastRead: ${newLog.lastReadAt}, boardName: $boardName');
       await parent.repository.saveThreadMark(newLog);
       return FetchResult.success;
     } else {
@@ -1039,12 +1047,13 @@ abstract class ForumStateBase with Store, WithDateTime {
       _setContent(content);
     }
     final thmb = contentData.thumbnailUrl;
+    final boardName = content.getBoardName;
     // final thumbnail =
     //     thmb != null ? jsonEncode(SrcData(thumbnailUri: thmb).toJson()) : null;
     // logger.d('thmb: $thmb');
     final url = uri.toString().replaceAll('https://', '');
     final markResult =
-        await _setInitialThreadMarkData(content, url, thmb, null);
+        await _setInitialThreadMarkData(content, url, thmb, boardName);
     if (markResult != FetchResult.success) {
       return contentData.result;
     }
@@ -1714,13 +1723,19 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<void> setFavBoardById(final String value,
-      {final bool remove = false}) async {
+      {final bool remove = false, final bool? chOrPl}) async {
     String id = value;
     switch (type) {
       case Communities.youtube:
-        id = 'ch/$value';
+        if (chOrPl != null) {
+          id = YoutubeData.getFavStr(id, chOrPl);
+        } else {
+          id = value;
+        }
+
         break;
       default:
+        id = value;
     }
     if (settings == null) {
       return;

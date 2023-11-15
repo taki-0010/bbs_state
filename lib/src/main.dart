@@ -145,6 +145,11 @@ abstract class MainStoreBase with Store, WithDateTime {
   // bool cancelInitialScroll = false;
 
   @computed
+  bool get showHistoryUpdateButton {
+    return selectedForumState?.showUpdateHistoryButton ?? true;
+  }
+
+  @computed
   bool get insertAd => (Platform.isIOS || Platform.isAndroid) && enableAd;
 
   @computed
@@ -1800,8 +1805,9 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<void> setFavBoardById(final String value,
-      {final bool remove = false}) async {
-    await selectedForumState?.setFavBoardById(value, remove: remove);
+      {final bool remove = false, final bool? chOrPl}) async {
+    await selectedForumState?.setFavBoardById(value,
+        remove: remove, chOrPl: chOrPl);
   }
 
   Future<void> setFavoritesBoards(final List<String?> value) async {

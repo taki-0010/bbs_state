@@ -46,6 +46,13 @@ mixin _$MainStore on MainStoreBase, Store {
                   () => super.autoDownloadableSizeLimit,
                   name: 'MainStoreBase.autoDownloadableSizeLimit'))
           .value;
+  Computed<bool>? _$showHistoryUpdateButtonComputed;
+
+  @override
+  bool get showHistoryUpdateButton => (_$showHistoryUpdateButtonComputed ??=
+          Computed<bool>(() => super.showHistoryUpdateButton,
+              name: 'MainStoreBase.showHistoryUpdateButton'))
+      .value;
   Computed<bool>? _$insertAdComputed;
 
   @override
@@ -1204,6 +1211,7 @@ openedMenu: ${openedMenu},
 disableSearch: ${disableSearch},
 snackMessage: ${snackMessage},
 autoDownloadableSizeLimit: ${autoDownloadableSizeLimit},
+showHistoryUpdateButton: ${showHistoryUpdateButton},
 insertAd: ${insertAd},
 contentLoading: ${contentLoading},
 selectedForumIndex: ${selectedForumIndex},

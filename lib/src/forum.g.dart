@@ -9,6 +9,13 @@ part of 'forum.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ForumState on ForumStateBase, Store {
+  Computed<bool>? _$showUpdateHistoryButtonComputed;
+
+  @override
+  bool get showUpdateHistoryButton => (_$showUpdateHistoryButtonComputed ??=
+          Computed<bool>(() => super.showUpdateHistoryButton,
+              name: 'ForumStateBase.showUpdateHistoryButton'))
+      .value;
   Computed<String>? _$thumbnailCacheSizeStrComputed;
 
   @override
@@ -607,6 +614,7 @@ thumbnailCacheSize: ${thumbnailCacheSize},
 allCacheSize: ${allCacheSize},
 boardMetadataSet: ${boardMetadataSet},
 boardsScroll: ${boardsScroll},
+showUpdateHistoryButton: ${showUpdateHistoryButton},
 thumbnailCacheSizeStr: ${thumbnailCacheSizeStr},
 allCacheSizeStr: ${allCacheSizeStr},
 currentTotal: ${currentTotal},

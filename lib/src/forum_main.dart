@@ -471,7 +471,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
     if (favorites != null && favorites.isNotEmpty) {
       List<BoardData?>? fav;
-      toggleBoardLoading();
+      // toggleBoardLoading();
       switch (parent.type) {
         case Communities.shitaraba:
           fav = await ShitarabaHandler.getBoardInfoList(favorites);
@@ -484,7 +484,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       }
       favoriteBoardsData.clear();
       favoriteBoardsData.addAll([...?fav]);
-      toggleBoardLoading();
+      // toggleBoardLoading();
     }
   }
 
@@ -1054,7 +1054,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
         : await YoutubeHandler.getPLayListPage(id);
   }
 
-  Future<List<BoardData?>> searchYt(final String keyword) async {
+  Future<YoutubeSearchResult> searchYt(final String keyword) async {
     final chOrPl = ytChannelOrPlaylist;
     logger.d('yt: $keyword, $chOrPl');
     return chOrPl

@@ -701,6 +701,17 @@ abstract class LibraryStateBase with Store, WithDateTime {
             }
           }
         }
+      case Communities.youtube:
+        for (final i in value) {
+          if (i != null) {
+            final data = await YoutubeHandler.getContent(i.id);
+            final first = data.content?.content.firstOrNull;
+            if(first is YoutubeContent && first.viewCount != null){
+              final update = UpdateFieldData(id: i.id, newResCount: first.viewCount!);
+              result.add(update);
+            }
+          }
+        }
       default:
     }
     return result;
