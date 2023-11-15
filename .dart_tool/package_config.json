@@ -51,9 +51,9 @@
     },
     {
       "name": "build_daemon",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_daemon-4.0.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/build_daemon-4.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.0"
     },
     {
       "name": "build_resolvers",
@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-1dd577f09cc02f7acb74aae1be31a128400330d3/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-f33344548e534c76901d3fb2872eace0b442e77d/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -393,7 +393,7 @@
     },
     {
       "name": "model",
-      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-f937f419cf031ccd92c24eb566f7585512e5d58d/",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-38ee12177232118a566b1a3a466cdca47cf95648/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -753,9 +753,9 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.0.9",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/win32-5.1.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.1"
     },
     {
       "name": "win32_registry",
@@ -818,7 +818,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-11-15T09:48:22.705418Z",
+  "generated": "2023-11-15T11:42:58.248726Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }
