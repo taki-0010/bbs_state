@@ -1730,7 +1730,11 @@ abstract class ForumStateBase with Store, WithDateTime {
         if (chOrPl != null) {
           id = YoutubeData.getFavStr(id, chOrPl);
         } else {
-          id = value;
+          if (YoutubeData.rawId(value)) {
+            id = YoutubeData.getChIdForFavBoard(value);
+          } else {
+            id = value;
+          }
         }
 
         break;
