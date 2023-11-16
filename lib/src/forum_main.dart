@@ -896,6 +896,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<FetchThreadsResultData?> _getThreadsForYoutube() async {
     final b = board;
     if (b is YoutubeBoardData) {
+      logger.d('_getThreadsForYoutube: ${b.id}, ${b.parsedId}, ${b.idType}');
       if (b.parsedId != null) {
         switch (b.idType) {
           case YoutubeIdType.channel:

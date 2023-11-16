@@ -917,39 +917,44 @@ abstract class MainStoreBase with Store, WithDateTime {
     return name ?? currentContentState?.getDefaultName;
   }
 
-  String? boardNameById(final String id) => switch (selectedForum) {
-        Communities.mal => MalData.boardNameById(id),
-        // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
-        Communities.fiveCh => FiveChBoardNames.getById(id),
-        Communities.girlsCh => GirlsChData.getBoardNameById(id),
-        Communities.futabaCh => FutabaChBoardNames.getById(id),
-        // Communities.pinkCh => pinkCh.boardNameByIdFromMetadataSet(id),
-        Communities.pinkCh => FiveChBoardNames.getById(id) ?? id,
-        Communities.machi => MachiData.getBoardNameById(id),
-        Communities.hatena => HatenaData.boardNameById(id) ?? id,
-        Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
-        Communities.shitaraba => selectedForumState?.history.markList
-                .firstWhere(
-                  (element) =>
-                      element?.boardId == id && element?.boardName != null,
-                  orElse: () => null,
-                )
-                ?.boardName ??
-            id,
-        Communities.youtube => _youtubeBoardNameById(id),
-        Communities.chan4 => selectedForumState?.forumMain.boards
-                .firstWhere(
-                  (element) => element?.id == id,
-                  orElse: () => null,
-                )
-                ?.name ??
-            id,
-        null => null
-      };
+  String? boardNameById(final String id, {final Communities? forum}) {
+    final f = forum ?? selectedForum;
+    return switch (f) {
+      Communities.mal => MalData.boardNameById(id),
+      // Communities.fiveCh => fiveCh.boardNameByIdFromMetadataSet(id),
+      Communities.fiveCh => FiveChBoardNames.getById(id),
+      Communities.girlsCh => GirlsChData.getBoardNameById(id),
+      Communities.futabaCh => FutabaChBoardNames.getById(id),
+      // Communities.pinkCh => pinkCh.boardNameByIdFromMetadataSet(id),
+      Communities.pinkCh => FiveChBoardNames.getById(id) ?? id,
+      Communities.machi => MachiData.getBoardNameById(id),
+      Communities.hatena => HatenaData.boardNameById(id) ?? id,
+      Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
+      Communities.shitaraba => shitaraba.history.markList
+              .firstWhere(
+                (element) =>
+                    element?.boardId == id && element?.boardName != null,
+                orElse: () => null,
+              )
+              ?.boardName ??
+          id,
+      Communities.youtube => _youtubeBoardNameById(id),
+      Communities.chan4 => chan4.forumMain.boards
+              .firstWhere(
+                (element) => element?.id == id,
+                orElse: () => null,
+              )
+              ?.name ??
+          id,
+      null => null
+    };
+  }
 
-  String? _youtubeBoardNameById(final String id) {
+  String? _youtubeBoardNameById(
+    final String id,
+  ) {
     if (currentScreen == BottomMenu.search) {
-      return selectedForumState?.searchList
+      return youtube.searchList
               .firstWhere(
                 (element) =>
                     element?.boardId == id && element?.boardName != null,
@@ -958,7 +963,7 @@ abstract class MainStoreBase with Store, WithDateTime {
               ?.boardName ??
           id;
     } else {
-      return selectedForumState?.history.markList
+      return youtube.history.markList
               .firstWhere(
                 (element) =>
                     element?.boardId == id && element?.boardName != null,
