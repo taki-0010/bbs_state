@@ -1723,7 +1723,9 @@ abstract class ForumStateBase with Store, WithDateTime {
   }
 
   Future<void> setFavBoardById(final String value,
-      {final bool remove = false, final bool? chOrPl}) async {
+      {final bool remove = false,
+      final bool? chOrPl,
+      final String? category}) async {
     String id = value;
     switch (type) {
       case Communities.youtube:
@@ -1736,8 +1738,14 @@ abstract class ForumStateBase with Store, WithDateTime {
             id = value;
           }
         }
-
         break;
+      case Communities.shitaraba:
+        if (category != null) {
+          id = ShitarabaData.favoriteBoardStr(
+              category: category, boardId: value);
+        } else {
+          id = value;
+        }
       default:
         id = value;
     }
@@ -1750,11 +1758,15 @@ abstract class ForumStateBase with Store, WithDateTime {
     if (!remove) {
       list.add(id);
     }
+    await saveFavBoardList(list);
+    forumMain.toggleBoardLoading();
+  }
+
+  Future<void> saveFavBoardList(final List<String?> list) async {
     final newData = settings!.copyWith(favoritesBoardList: list);
     setSettings(newData);
     await parent.updateForumSettings();
     await forumMain.getFavBoards();
-    forumMain.toggleBoardLoading();
   }
 
   Future<void> blockThreadPostUser(final ThreadData thread) async {

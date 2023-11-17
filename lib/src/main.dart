@@ -1173,6 +1173,10 @@ abstract class MainStoreBase with Store, WithDateTime {
   // void toggleSecondaryViewLoading() =>
   //     secondaryViewLoading = !secondaryViewLoading;
 
+  void toggleBoardsLoading() {
+    selectedForumState?.forumMain.toggleBoardLoading();
+  }
+
   void toggleContentLoading() {
     selectedForumState?.toggleContentLoading();
   }
@@ -1815,53 +1819,63 @@ abstract class MainStoreBase with Store, WithDateTime {
         remove: remove, chOrPl: chOrPl);
   }
 
-  Future<void> setFavoritesBoards(final List<String?> value) async {
-    final settnigs = selectedForumState?.settings;
-    if (settnigs == null) return;
-    final newData = settnigs.copyWith(favoritesBoardList: value);
-    selectedForumState?.setSettings(newData);
-    await updateForumSettings();
-    await selectedForumState?.forumMain.getFavBoards();
+  // Future<void> setFavoritesBoards(final List<String?> value) async {
+  //   final settnigs = selectedForumState?.settings;
+  //   if (settnigs == null) return;
+  //   final newData = settnigs.copyWith(favoritesBoardList: value);
+  //   selectedForumState?.setSettings(newData);
+  //   await updateForumSettings();
+  //   await selectedForumState?.forumMain.getFavBoards();
+  // }
+
+  Future<void> setFavBoardList(final List<String?> value) async {
+    await selectedForumState?.saveFavBoardList(value);
   }
 
-  Future<void> toggleFavoriteBoard() async {
+  Future<void> toggleFavoriteBoardByCurrent() async {
     final list = selectedForumState?.forumMain.toggleFavoriteBoard();
     if (list != null) {
-      await setFavoritesBoards(list);
+      await selectedForumState?.saveFavBoardList(list);
+      // await setFavoritesBoards(list);
     }
   }
 
-  Future<bool> addBoard(final String url) async {
-    final list = selectedForumState?.forumMain.addBoard(url);
-    if (list != null) {
-      await setFavoritesBoards(list);
-      return true;
-    }
-    return false;
-  }
+  // Future<bool> addBoard(final String url) async {
+  //   final str = selectedForumState?.forumMain.getFavBoardStrFromUri(url);
+  //   if (str != null) {
+  //     await selectedForumState?.setFavBoardById(str);
+  //     // await setFavoritesBoards(list);
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
-  Future<bool> addFavBoardBySelectedForum(
-      final Communities forum, final Uri uri) async {
+  Future<bool> addFavBoardBySelectedForum(final Uri uri,
+      {final Communities? forumData}) async {
     List<String?>? favs;
+    final forum = forumData ?? selectedForum;
+
     final selected = _selectedForum(forum);
     if (selected == null) {
       return false;
     }
-    switch (forum) {
-      case Communities.shitaraba:
-        favs = shitaraba.forumMain.addBoard(uri.toString());
-        logger.d('favs: $favs');
-        break;
-      default:
-        favs = selected.forumMain.setFavoriteBoardByUri(uri);
-    }
+    favs = await selected.forumMain.getNewFavoritesBoardListByUri(uri);
+    // switch (forum) {
+    //   case Communities.shitaraba:
+    //     favs = shitaraba.forumMain.addBoard(uri.toString());
+    //     logger.d('favs: $favs');
+    //     break;
+    //   default:
+    //     favs = selected.forumMain.setFavoriteBoardByUri(uri);
+    // }
     if (favs == null) return false;
     final settnigs = selected.settings;
     if (settnigs == null) return false;
-    final newData = settnigs.copyWith(favoritesBoardList: favs);
-    selected.setSettings(newData);
-    await updateForumSettings(newData: newData);
-    await selected.forumMain.getFavBoards();
+    await selected.saveFavBoardList(favs);
+    // final newData = settnigs.copyWith(favoritesBoardList: favs);
+    // selected.setSettings(newData);
+    // await updateForumSettings(newData: newData);
+    // await selected.forumMain.getFavBoards();
     return true;
   }
 
@@ -1999,6 +2013,9 @@ abstract class MainStoreBase with Store, WithDateTime {
     final host = uri.host;
     for (final i in selectedForumList!) {
       if (host.contains(i.host)) {
+        return i;
+      }
+      if (i == Communities.youtube && host == YoutubeData.sHost) {
         return i;
       }
     }

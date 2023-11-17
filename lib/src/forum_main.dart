@@ -1025,28 +1025,54 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return current;
   }
 
-  List<String?>? setFavoriteBoardByUri(final Uri uri) {
-    final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
-    if (boardId != null) {
-      return _setFavorite(boardId);
+  Future<List<String?>?> getNewFavoritesBoardListByUri(final Uri uri) async {
+    String? str;
+    switch (parent.type) {
+      case Communities.shitaraba:
+        // final uri = Uri.parse(url);
+        final result = ShitarabaData.uriIsThreadOrBoard(uri);
+        if (result != null && !result) {
+          str = ShitarabaData.getFavoriteStr(uri);
+          // if (favoriteStr != null) {
+          //   return _setFavorite(favoriteStr);
+          // }
+          logger.d('shitaraba: $str');
+        }
+        break;
+      case Communities.youtube:
+        final id = YoutubeData.getBoardIdFromUri(uri);
+        if (id != null) {
+          final ch = await YoutubeHandler.getChannelIdByHandle(id);
+          if (ch != null) {
+            str = YoutubeData.getFavStr(ch, true, handle:id.startsWith('@') ? id : null );
+          }
+        }
+        logger.d('yt: fav: id: $id, str: $str');
+        break;
+      default:
+        str = parent.parent.getBoardIdFromUri(uri, parent.type);
+    }
+    // final boardId = parent.parent.getBoardIdFromUri(uri, parent.type);
+    if (str != null) {
+      return _setFavorite(str);
     }
     return null;
   }
 
-  List<String?>? addBoard(final String url) {
-    if (parent.type != Communities.shitaraba) {
-      return null;
-    }
-    final uri = Uri.parse(url);
-    final result = ShitarabaData.uriIsThreadOrBoard(uri);
-    if (result != null && !result) {
-      final favoriteStr = ShitarabaData.getFavoriteStr(uri);
-      if (favoriteStr != null) {
-        return _setFavorite(favoriteStr);
-      }
-    }
-    return null;
-  }
+  // String? getFavBoardStrFromUri(final String url) {
+  //   if (parent.type != Communities.shitaraba) {
+  //     return null;
+  //   }
+  //   final uri = Uri.parse(url);
+  //   final result = ShitarabaData.uriIsThreadOrBoard(uri);
+  //   if (result != null && !result) {
+  //     return ShitarabaData.getFavoriteStr(uri);
+  //     // if (favoriteStr != null) {
+  //     //   return _setFavorite(favoriteStr);
+  //     // }
+  //   }
+  //   return null;
+  // }
 
   Future<YoutubeBoardData?> getYtDetail(final String id) async {
     final chOrPl = ytChannelOrPlaylist;

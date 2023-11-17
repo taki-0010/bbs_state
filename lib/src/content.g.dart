@@ -65,6 +65,20 @@ mixin _$ContentState on ContentStateBase, Store {
       (_$showBottomChipComputed ??= Computed<bool>(() => super.showBottomChip,
               name: 'ContentStateBase.showBottomChip'))
           .value;
+  Computed<bool>? _$showThreadCommentsCountComputed;
+
+  @override
+  bool get showThreadCommentsCount => (_$showThreadCommentsCountComputed ??=
+          Computed<bool>(() => super.showThreadCommentsCount,
+              name: 'ContentStateBase.showThreadCommentsCount'))
+      .value;
+  Computed<int?>? _$threadCommentsCountComputed;
+
+  @override
+  int? get threadCommentsCount => (_$threadCommentsCountComputed ??=
+          Computed<int?>(() => super.threadCommentsCount,
+              name: 'ContentStateBase.threadCommentsCount'))
+      .value;
   Computed<List<RangeList?>?>? _$rangeListBy1000StepsComputed;
 
   @override
@@ -676,6 +690,8 @@ showYtNextCommentsButton: ${showYtNextCommentsButton},
 groupList: ${groupList},
 getDefaultName: ${getDefaultName},
 showBottomChip: ${showBottomChip},
+showThreadCommentsCount: ${showThreadCommentsCount},
+threadCommentsCount: ${threadCommentsCount},
 rangeListBy1000Steps: ${rangeListBy1000Steps}
     ''';
   }

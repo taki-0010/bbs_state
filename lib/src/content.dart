@@ -321,7 +321,9 @@ abstract class ContentStateBase with Store, WithDateTime {
             element != null &&
             element.body.toLowerCase().contains(value.toLowerCase()))
         .toList();
-    return result.map((e) => e?.index).toList();
+    return content.type == Communities.chan4
+        ? result.map((e) => (e as Chan4Content?)?.no).toList()
+        : result.map((e) => e?.index).toList();
   }
 
   // @computed
@@ -575,6 +577,19 @@ abstract class ContentStateBase with Store, WithDateTime {
         malPoll != null ||
         malPaging != null ||
         showYtNextCommentsButton;
+  }
+
+  @computed
+  bool get showThreadCommentsCount {
+    return content.type == Communities.youtube;
+  }
+
+  @computed
+  int? get threadCommentsCount {
+    if (showThreadCommentsCount && content.threadLength >1) {
+      return content.threadLength;
+    }
+    return null;
   }
 
   @computed
