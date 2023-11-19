@@ -93,49 +93,94 @@ abstract class ForumMainStateBase with Store, WithDateTime {
 
   @computed
   List<BoardData?> get boardsData {
-    if (userFavoritesBoards) {
-      switch (parent.type) {
-        case Communities.fiveCh || Communities.open2Ch:
-          List<BoardData?> boardList = [];
-          for (final element in boards) {
-            if (element is FiveChCategoryData) {
-              final i = element.categoryContent;
-              for (final t in i) {
-                boardList.add(t);
-              }
+    return boards;
+    // if (userFavoritesBoards) {
+    //   switch (parent.type) {
+    //     case Communities.fiveCh || Communities.open2Ch:
+    //       List<BoardData?> boardList = [];
+    //       for (final element in boards) {
+    //         if (element is FiveChCategoryData) {
+    //           final i = element.categoryContent;
+    //           for (final t in i) {
+    //             boardList.add(t);
+    //           }
+    //         }
+    //       }
+    //       return favoritesBoards
+    //           .map((e) => boardList.firstWhere(
+    //               (final element) => element?.id == e,
+    //               orElse: () => null))
+    //           .toList();
+    //     // case Communities.open2Ch:
+    //     //   List<BoardData?> boardList = [];
+    //     //   for (final element in boards) {
+    //     //     if (element is FiveChCategoryData) {
+    //     //       final i = element.categoryContent;
+    //     //       for (final t in i) {
+    //     //         boardList.add(t);
+    //     //       }
+    //     //     }
+    //     //   }
+    //     //   return favoritesBoards
+    //     //       .map((e) => boardList.firstWhere(
+    //     //           (final element) => element?.id == e,
+    //     //           orElse: () => null))
+    //     //       .toList();
+    //     case Communities.shitaraba || Communities.youtube:
+    //       return favoriteBoardsData;
+
+    //     default:
+    //       return favoritesBoards
+    //           .map((e) => boards.firstWhere((final element) => element?.id == e,
+    //               orElse: () => null))
+    //           .toList();
+    //   }
+    // } else {
+    //   return boards;
+    // }
+  }
+
+  @computed
+  List<BoardData?> get favoritesBoardsData {
+    switch (parent.type) {
+      case Communities.fiveCh || Communities.open2Ch:
+        List<BoardData?> boardList = [];
+        for (final element in boards) {
+          if (element is FiveChCategoryData) {
+            final i = element.categoryContent;
+            for (final t in i) {
+              boardList.add(t);
             }
           }
-          return favoritesBoards
-              .map((e) => boardList.firstWhere(
-                  (final element) => element?.id == e,
-                  orElse: () => null))
-              .toList();
-        // case Communities.open2Ch:
-        //   List<BoardData?> boardList = [];
-        //   for (final element in boards) {
-        //     if (element is FiveChCategoryData) {
-        //       final i = element.categoryContent;
-        //       for (final t in i) {
-        //         boardList.add(t);
-        //       }
-        //     }
-        //   }
-        //   return favoritesBoards
-        //       .map((e) => boardList.firstWhere(
-        //           (final element) => element?.id == e,
-        //           orElse: () => null))
-        //       .toList();
-        case Communities.shitaraba || Communities.youtube:
-          return favoriteBoardsData;
+        }
+        return favoritesBoards
+            .map((e) => boardList.firstWhere(
+                (final element) => element?.id == e,
+                orElse: () => null))
+            .toList();
+      // case Communities.open2Ch:
+      //   List<BoardData?> boardList = [];
+      //   for (final element in boards) {
+      //     if (element is FiveChCategoryData) {
+      //       final i = element.categoryContent;
+      //       for (final t in i) {
+      //         boardList.add(t);
+      //       }
+      //     }
+      //   }
+      //   return favoritesBoards
+      //       .map((e) => boardList.firstWhere(
+      //           (final element) => element?.id == e,
+      //           orElse: () => null))
+      //       .toList();
+      case Communities.shitaraba || Communities.youtube:
+        return favoriteBoardsData;
 
-        default:
-          return favoritesBoards
-              .map((e) => boards.firstWhere((final element) => element?.id == e,
-                  orElse: () => null))
-              .toList();
-      }
-    } else {
-      return boards;
+      default:
+        return favoritesBoards
+            .map((e) => boards.firstWhere((final element) => element?.id == e,
+                orElse: () => null))
+            .toList();
     }
   }
 
@@ -1042,9 +1087,14 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       case Communities.youtube:
         final id = YoutubeData.getBoardIdFromUri(uri);
         if (id != null) {
-          final ch = await YoutubeHandler.getChannelIdByHandle(id);
-          if (ch != null) {
-            str = YoutubeData.getFavStr(ch, true, handle:id.startsWith('@') ? id : null );
+          if (id.startsWith('PL')) {
+            str = YoutubeData.getFavStr(id, false);
+          } else {
+            final ch = await YoutubeHandler.getChannelIdByHandle(id);
+            if (ch != null) {
+              str = YoutubeData.getFavStr(ch, true,
+                  handle: id.startsWith('@') ? id : null);
+            }
           }
         }
         logger.d('yt: fav: id: $id, str: $str');

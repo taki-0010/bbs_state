@@ -171,7 +171,7 @@
     },
     {
       "name": "data",
-      "rootUri": "../../data",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_data-92a34ed36017c6d5e9976b9d44f9925fb60689e6/",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -393,7 +393,7 @@
     },
     {
       "name": "model",
-      "rootUri": "../../model",
+      "rootUri": "file:///Users/yh_home/.pub-cache/git/bbs_model-c7a1c9b71c57fa6a4b9b7abb8036fe97b88d4a28/",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -483,9 +483,9 @@
     },
     {
       "name": "plugin_platform_interface",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.6",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.7",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "pool",
@@ -590,6 +590,12 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "string_extensions",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/string_extensions-0.6.13",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "string_scanner",
       "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/string_scanner-1.2.0",
       "packageUri": "lib/",
@@ -675,9 +681,9 @@
     },
     {
       "name": "url_launcher_ios",
-      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/url_launcher_ios-6.2.0",
+      "rootUri": "file:///Users/yh_home/.pub-cache/hosted/pub.dev/url_launcher_ios-6.2.1",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "url_launcher_linux",
@@ -818,7 +824,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-11-17T10:01:29.434431Z",
+  "generated": "2023-11-19T12:18:56.960145Z",
   "generator": "pub",
   "generatorVersion": "3.1.3"
 }

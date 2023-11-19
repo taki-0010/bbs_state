@@ -618,6 +618,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     }
   }
 
+  ForumState? selectForum(final Communities value) => _selectedForum(value);
+
   @computed
   String? get boardIdForSearch {
     return _selectedForum(selectedForum)?.settings?.searchBoardId;

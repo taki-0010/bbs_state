@@ -228,9 +228,11 @@ packages:
   data:
     dependency: "direct main"
     description:
-      path: "../data"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "92a34ed36017c6d5e9976b9d44f9925fb60689e6"
+      url: "https://github.com/taki-0010/bbs_data.git"
+    source: git
     version: "1.0.0"
   device_info_plus:
     dependency: transitive
@@ -517,9 +519,11 @@ packages:
   model:
     dependency: "direct main"
     description:
-      path: "../model"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: c7a1c9b71c57fa6a4b9b7abb8036fe97b88d4a28
+      url: "https://github.com/taki-0010/bbs_model.git"
+    source: git
     version: "1.0.0"
   node_preamble:
     dependency: transitive
@@ -637,10 +641,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: da3fdfeccc4d4ff2da8f8c556704c08f912542c5fb3cf2233ed75372384a034d
+      sha256: f4f88d4a900933e7267e2b353594774fc0d07fb072b47eedcd5b54e1ea3269f8
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.6"
+    version: "2.1.7"
   pool:
     dependency: transitive
     description:
@@ -774,6 +778,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  string_extensions:
+    dependency: transitive
+    description:
+      name: string_extensions
+      sha256: d008e74609502d3e13dbe38cc553e8a4f08950614aeada661c1590dccc2b5628
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.13"
   string_scanner:
     dependency: transitive
     description:
@@ -890,10 +902,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_ios
-      sha256: "4ac97281cf60e2e8c5cc703b2b28528f9b50c8f7cebc71df6bdf0845f647268a"
+      sha256: bba3373219b7abb6b5e0d071b0fe66dfbe005d07517a68e38d4fc3638f35c6d3
       url: "https://pub.dev"
     source: hosted
-    version: "6.2.0"
+    version: "6.2.1"
   url_launcher_linux:
     dependency: transitive
     description:
