@@ -2068,6 +2068,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   String? getThreadIdFromUri(final Uri uri, final Communities forum) {
+    logger.d('threadId: $uri');
     switch (forum) {
       case Communities.fiveCh || Communities.pinkCh:
         return FiveChData.getThreadIdFromUri(uri, forum);
