@@ -800,6 +800,11 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   @computed
+  bool get hideUpdateThreadsButton {
+    return selectedForumState?.forumMain.hideUpdateThreadsButton ?? false;
+  }
+
+  @computed
   bool get showNextButtonForSearch =>
       currentScreen == BottomMenu.search &&
       (selectedForumState?.search.showNextButton ?? false);
@@ -2177,7 +2182,11 @@ abstract class MainStoreBase with Store, WithDateTime {
     required final dynamic data,
   }) async {
     if (data is! PostData) return false;
-    return await selectedForumState?.forumMain.postThread(data: data) ?? false;
+    toggleMainThreadsLoading();
+    final result =
+        await selectedForumState?.forumMain.postThread(data: data) ?? false;
+    toggleMainThreadsLoading();
+    return result;
   }
 
   Future<bool> deleteRes(final ContentData value) async {

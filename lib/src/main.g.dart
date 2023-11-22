@@ -601,6 +601,13 @@ mixin _$MainStore on MainStoreBase, Store {
           Computed<bool>(() => super.showNextButtonForForum,
               name: 'MainStoreBase.showNextButtonForForum'))
       .value;
+  Computed<bool>? _$hideUpdateThreadsButtonComputed;
+
+  @override
+  bool get hideUpdateThreadsButton => (_$hideUpdateThreadsButtonComputed ??=
+          Computed<bool>(() => super.hideUpdateThreadsButton,
+              name: 'MainStoreBase.hideUpdateThreadsButton'))
+      .value;
   Computed<bool>? _$showNextButtonForSearchComputed;
 
   @override
@@ -1286,6 +1293,7 @@ currentSearchList: ${currentSearchList},
 searchList: ${searchList},
 showSearchWordChipOnPrimary: ${showSearchWordChipOnPrimary},
 showNextButtonForForum: ${showNextButtonForForum},
+hideUpdateThreadsButton: ${hideUpdateThreadsButton},
 showNextButtonForSearch: ${showNextButtonForSearch},
 mainSearchWord: ${mainSearchWord},
 searchScreenWord: ${searchScreenWord},

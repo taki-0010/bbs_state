@@ -68,6 +68,13 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   }
 
   @computed
+  bool get hideUpdateThreadsButton {
+    return parent.type == Communities.youtube &&
+        board != null &&
+        board!.id.startsWith('pl/');
+  }
+
+  @computed
   bool get hasYtThreadsClient => ytThreadsResult?.data != null;
 
   @computed
@@ -948,7 +955,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
             return await YoutubeHandler.getThreadsFromChannel(
                 b.parsedId!, b.name,
                 sort: ytSort);
-          case YoutubeIdType.playList:
+          case YoutubeIdType.playlist:
             return await YoutubeHandler.getThreadsFromPlaylist(
               b.parsedId!,
               b.name,
@@ -1149,7 +1156,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
   Future<bool> postThread({required final PostData data}) async {
     final b = board;
     bool result = false;
-    toggleThreadsLoading();
     switch (parent.type) {
       case Communities.fiveCh || Communities.pinkCh:
         if (b is FiveChBoardData) {
@@ -1157,13 +1163,12 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           final bbs = b.directoryName;
           if (domain == null ||
               // bbs == null ||
-              data.body.isEmpty ||
-              data.name.isEmpty) {
+              data.body.isEmpty) {
             return result;
           }
           // https: //b.hatena.ne.jp/entry/jsonlite/?url=http%3A%2F%2Fwww.itmedia.co.jp%2Fnews%2Farticles%2F2310%2F19%2Fnews138.html
           // https: //www.itmedia.co.jp/news/articles/2310/19/news138.html
-          logger.i('postThread: $domain, $bbs');
+
           result = await FiveChHandler.postThread(
               forum: parent.type,
               postData: data,
@@ -1171,6 +1176,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
               // title: data.name,
               origin: domain,
               boardId: bbs);
+          logger.i('postThread: $domain, $bbs, $result');
         }
 
       case Communities.futabaCh:
@@ -1205,8 +1211,7 @@ abstract class ForumMainStateBase with Store, WithDateTime {
           final bbs = b.id;
           if (domain == null ||
               // bbs == null ||
-              data.body.isEmpty ||
-              data.name.isEmpty) {
+              data.body.isEmpty) {
             return result;
           }
           result = await Open2ChHandler.postThread(data, domain, bbs);
@@ -1218,7 +1223,6 @@ abstract class ForumMainStateBase with Store, WithDateTime {
       await Future.delayed(const Duration(milliseconds: 800));
       await getThreads();
     }
-    toggleThreadsLoading();
     return result;
   }
 

@@ -23,6 +23,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<bool?>(() => super.getYtChannelOrPlayList,
               name: 'ForumMainStateBase.getYtChannelOrPlayList'))
       .value;
+  Computed<bool>? _$hideUpdateThreadsButtonComputed;
+
+  @override
+  bool get hideUpdateThreadsButton => (_$hideUpdateThreadsButtonComputed ??=
+          Computed<bool>(() => super.hideUpdateThreadsButton,
+              name: 'ForumMainStateBase.hideUpdateThreadsButton'))
+      .value;
   Computed<bool>? _$hasYtThreadsClientComputed;
 
   @override
@@ -51,6 +58,13 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
   List<BoardData?> get boardsData => (_$boardsDataComputed ??=
           Computed<List<BoardData?>>(() => super.boardsData,
               name: 'ForumMainStateBase.boardsData'))
+      .value;
+  Computed<List<BoardData?>>? _$favoritesBoardsDataComputed;
+
+  @override
+  List<BoardData?> get favoritesBoardsData => (_$favoritesBoardsDataComputed ??=
+          Computed<List<BoardData?>>(() => super.favoritesBoardsData,
+              name: 'ForumMainStateBase.favoritesBoardsData'))
       .value;
   Computed<List<ThreadData?>>? _$sortedThreadsComputed;
 
@@ -568,10 +582,12 @@ ytSort: ${ytSort},
 ytChannelOrPlaylist: ${ytChannelOrPlaylist},
 settings: ${settings},
 getYtChannelOrPlayList: ${getYtChannelOrPlayList},
+hideUpdateThreadsButton: ${hideUpdateThreadsButton},
 hasYtThreadsClient: ${hasYtThreadsClient},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
 boardsData: ${boardsData},
+favoritesBoardsData: ${favoritesBoardsData},
 sortedThreads: ${sortedThreads},
 currentBoardIsFavorite: ${currentBoardIsFavorite},
 displayThreads: ${displayThreads},
