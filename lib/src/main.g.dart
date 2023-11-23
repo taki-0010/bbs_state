@@ -658,6 +658,22 @@ mixin _$MainStore on MainStoreBase, Store {
               name: 'MainStoreBase.searchViewState'))
       .value;
 
+  late final _$forumsAtom =
+      Atom(name: 'MainStoreBase.forums', context: context);
+
+  @override
+  ObservableList<ForumState?> get forums {
+    _$forumsAtom.reportRead();
+    return super.forums;
+  }
+
+  @override
+  set forums(ObservableList<ForumState?> value) {
+    _$forumsAtom.reportWrite(value, super.forums, () {
+      super.forums = value;
+    });
+  }
+
   late final _$launchStatusAtom =
       Atom(name: 'MainStoreBase.launchStatus', context: context);
 
@@ -1114,6 +1130,28 @@ mixin _$MainStore on MainStoreBase, Store {
   }
 
   @override
+  void _setForum(Communities value) {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase._setForum');
+    try {
+      return super._setForum(value);
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void _removeForum(Communities value) {
+    final _$actionInfo = _$MainStoreBaseActionController.startAction(
+        name: 'MainStoreBase._removeForum');
+    try {
+      return super._removeForum(value);
+    } finally {
+      _$MainStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setSelectedForum(int value) {
     final _$actionInfo = _$MainStoreBaseActionController.startAction(
         name: 'MainStoreBase.setSelectedForum');
@@ -1193,6 +1231,7 @@ mixin _$MainStore on MainStoreBase, Store {
   @override
   String toString() {
     return '''
+forums: ${forums},
 launchStatus: ${launchStatus},
 devMode: ${devMode},
 devModeCount: ${devModeCount},

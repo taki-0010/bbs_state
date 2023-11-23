@@ -16,17 +16,20 @@ abstract class MainStoreBase with Store, WithDateTime {
   late final repository = RepositoryState(parent: this);
   // late final server = AppwriteState(parent: this);
 
-  late final fiveCh = ForumState(parent: this, type: Communities.fiveCh);
-  late final girlsCh = ForumState(parent: this, type: Communities.girlsCh);
-  late final futabaCh = ForumState(parent: this, type: Communities.futabaCh);
-  late final pinkCh = ForumState(parent: this, type: Communities.pinkCh);
-  late final machi = ForumState(parent: this, type: Communities.machi);
-  late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
-  late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
-  late final chan4 = ForumState(parent: this, type: Communities.chan4);
-  late final hatena = ForumState(parent: this, type: Communities.hatena);
-  late final mal = ForumState(parent: this, type: Communities.mal);
-  late final youtube = ForumState(parent: this, type: Communities.youtube);
+  @observable
+  ObservableList<ForumState?> forums = ObservableList<ForumState?>();
+
+  // late final fiveCh = ForumState(parent: this, type: Communities.fiveCh);
+  // late final girlsCh = ForumState(parent: this, type: Communities.girlsCh);
+  // late final futabaCh = ForumState(parent: this, type: Communities.futabaCh);
+  // late final pinkCh = ForumState(parent: this, type: Communities.pinkCh);
+  // late final machi = ForumState(parent: this, type: Communities.machi);
+  // late final shitaraba = ForumState(parent: this, type: Communities.shitaraba);
+  // late final open2ch = ForumState(parent: this, type: Communities.open2Ch);
+  // late final chan4 = ForumState(parent: this, type: Communities.chan4);
+  // late final hatena = ForumState(parent: this, type: Communities.hatena);
+  // late final mal = ForumState(parent: this, type: Communities.mal);
+  // late final youtube = ForumState(parent: this, type: Communities.youtube);
 
   // late final SembastCacheStore store;
 
@@ -261,7 +264,7 @@ abstract class MainStoreBase with Store, WithDateTime {
   @computed
   ThreadsOrderType get currentThreadsOrder =>
       selectedForumState?.settings?.threadsOrderType ??
-      ThreadsOrderType.newerResponce;
+      ThreadsOrderType.importance;
 
   @computed
   TimeagoList get currentTimeago =>
@@ -638,36 +641,38 @@ abstract class MainStoreBase with Store, WithDateTime {
 
   @computed
   Future<List<BoardData?>?> get boardListForSearch async {
-    switch (selectedForum) {
-      case Communities.futabaCh:
-        final boards = futabaCh.forumMain.boards;
-        if (boards.isNotEmpty) {
-          return boards;
-        } else {
-          final boards = await FutabaChHandler.getBoards();
-          return boards.boards;
-        }
-      case Communities.machi:
-        final boards = machi.forumMain.boards;
-        if (boards.isNotEmpty) {
-          return boards;
-        } else {
-          final boards = await MachiHandler.getBoards();
-          return boards.boards;
-        }
-      case Communities.chan4:
-        final boards = chan4.forumMain.boards;
-        if (boards.isNotEmpty) {
-          return boards;
-        } else {
-          final boards = await Chan4Handler.getBoards(chan4.selectedNsfw);
-          return boards.boards;
-        }
-      case Communities.mal:
-        return MalData.searchBoardList;
-      default:
-    }
-    return null;
+    return selectedForumState?.forumMain.boardListForSearch;
+
+    // switch (selectedForum) {
+    //   case Communities.futabaCh:
+    //     final boards = futabaCh.forumMain.boards;
+    //     if (boards.isNotEmpty) {
+    //       return boards;
+    //     } else {
+    //       final boards = await FutabaChHandler.getBoards();
+    //       return boards.boards;
+    //     }
+    //   case Communities.machi:
+    //     final boards = machi.forumMain.boards;
+    //     if (boards.isNotEmpty) {
+    //       return boards;
+    //     } else {
+    //       final boards = await MachiHandler.getBoards();
+    //       return boards.boards;
+    //     }
+    //   case Communities.chan4:
+    //     final boards = chan4.forumMain.boards;
+    //     if (boards.isNotEmpty) {
+    //       return boards;
+    //     } else {
+    //       final boards = await Chan4Handler.getBoards(chan4.selectedNsfw);
+    //       return boards.boards;
+    //     }
+    //   case Communities.mal:
+    //     return MalData.searchBoardList;
+    //   default:
+    // }
+    // return null;
   }
 
   @computed
@@ -937,7 +942,9 @@ abstract class MainStoreBase with Store, WithDateTime {
       Communities.machi => MachiData.getBoardNameById(id),
       Communities.hatena => HatenaData.boardNameById(id) ?? id,
       Communities.open2Ch => FiveChBoardNames.getById(id) ?? id,
-      Communities.shitaraba => shitaraba.history.markList
+      Communities.shitaraba => _selectedForum(f)
+              ?.history
+              .markList
               .firstWhere(
                 (element) =>
                     element?.boardId == id && element?.boardName != null,
@@ -946,7 +953,9 @@ abstract class MainStoreBase with Store, WithDateTime {
               ?.boardName ??
           id,
       Communities.youtube => _youtubeBoardNameById(id),
-      Communities.chan4 => chan4.forumMain.boards
+      Communities.chan4 => _selectedForum(f)
+              ?.forumMain
+              .boards
               .firstWhere(
                 (element) => element?.id == id,
                 orElse: () => null,
@@ -961,7 +970,8 @@ abstract class MainStoreBase with Store, WithDateTime {
     final String id,
   ) {
     if (currentScreen == BottomMenu.search) {
-      return youtube.searchList
+      return _selectedForum(Communities.youtube)
+              ?.searchList
               .firstWhere(
                 (element) =>
                     element?.boardId == id && element?.boardName != null,
@@ -970,7 +980,9 @@ abstract class MainStoreBase with Store, WithDateTime {
               ?.boardName ??
           id;
     } else {
-      return youtube.history.markList
+      return _selectedForum(Communities.youtube)
+              ?.history
+              .markList
               .firstWhere(
                 (element) =>
                     element?.boardId == id && element?.boardName != null,
@@ -1222,8 +1234,11 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<void> loadInitialData() async {
-    await repository.loadInitialData();
+    await repository.loadUserData();
+    _setForumList();
     _setInitialForum();
+    await repository.loadInitialData();
+
     // initWhenLargeScreen();
   }
 
@@ -1237,6 +1252,25 @@ abstract class MainStoreBase with Store, WithDateTime {
   Future<void> sendAgree(final ContentData value,
       {final bool good = true}) async {
     await selectedForumState?.sendAgree(value, good: good);
+  }
+
+  @action
+  void _setForum(final Communities value) {
+    final s = ForumState(parent: this, type: value);
+    forums.add(s);
+  }
+
+  @action
+  void _removeForum(final Communities value) {
+    forums.removeWhere((element) => element?.type == value);
+  }
+
+  void _setForumList() {
+    if (selectedForumList != null) {
+      for (final i in selectedForumList!) {
+        _setForum(i);
+      }
+    }
   }
 
   void _setInitialForum() {
@@ -1329,16 +1363,21 @@ abstract class MainStoreBase with Store, WithDateTime {
   void setScreenSize(final bool value) {
     largeScreen = value;
     if (largeScreen) {
-      fiveCh.disposeNonLargeContent();
-      girlsCh.disposeNonLargeContent();
-      futabaCh.disposeNonLargeContent();
-      pinkCh.disposeNonLargeContent();
-      shitaraba.disposeNonLargeContent();
-      machi.disposeNonLargeContent();
-      chan4.disposeNonLargeContent();
-      open2ch.disposeNonLargeContent();
-      hatena.disposeNonLargeContent();
-      mal.disposeNonLargeContent();
+      for (final i in forums) {
+        if (i != null) {
+          i.disposeNonLargeContent();
+        }
+      }
+      // fiveCh.disposeNonLargeContent();
+      // girlsCh.disposeNonLargeContent();
+      // futabaCh.disposeNonLargeContent();
+      // pinkCh.disposeNonLargeContent();
+      // shitaraba.disposeNonLargeContent();
+      // machi.disposeNonLargeContent();
+      // chan4.disposeNonLargeContent();
+      // open2ch.disposeNonLargeContent();
+      // hatena.disposeNonLargeContent();
+      // mal.disposeNonLargeContent();
       if (bottomBarIndex == 0) {
         setBottomIndex(1);
       }
@@ -1782,20 +1821,24 @@ abstract class MainStoreBase with Store, WithDateTime {
     await updateForumSettings();
   }
 
-  ForumState? _selectedForum(final Communities? forum) => switch (forum) {
-        Communities.fiveCh => fiveCh,
-        Communities.pinkCh => pinkCh,
-        Communities.shitaraba => shitaraba,
-        Communities.futabaCh => futabaCh,
-        Communities.girlsCh => girlsCh,
-        Communities.open2Ch => open2ch,
-        Communities.machi => machi,
-        Communities.chan4 => chan4,
-        Communities.hatena => hatena,
-        Communities.mal => mal,
-        Communities.youtube => youtube,
-        null => null
-      };
+  ForumState? _selectedForum(final Communities? forum) {
+    return forums.firstWhere((element) => element?.type == forum,
+        orElse: () => null);
+  }
+  // ForumState? _selectedForum(final Communities? forum) => switch (forum) {
+  //       Communities.fiveCh => fiveCh,
+  //       Communities.pinkCh => pinkCh,
+  //       Communities.shitaraba => shitaraba,
+  //       Communities.futabaCh => futabaCh,
+  //       Communities.girlsCh => girlsCh,
+  //       Communities.open2Ch => open2ch,
+  //       Communities.machi => machi,
+  //       Communities.chan4 => chan4,
+  //       Communities.hatena => hatena,
+  //       Communities.mal => mal,
+  //       Communities.youtube => youtube,
+  //       null => null
+  //     };
 
   Future<void> setSaveLastUsedText(
       final InputCommentFields target, final bool value) async {
@@ -1927,23 +1970,24 @@ abstract class MainStoreBase with Store, WithDateTime {
     final current = selectedForumState?.settings;
     if (current == null) return;
     final newData = current.copyWith(searchBoardId: id);
-    switch (selectedForumState?.type) {
-      case Communities.futabaCh:
-        // final newData = current.copyWith(searchBoardIdForFutaba: id);
-        futabaCh.setSettings(newData);
-        break;
-      case Communities.machi:
-        // final newData = current.copyWith(searchBoardIdForMachi: id);
-        machi.setSettings(newData);
-        break;
-      case Communities.chan4:
-        chan4.setSettings(newData);
-        break;
-      case Communities.mal:
-        mal.setSettings(newData);
-        break;
-      default:
-    }
+    selectedForumState?.setSettings(newData);
+    // switch (selectedForumState?.type) {
+    //   case Communities.futabaCh:
+    //     // final newData = current.copyWith(searchBoardIdForFutaba: id);
+    //     futabaCh.setSettings(newData);
+    //     break;
+    //   case Communities.machi:
+    //     // final newData = current.copyWith(searchBoardIdForMachi: id);
+    //     machi.setSettings(newData);
+    //     break;
+    //   case Communities.chan4:
+    //     chan4.setSettings(newData);
+    //     break;
+    //   case Communities.mal:
+    //     mal.setSettings(newData);
+    //     break;
+    //   default:
+    // }
     await updateForumSettings();
     // await repository.server.forumState.update();
   }
@@ -1993,11 +2037,22 @@ abstract class MainStoreBase with Store, WithDateTime {
   }
 
   Future<void> addForum(final Communities value) async {
-    await repository.addForum(value);
+    final data = await repository.addForum(value);
+    if (data != null &&
+        selectedForumList != null &&
+        selectedForumList!.contains(value)) {
+      _setForum(value);
+      setForumSettings(data);
+      logger.d('addForum: $value');
+    }
   }
 
   Future<void> removeForum(final Communities value) async {
     await repository.removeForum(value);
+    if (selectedForumList != null && !selectedForumList!.contains(value)) {
+      _removeForum(value);
+      logger.d('removeForum: $value');
+    }
   }
 
   // Future<void> getThreadsByJson() async {

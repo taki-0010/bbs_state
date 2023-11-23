@@ -52,6 +52,14 @@ mixin _$ForumMainState on ForumMainStateBase, Store {
           Computed<Map<String, int?>>(() => super.threadsLastReadAt,
               name: 'ForumMainStateBase.threadsLastReadAt'))
       .value;
+  Computed<Future<List<BoardData?>?>>? _$boardListForSearchComputed;
+
+  @override
+  Future<List<BoardData?>?> get boardListForSearch =>
+      (_$boardListForSearchComputed ??= Computed<Future<List<BoardData?>?>>(
+              () => super.boardListForSearch,
+              name: 'ForumMainStateBase.boardListForSearch'))
+          .value;
   Computed<List<BoardData?>>? _$boardsDataComputed;
 
   @override
@@ -586,6 +594,7 @@ hideUpdateThreadsButton: ${hideUpdateThreadsButton},
 hasYtThreadsClient: ${hasYtThreadsClient},
 currentBoardDiff: ${currentBoardDiff},
 threadsLastReadAt: ${threadsLastReadAt},
+boardListForSearch: ${boardListForSearch},
 boardsData: ${boardsData},
 favoritesBoardsData: ${favoritesBoardsData},
 sortedThreads: ${sortedThreads},

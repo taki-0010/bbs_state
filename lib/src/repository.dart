@@ -57,9 +57,21 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     db = await databaseFactoryIo.openDatabase(dbPath);
   }
 
-  @action
-  Future<void> loadInitialData() async {
+  // @action
+  Future<void> loadUserData() async {
     await userLocal.init();
+
+    // final accountExist = await server.init();
+    // if (!accountExist) {
+    //   connection = ConnectTo.local;
+    // } else {
+    //   connection = ConnectTo.server;
+    // }
+    logger.d(
+        'repository: init: connection: $connection, user: ${user?.toJson()}');
+  }
+
+  Future<void> loadInitialData() async {
     await threadLocal.loadCache();
     await forumLocal.load();
     await postDraftLocal.load();
@@ -70,8 +82,8 @@ abstract class RepositoryStateBase with Store, WithDateTime {
     // } else {
     //   connection = ConnectTo.server;
     // }
-    logger.d(
-        'repository: init: connection: $connection, user: ${user?.toJson()}');
+    // logger.d(
+    //     'repository: init: connection: $connection, user: ${user?.toJson()}');
   }
 
   Future<void> _mediaInit(final Directory cacheDir, final String folder) async {
@@ -103,14 +115,14 @@ abstract class RepositoryStateBase with Store, WithDateTime {
   //   setUser(value);
   // }
 
-  Future<void> addForum(final Communities value) async {
-    if (user == null) return;
+  Future<ForumSettingsData?> addForum(final Communities value) async {
+    if (user == null) return null;
     final copied = [...forums!];
-    if (copied.contains(value)) return;
+    if (copied.contains(value)) return null;
     copied.add(value);
     final newUserData = user!.copyWith(forums: copied);
     final forum = InitialForumData.getInitialSettings(value, user!.id);
-    if (forum == null) return;
+    if (forum == null) return null;
     switch (connection) {
       case ConnectTo.server:
         await server.forumState.addNewForum(forum);
@@ -123,7 +135,8 @@ abstract class RepositoryStateBase with Store, WithDateTime {
       default:
     }
     setUser(newUserData);
-    setForumSettings(forum);
+    // setForumSettings(forum);
+    return forum;
   }
 
   Future<void> removeForum(final Communities value) async {

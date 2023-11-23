@@ -95,6 +95,35 @@ abstract class ForumMainStateBase with Store, WithDateTime {
     return result;
   }
 
+  @computed
+  Future<List<BoardData?>?> get boardListForSearch async {
+    List<BoardData?> result = boards;
+    switch (parent.type) {
+      case Communities.futabaCh:
+        // final boards = futabaCh.forumMain.boards;
+        if (boards.isEmpty) {
+          final boards = await FutabaChHandler.getBoards();
+          result.addAll([...?boards.boards]);
+        }
+      case Communities.machi:
+        // final boards = machi.forumMain.boards;
+        if (boards.isEmpty) {
+          final boards = await MachiHandler.getBoards();
+          result.addAll([...?boards.boards]);
+        }
+      case Communities.chan4:
+        // final boards = chan4.forumMain.boards;
+        if (boards.isEmpty) {
+          final boards = await Chan4Handler.getBoards(parent.selectedNsfw);
+          result.addAll([...?boards.boards]);
+        }
+      case Communities.mal:
+        result.addAll(MalData.searchBoardList);
+      default:
+    }
+    return result;
+  }
+
   // @observable
   // ThreadContentData? mainContent;
 
